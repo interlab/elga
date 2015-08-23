@@ -56,28 +56,6 @@ class Elga_Controller extends Action_Controller
 
         return $data;
     }
-    
-    public function action_ugli()
-    {
-        global $context, $scripturl;
-
-		$context['linktree'][] = [
-			'url' => $scripturl . '?action=gallery;sa=ugli',
-			'name' => 'Ugli',
-		];
-
-        $context['sub_template'] = 'ugli';
-
-        // echo 'sa - ugli';
-        // 
-
-        /*
-        $context['html_headers'] = '
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.css" />
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://raw.githubusercontent.com/elkarte/elkarte.net/master/elk/home.css">';
-        */
-    }
 
     public function action_add_file()
     {
@@ -88,8 +66,9 @@ class Elga_Controller extends Action_Controller
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
-        
-        // @todo ...
+
+        $albums = $this->getAlbums();
+            
 		if (isset($_REQUEST['send']))
 		{
 			checkSession('post');
@@ -102,7 +81,7 @@ class Elga_Controller extends Action_Controller
 
 			// Could they get the right send topic verification code?
 			require_once(SUBSDIR . '/VerificationControls.class.php');
-			require_once(SUBSDIR . '/Members.subs.php');
+			// require_once(SUBSDIR . '/Members.subs.php');
 
 			// form validation
 			require_once(SUBSDIR . '/DataValidator.class.php');
@@ -112,10 +91,12 @@ class Elga_Controller extends Action_Controller
 				'descr' => 'trim|Util::htmlspecialchars'
 			]);
 			$validator->validation_rules([
+                'album' => 'required|numeric',
 				'title' => 'required', // |valid_email',
 				'descr' => 'required'
 			]);
 			$validator->text_replacements([
+                'album' => 'Album not selected!',
 				'title' => 'Title is empty!',
 				'descr' => $txt['error_message']
 			]);
@@ -138,11 +119,44 @@ class Elga_Controller extends Action_Controller
                 }
             }
 
-            uploadImage();
+            if (!isset($albums[$_POST['album']]))
+                $context['errors'][] = 'Album not exists!';
+
+			if (empty($context['errors'])) {
+                $img = uploadImage();
+            }
 
 			// No errors, then send the PM to the admins
 			if (empty($context['errors']))
 			{
+                $db = database();
+
+                $db->insert('',
+                    '{db_prefix}elga_files',
+                    array(
+    'orig_name' => 'string',
+    'fname' => 'string',
+    'fsize' => 'raw',
+    'id_album' => 'int',
+    'title' => 'string',
+    'description' => 'string',
+    'id_member' => 'int',
+    'member_name' => 'string',
+    
+                ),
+                    array(
+    $img['orig_name'],
+    $img['name'],
+    $img['size'],
+    $_POST['album'],
+    $validator->title,
+    $validator->descr,
+    $user_info['id'],
+    $user_info['name'],
+    
+                ),
+                    array('id_member', 'id_topic')
+                );
                 /*
 				$admins = admins();
 				if (!empty($admins))
@@ -166,6 +180,7 @@ class Elga_Controller extends Action_Controller
 			}
 			else
 			{
+                $context['elga_album'] = $validator->album;
 				$context['elga_title'] = $validator->title;
 				$context['elga_descr'] = $validator->descr;
 			}
@@ -191,16 +206,10 @@ class Elga_Controller extends Action_Controller
 		createToken('add_file');
 
         /*
-        $context['html_headers'] = '
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.css" />
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://raw.githubusercontent.com/elkarte/elkarte.net/master/elk/home.css">';
-        */
-
-        $albums = $this->getAlbums();
         foreach ($albums as &$row) {
             $row['selected'] = false;
         }
+        */
         $context['elga_albums'] = $albums;
     }
 }
@@ -239,187 +248,52 @@ function uploadImage()
                 $context['errors'][] = 'Unknown Error';
                 break;
         }
+
+        return false;
     }
 
-    $loader = require_once EXTDIR . '/elga_lib/vendor/autoload.php';
-    // $loader->add('Elga', dirname(__DIR__));
-    
-    // Simple validation (max file size 2MB and only two allowed mime types)
-    $validator = new FileUpload\Validator\Simple(1024 * 1024 * 2, ['image/png', 'image/jpg', 'image/gif', 'image/jpeg']);
-
-    // Simple path resolver, where uploads will be put
-    $pathresolver = new FileUpload\PathResolver\Simple(BOARDDIR . '/files/gallery');
-
-    // The machine's filesystem
-    $filesystem = new FileUpload\FileSystem\Simple();
-
-    // FileUploader itself
-    $fileupload = new FileUpload\FileUpload($_FILES['image'], $_SERVER);
-
-    // Adding it all together. Note that you can use multiple validators or none at all
-    $fileupload->setPathResolver($pathresolver);
-    $fileupload->setFileSystem($filesystem);
-    $fileupload->addValidator($validator);
-
-    // Doing the deed
-    list($files, $headers) = $fileupload->processAll();
-
-    // elga hack
-    if (!empty($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        if (!empty($files->error))
-            $context['errors'][] = $files->error;
-    }
-    
-    return;
-
-    // return $files;
-
-    // Outputting it, for example like this
-    foreach($headers as $header => $value) {
-      header($header . ': ' . $value);
-    }
-
-    echo json_encode(array('files' => $files));
-}
-
-function createTempScreenImage($fkey, $idtor = 0) /*, $uploaddir) */
-{
-    global $modSettings, $user_info;
-
-    # delete screen image
-    if (!empty($_POST[$fkey . '_del']) && !empty($idtor)) /* && empty($_SESSION['st_temp_screens']) */
+    if (!empty($_FILES['image']) && $_FILES['image']['error'] === 0)
     {
-        // unset($_POST[$fkey . '_del']);
-        delScreenImage($_POST[$fkey . '_del'], $idtor);
-    }
+        $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $directory = BOARDDIR . '/files/gallery';
+        $max_size = 1024 * 1024 * 3;
 
-    if (!isset($_FILES[$fkey]))
-        return false;
-
-    if (!$modSettings['st_screens_enable'])
-        return false;
-
-    $attachID = 'tmp_' . $fkey . '_' . $user_info['id'];
-    $destName = $modSettings['st_screens_directory'] . '/' . $attachID;
-
-    if (!empty($_FILES[$fkey]) && $_FILES[$fkey]['error'] === 0) {
-
-        $fname = pathinfo($_FILES[$fkey]['name'], PATHINFO_FILENAME);
-        $ext = pathinfo($_FILES[$fkey]['name'], PATHINFO_EXTENSION);
-
-        if (!is_dir($modSettings['st_screens_directory']))
+        if (!is_dir($directory))
             fatal_error('Директория постеров указана неверно!', false);
 
-        if (!is_uploaded_file($_FILES[$fkey]['tmp_name']))
+        if (!is_uploaded_file($_FILES['image']['tmp_name']))
             fatal_error('Ошибка загрузки файла на сервер. Попробуйте заново закачать файл.', false);
 
-        if (filesize($_FILES[$fkey]['tmp_name']) > $modSettings['st_max_screen_size'])
+        $fsize = filesize($_FILES['image']['tmp_name']);
+        if ($fsize > $max_size)
             fatal_error('Файл превышает максимально допустимый размер!', false);
 
-        if (preg_match('~\\/:\*\?"<>|\\0~', $_FILES[$fkey]['name']))
-            fatal_error(ST::h($_FILES[$fkey]['name']) . 'Недопустимые символы в имени постер-файла!', false);
+        if (preg_match('~\\/:\*\?"<>|\\0~', $_FILES['image']['name']))
+            fatal_error(Util::htmlspecialchars($_FILES['image']['name']) . 'Недопустимые символы в имени постер-файла!', false);
 
         if (!preg_match('~png|gif|jpg|jpeg~i', $ext))
             fatal_error('Расширение постера должно быть <strong>png, gif, jpg, jpeg</strong>.', false);
 
-        // $fileName = $order . '.' . $ext;
-        $fileName = sha1_file($_FILES[$fkey]['tmp_name']) . '.' . $ext;
+        $nfname = sha1_file($_FILES['image']['tmp_name']) . '.' . $ext;
+        $date = date('Y/m/d', time());
+        $dest_dir = $directory . '/' . $date;
+        if (!is_dir($dest_dir)) {
+            if (!mkdir($dest_dir, 0777, true))
+                fatal_error('Не получается создать директорию ' . $dest_dir);
+        }
+        $dest_name = $dest_dir . '/' . $nfname;
 
-        $_SESSION['st_temp_screens'][$attachID] = $fileName;
-
-        if (!empty($_FILES[$fkey])) {
-            if (!move_uploaded_file($_FILES[$fkey]['tmp_name'], $destName)) {
-                unset($_SESSION['st_temp_screens'][$attachID]);
-                fatal_error('Ошибка копирования временного файла постера!', false);
-            }
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
+            fatal_error('Ошибка копирования временного файла!', false);
+        } else {
+            return [
+    'name' => $date . '/' . $nfname,
+    'orig_name' => $_FILES['image']['name'], // ? need sanitize?
+    'size' => $fsize,
+            ];
         }
     }
 
-    if (!empty($_SESSION['st_temp_screens'])) {
-        # clean folder for temporary screens
-        $dir = @opendir($modSettings['st_screens_directory']) or fatal_error('Нет доступа к папке скриншотов!', false);
-        while ($file = readdir($dir)) {
-            if ($file == '.' || $file == '..')
-                continue;
-
-            if (preg_match('~^tmp_st_screen\d+_\d+$~', $file) != 0) {
-                # Temp file is more than 5 hours old!
-                if (filemtime($modSettings['st_screens_directory'] . '/' . $file) < time() - 18000)
-                    @unlink($modSettings['st_screens_directory'] . '/' . $file);
-                continue;
-            }
-        }
-        closedir($dir);
-
-        # Удаляем сессионный screen
-        if (!empty($_POST[$fkey . '_del']) && $_SESSION['st_temp_screens'][$attachID] === $_POST[$fkey . '_del']) {
-            unset($_POST[$fkey . '_del']);
-            unset($_SESSION['st_temp_screens'][$attachID]);
-            @unlink($destName);
-        }
-
-        if (isset($_FILES[$fkey]))
-            unset($_FILES[$fkey]);
-
-        return true;
-    }
-}
-
-function saveScreenImage($fkey, $idtor)
-{
-    global $modSettings, $user_info, $smcFunc;
-
-    if (!$modSettings['st_screens_enable'] || empty($_SESSION['st_temp_screens'])) {
-        return false;
-    }
-
-    $attachID = 'tmp_' . $fkey . '_' . $user_info['id'];
-    $destName = $modSettings['st_screens_directory'] . '/' . $attachID;
-
-    if (!file_exists($destName)) {
-        return false;
-    }
-
-    $date = date('Y/m/d', time());
-    $maxWidth = $modSettings['st_max_width_screen'];
-    $maxHeight = $modSettings['st_max_height_screen'];
-
-    // if (empty($fileName))
-        // $fileName = $idtor . '.' . $ext;
-
-    $dir = $modSettings['st_screens_directory'] . '/' . $date . '/' . $idtor;
-    if (!is_dir($dir)) {
-        if (!mkdir($dir, 0777, true))
-            fatal_error('Не получается создать директорию ' . $dir);
-    }
-
-    $new_name = $_SESSION['st_temp_screens'][$attachID];
-    $prev_name = pathinfo($new_name, PATHINFO_FILENAME) . '_thumb.' . pathinfo($new_name, PATHINFO_EXTENSION);
-
-    if (file_exists($dir . '/' . $new_name)) {
-        unset($_SESSION['st_temp_screens'][$fkey]);
-        return false;
-    }
-
-    # Переименовываем временный скрин в настоящий
-    rename($destName, $dir . '/' . $new_name);
-
-    # Создаем мини-постер
-    ST::thumb(
-        $dir . '/' . $new_name,
-        $dir . '/' . $prev_name,
-        $maxWidth,
-        $maxHeight
-    );
-
-    $smcFunc['db_insert']('insert',
-        '{db_prefix}st_screens',
-        [ 'id_torrent' => 'int', 'name' => 'string-255', 'thumb' => 'string-255' ],
-        [ $idtor, ($date . '/' . $idtor . '/' . $new_name), ($date . '/' . $idtor . '/' . $prev_name) ],
-        [ 'id_torrent' ]
-    );
-
-    // $id_new = $smcFunc['db_insert_id']('{db_prefix}st_screens', 'id_torrent');
-
-    unset($_SESSION['st_temp_screens'][$fkey]);
+    return false;
 }
