@@ -1,0 +1,5 @@
+{
+    "require": {
+       "gargron/fileupload": "1.0.*"
+    }
+}
