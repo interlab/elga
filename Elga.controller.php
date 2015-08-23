@@ -157,6 +157,10 @@ class Elga_Controller extends Action_Controller
                 ),
                     array('id_member', 'id_topic')
                 );
+                $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
+
+                redirectexit('action=gallery;sa=view;id=' . $insert_id);
+
                 /*
 				$admins = admins();
 				if (!empty($admins))
