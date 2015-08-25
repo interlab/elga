@@ -22,7 +22,7 @@ function template_home()
         echo '
         <ins class="thumbnail">
             <div class="r">
-                <img src="', $row['icon'] ? $row['icon'] : $def_icon, '" alt="..." />
+                <a href="', $row['icon'], '" class="fancybox" rel="group"><img src="', $row['icon'], '" alt="icon" height="64px" width="64px" class="fancybox" /></a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">' . $row['name'] . '</a></h4>
                 text for text ...
             </div>
@@ -120,9 +120,6 @@ function template_album()
 {
     global $context, $scripturl, $txt, $boardurl;
 
-    $dir = $boardurl . '/files/gallery';
-    $def_icon = 'http://simaru.tk/themes/MostlyBlue/images/_blue/logo_elk.png';
-
     echo '
     <h1>', $context['elga_album']['name'], '</h1>
     <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '">Add new file</a>';
@@ -132,7 +129,9 @@ function template_album()
         echo '
         <ins class="thumbnail">
             <div class="r">
-                <img src="', $dir, '/', $row['fname'], '" alt="..." height="100px" width="100px" />
+                <a href="', $row['icon'], '" class="fancybox" rel="group">
+                    <img src="', $row['icon'], '" alt="..." height="100px" width="100px" class="fancybox" />
+                </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a></h4>
                 Author: ', $row['member_name'], ' 
             </div>

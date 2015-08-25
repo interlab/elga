@@ -109,24 +109,11 @@ class Elga_Controller extends Action_Controller
 			{
                 $db = database();
 
-                $db->insert('',
-                    '{db_prefix}elga_files',
-                    [
-
-    'orig_name' => 'string',
-    'fname' => 'string',
-    'fsize' => 'raw',
-    'id_album' => 'int',
-    'title' => 'string',
-    'description' => 'string',
-    'id_member' => 'int',
-    'member_name' => 'string',
-
-                    ],
-                    [
-                        $img['orig_name'], $img['name'], $img['size'], $validator->album, $validator->title, 
-                        $validator->descr, $user_info['id'], $user_info['name'],
-                    ],
+                $db->insert('', '{db_prefix}elga_files',
+                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'id_album' => 'int',
+                      'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string', ],
+                    [ $img['orig_name'], $img['name'], $img['size'], $validator->album, $validator->title, 
+                      $validator->descr, $user_info['id'], $user_info['name'], ],
                     [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
@@ -171,7 +158,7 @@ class Elga_Controller extends Action_Controller
 
     public function action_album()
     {
-        global $context, $scripturl;
+        global $context, $scripturl, $boardurl;
 
         if (empty($_GET['id']))
             redirectexit('action=gallery');
@@ -201,10 +188,12 @@ class Elga_Controller extends Action_Controller
             'album' => $album['id'],
         ]);
 
+        $dir = $boardurl . '/files/gallery';
         $context['elga_files'] = [];
         if ($db->num_rows($req) > 0)
         {
             while ($row = $db->fetch_assoc($req)) {
+                $row['icon'] = $dir . '/' . $row['fname'];
                 $context['elga_files'][$row['id']] = $row;
             }
         }
@@ -215,6 +204,8 @@ class Elga_Controller extends Action_Controller
 
 function getAlbums()
 {
+    global $boardurl;
+
     $db = database();
 
     $req = $db->query('', '
@@ -225,8 +216,9 @@ function getAlbums()
     $data = new Foo();
     if ($db->num_rows($req) > 0)
     {
-        while ($album = $db->fetch_assoc($req)) {
-            $data[$album['id']] = $album;
+        while ($row = $db->fetch_assoc($req)) {
+            $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $boardurl . '/files/gallery/icons/' . $row['icon'];
+            $data[$row['id']] = $row;
         }
     }
     $db->free_result($req);
