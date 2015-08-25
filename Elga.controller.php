@@ -200,6 +200,54 @@ class Elga_Controller extends Action_Controller
         $db->free_result($req);
         //print_r($context['elga_files']);
     }
+
+    public function action_file()
+    {
+        global $context, $scripturl, $boardurl;
+
+        if (empty($_GET['id']))
+            redirectexit('action=gallery');
+
+        //$albums = getAlbums();
+
+        $id = (int) $_GET['id'];
+
+        $db = database();
+        $req = $db->query('', '
+        SELECT
+            f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
+            a.name AS album_name
+        FROM {db_prefix}elga_files as f
+            INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+        WHERE f.id = {int:id}
+        LIMIT 1', [
+            'id' => $id,
+        ]);
+        if (!$db->num_rows($req)) {
+            $db->free_result($req);
+            fatal_error('File not found!', false);
+        }
+
+        $dir = $boardurl . '/files/gallery';
+        $context['elga_file'] = $file = $db->fetch_assoc($req);
+        $context['elga_file']['icon'] = $dir . '/' .  $context['elga_file']['fname'];
+
+		$context['linktree'][] = [
+			'url' => $scripturl . '?action=gallery;sa=album;id=' . $file['id_album'],
+			'name' => $file['album_name'],
+		];
+
+		$context['linktree'][] = [
+			'url' => $scripturl . '?action=gallery;sa=file;id=' . $file['id'],
+			'name' => $file['orig_name'],
+		];
+
+        $context['page_title'] = '' . $file['orig_name'];
+
+        $context['sub_template'] = 'file';
+
+        return;
+    }
 }
 
 function getAlbums()

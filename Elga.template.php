@@ -22,7 +22,9 @@ function template_home()
         echo '
         <ins class="thumbnail">
             <div class="r">
-                <a href="', $row['icon'], '" class="fancybox" rel="group"><img src="', $row['icon'], '" alt="icon" height="64px" width="64px" class="fancybox" /></a>
+                <a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">
+                    <img src="', $row['icon'], '" alt="icon" height="64px" width="64px" />
+                </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">' . $row['name'] . '</a></h4>
                 text for text ...
             </div>
@@ -140,3 +142,22 @@ function template_album()
     echo '</div>';
 }
 
+function template_file()
+{
+    global $context, $scripturl, $txt, $boardurl;
+
+    $row = $context['elga_file'];
+
+    echo '
+    <div class="thumbnails">
+        <ins class="thumbnail">
+            <div class="r">
+                <a href="', $row['icon'], '" class="fancybox" rel="group">
+                    <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
+                </a>
+                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a></h4>
+                Author: ', $row['member_name'], ' 
+            </div>
+        </ins>
+    </div>';
+}
