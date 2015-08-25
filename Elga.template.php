@@ -12,7 +12,7 @@ function template_home()
     <h1>ElkArte Gallery</h1>
     <a href="', $scripturl, '?action=gallery;sa=add_file">Add new file</a>';
 
-    $albums = $context['elga']['albums'];
+    $albums = $context['elga_albums'];
 
     // http://www.artlebedev.ru/tools/technogrette/html/thumbnails-center/
     
@@ -23,7 +23,7 @@ function template_home()
         <ins class="thumbnail">
             <div class="r">
                 <img src="', $row['icon'] ? $row['icon'] : $def_icon, '" alt="..." />
-                <h4><a href="">' . $row['name'] . '</a></h4>
+                <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">' . $row['name'] . '</a></h4>
                 text for text ...
             </div>
         </ins>';
@@ -115,3 +115,29 @@ function template_add_file()
     
     </form>';
 }
+
+function template_album()
+{
+    global $context, $scripturl, $txt, $boardurl;
+
+    $dir = $boardurl . '/files/gallery';
+    $def_icon = 'http://simaru.tk/themes/MostlyBlue/images/_blue/logo_elk.png';
+
+    echo '
+    <h1>', $context['elga_album']['name'], '</h1>
+    <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '">Add new file</a>';
+
+    echo '<div class="thumbnails">';
+    foreach ($context['elga_files'] as $row) {
+        echo '
+        <ins class="thumbnail">
+            <div class="r">
+                <img src="', $dir, '/', $row['fname'], '" alt="..." height="100px" width="100px" />
+                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a></h4>
+                Author: ', $row['member_name'], ' 
+            </div>
+        </ins>';
+    }
+    echo '</div>';
+}
+

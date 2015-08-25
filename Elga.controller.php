@@ -33,28 +33,7 @@ class Elga_Controller extends Action_Controller
             }
         }
 
-        $context['elga']['albums'] = $this->getAlbums();
-    }
-
-    public function getAlbums()
-    {
-        $db = database();
-
-        $req = $db->query('', '
-        SELECT id, name, description, icon
-        FROM {db_prefix}elga_albums
-        LIMIT 100', []);
-
-        $data = [];
-		if ($db->num_rows($req) > 0)
-		{
-			while ($album = $db->fetch_assoc($req)) {
-				$data[$album['id']] = $album;
-            }
-		}
-		$db->free_result($req);
-
-        return $data;
+        $context['elga_albums'] = getAlbums();
     }
 
     public function action_add_file()
@@ -67,8 +46,8 @@ class Elga_Controller extends Action_Controller
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
 
-        $albums = $this->getAlbums();
-            
+        $albums = getAlbums();
+
 		if (isset($_REQUEST['send']))
 		{
 			checkSession('post');
@@ -87,6 +66,7 @@ class Elga_Controller extends Action_Controller
 			require_once(SUBSDIR . '/DataValidator.class.php');
 			$validator = new Data_Validator();
 			$validator->sanitation_rules([
+                'album' => 'int',
 				'title' => 'trim|Util::htmlspecialchars',
 				'descr' => 'trim|Util::htmlspecialchars'
 			]);
@@ -122,9 +102,7 @@ class Elga_Controller extends Action_Controller
             if (!isset($albums[$_POST['album']]))
                 $context['errors'][] = 'Album not exists!';
 
-			if (empty($context['errors'])) {
-                $img = uploadImage();
-            }
+            $img = uploadImage();
 
 			// No errors, then send the PM to the admins
 			if (empty($context['errors']))
@@ -133,7 +111,8 @@ class Elga_Controller extends Action_Controller
 
                 $db->insert('',
                     '{db_prefix}elga_files',
-                    array(
+                    [
+
     'orig_name' => 'string',
     'fname' => 'string',
     'fsize' => 'raw',
@@ -142,45 +121,17 @@ class Elga_Controller extends Action_Controller
     'description' => 'string',
     'id_member' => 'int',
     'member_name' => 'string',
-    
-                ),
-                    array(
-    $img['orig_name'],
-    $img['name'],
-    $img['size'],
-    $_POST['album'],
-    $validator->title,
-    $validator->descr,
-    $user_info['id'],
-    $user_info['name'],
-    
-                ),
-                    array('id_member', 'id_topic')
+
+                    ],
+                    [
+                        $img['orig_name'], $img['name'], $img['size'], $validator->album, $validator->title, 
+                        $validator->descr, $user_info['id'], $user_info['name'],
+                    ],
+                    [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
 
                 redirectexit('action=gallery;sa=view;id=' . $insert_id);
-
-                /*
-				$admins = admins();
-				if (!empty($admins))
-				{
-					require_once(SUBSDIR . '/PersonalMessage.subs.php');
-					sendpm(array(
-                            'to' => array_keys($admins),
-                            'bcc' => []
-                        ),
-                        $txt['contact_subject'],
-                        $_REQUEST['descr'],
-                        false,
-                        array('id' => 0, 'name' => $validator->title, 'username' => $validator->title)
-                    );
-				}
-
-				redirectexit('action=gallery;sa=done');
-                
-                */
-                
 			}
 			else
 			{
@@ -214,8 +165,73 @@ class Elga_Controller extends Action_Controller
             $row['selected'] = false;
         }
         */
+        $context['elga_album'] = isset($_GET['album']) ? (int) $_GET['album'] : 0;
         $context['elga_albums'] = $albums;
     }
+
+    public function action_album()
+    {
+        global $context, $scripturl;
+
+        if (empty($_GET['id']))
+            redirectexit('action=gallery');
+
+        $albums = getAlbums();
+        if (empty($albums[$_GET['id']]))
+            fatal_error('Album not found!', false);
+        $context['elga_album'] = $album = $albums[$_GET['id']];
+
+		$context['linktree'][] = [
+			'url' => $scripturl . '?action=gallery;sa=album;id=' . $album['id'],
+			'name' => $album['name'],
+		];
+
+        $context['page_title'] = 'Галерея - ' . $album['name'];
+
+        $context['sub_template'] = 'album';
+
+        $db = database();
+
+        // @todo limit
+        $req = $db->query('', '
+        SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
+        FROM {db_prefix}elga_files as f
+        WHERE f.id_album = {int:album}
+        LIMIT 100', [
+            'album' => $album['id'],
+        ]);
+
+        $context['elga_files'] = [];
+        if ($db->num_rows($req) > 0)
+        {
+            while ($row = $db->fetch_assoc($req)) {
+                $context['elga_files'][$row['id']] = $row;
+            }
+        }
+        $db->free_result($req);
+        //print_r($context['elga_files']);
+    }
+}
+
+function getAlbums()
+{
+    $db = database();
+
+    $req = $db->query('', '
+    SELECT id, name, description, icon
+    FROM {db_prefix}elga_albums
+    LIMIT 100', []);
+
+    $data = new Foo();
+    if ($db->num_rows($req) > 0)
+    {
+        while ($album = $db->fetch_assoc($req)) {
+            $data[$album['id']] = $album;
+        }
+    }
+    $db->free_result($req);
+
+    return $data;
 }
 
 function uploadImage()
@@ -252,7 +268,9 @@ function uploadImage()
                 $context['errors'][] = 'Unknown Error';
                 break;
         }
+    }
 
+    if (!empty($context['errors'])) {
         return false;
     }
 
@@ -300,4 +318,96 @@ function uploadImage()
     }
 
     return false;
+}
+
+class Foo extends ArrayObject
+{
+    
+}
+
+// http://habrahabr.ru/post/127711/
+class Foo2 implements ArrayAccess, Countable, Iterator, Serializable
+{
+    protected $_container = array();
+    protected $_position = 0;
+
+    public function __construct(array $array = null)
+    {
+        if (!is_null($array)) {
+            $this->_container = $array;
+        }
+    }
+
+    public function offsetExists($offset)
+    {
+        return isset($this->_container[$offset]);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->offsetExists($offset) ? $this->_container[$offset] : null;
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        if (is_null($offset)) {
+            $this->_container[] = $value;
+        } else {
+            $this->_container[$offset] = $value;
+        }
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->_container[$offset]);
+    }
+
+    public function rewind()
+    {
+        $this->_position = 0;
+    }
+
+    public function current() 
+    {
+        return $this->_container[$this->_position];
+    }
+
+    public function key() 
+    {
+        return $this->_position;
+    }
+
+    public function next() 
+    {
+        ++$this->_position;
+    }
+
+    public function valid() 
+    {
+        return isset($this->_container[$this->_position]);
+    }
+
+    public function count()
+    {
+        return count($this->_container);
+    }
+
+    public function serialize()
+    {
+        return serialize($this->_container);
+    }
+
+    public function unserialize($data)
+    {
+        $this->_container = unserialize($data);
+    }
+
+    public function __invoke(array $data = null)
+    {
+        if (is_null($data)) {
+            return $this->_container;
+        } else {
+            $this->_container = $data;
+        }
+    }
 }
