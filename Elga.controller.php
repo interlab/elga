@@ -107,7 +107,8 @@ class Elga_Controller extends Action_Controller
             $img = uploadImage();
 
             require_once(SUBSDIR . '/Post.subs.php');
-            preparsecode($validator->descr);
+            $descr = $validator->descr;
+            preparsecode($descr);
 
 			// No errors, then send the PM to the admins
 			if (empty($context['errors']))
@@ -118,7 +119,7 @@ class Elga_Controller extends Action_Controller
                     [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'id_album' => 'int',
                       'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string', ],
                     [ $img['orig_name'], $img['name'], $img['size'], $validator->album, $validator->title, 
-                      $validator->descr, $user_info['id'], $user_info['name'], ],
+                      $descr, $user_info['id'], $user_info['name'], ],
                     [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
@@ -129,7 +130,7 @@ class Elga_Controller extends Action_Controller
 			{
                 $context['elga_album'] = $validator->album;
 				$context['elga_title'] = $validator->title;
-				$context['elga_descr'] = $validator->descr;
+				$context['elga_descr'] = $descr;
 			}
 		}
 
@@ -305,7 +306,8 @@ class Elga_Controller extends Action_Controller
             // @todo: del old image
 
             require_once(SUBSDIR . '/Post.subs.php');
-            preparsecode($validator->descr);
+            $descr = $validator->descr;
+            preparsecode($descr);
 
 			// No errors, then send the PM to the admins
 			if (empty($context['errors']))
@@ -328,7 +330,7 @@ class Elga_Controller extends Action_Controller
                         'fsize' => $img ? $img['size'] : '',
                         'album' => $validator->album,
                         'title' => $validator->title, 
-                        'descr' => $validator->descr,
+                        'descr' => $descr,
                         'mem_id' => $user_info['id'],
                         'mem_name' => $user_info['name'],
                         'id' => $id,
@@ -341,7 +343,7 @@ class Elga_Controller extends Action_Controller
 			{
                 $context['elga_album'] = $validator->album;
 				$context['elga_title'] = $validator->title;
-				$context['elga_descr'] = $validator->descr;
+				$context['elga_descr'] = $descr;
 			}
 		}
 
