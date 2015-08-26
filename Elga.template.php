@@ -39,9 +39,9 @@ function template_add_file()
     global $context, $scripturl, $txt;
     
     echo '
-    <h2 class="category_header">New File</h2>
+    <h2 class="category_header">', $context['page_title'], '</h2>
 
-    <form form action="', $scripturl, '?action=gallery;sa=add_file" method="post" accept-charset="UTF-8"
+    <form form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
     
 	if (!empty($context['errors']))
@@ -107,9 +107,13 @@ function template_add_file()
     </dl>
 	<hr>
     <div class="submitbutton">
-        <input type="submit" value="', $txt['sendtopic_send'], '" name="send" tabindex="', $context['tabindex']++, '" class="button_submit" />
-        <input type="hidden" name="sa" value="reservednames" />
-        <input type="hidden" name="sa" value="add_file">
+    <input type="submit" value="', $txt['sendtopic_send'], '" name="send" tabindex="', $context['tabindex']++, '" class="button_submit" />
+    <input type="hidden" name="sa" value="', $context['elga_sa'], '">';
+    if (isset($context['elga_file'])) {
+        echo '
+    <input type="hidden" name="id" value="', $context['elga_file']['id'], '" />';
+    }
+    echo '
     <input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
     <input type="hidden" name="', $context['add_file_token_var'], '" value="', $context['add_file_token'], '" />
     </div>
@@ -134,8 +138,8 @@ function template_album()
                 <a href="', $row['icon'], '" class="fancybox" rel="group">
                     <img src="', $row['icon'], '" alt="..." height="100px" width="100px" class="fancybox" />
                 </a>
-                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a></h4>
-                Author: ', $row['member_name'], ' 
+                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
+                Author: ', $row['member_name'], '
             </div>
         </ins>';
     }
@@ -149,15 +153,22 @@ function template_file()
     $row = $context['elga_file'];
 
     echo '
+    <a href="', $scripturl, '?action=gallery;sa=edit_file;id=', $row['id'], '">Edit</a>';
+    
+    echo '
     <div class="thumbnails">
         <ins class="thumbnail">
             <div class="r">
-                <a href="', $row['icon'], '" class="fancybox" rel="group">
-                    <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
-                </a>
-                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a></h4>
-                Author: ', $row['member_name'], ' 
+    <a href="', $row['icon'], '" class="fancybox" rel="group">
+        <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
+    </a>
             </div>
         </ins>
     </div>';
+
+    echo '
+    Имя файла: <a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a><br>
+    Title: ', $row['title'], '<br>
+    Description: ', $row['description'], '<br>
+    Author: <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>';
 }

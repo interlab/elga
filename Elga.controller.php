@@ -36,6 +36,7 @@ class Elga_Controller extends Action_Controller
         $context['elga_albums'] = getAlbums();
     }
 
+    // @todo: parse bbc
     public function action_add_file()
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
@@ -104,6 +105,9 @@ class Elga_Controller extends Action_Controller
 
             $img = uploadImage();
 
+            require_once(SUBSDIR . '/Post.subs.php');
+            preparsecode($validator->descr);
+            
 			// No errors, then send the PM to the admins
 			if (empty($context['errors']))
 			{
@@ -118,7 +122,7 @@ class Elga_Controller extends Action_Controller
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
 
-                redirectexit('action=gallery;sa=view;id=' . $insert_id);
+                redirectexit('action=gallery;sa=file;id=' . $insert_id);
 			}
 			else
 			{
@@ -153,7 +157,8 @@ class Elga_Controller extends Action_Controller
         }
         */
         $context['elga_album'] = isset($_GET['album']) ? (int) $_GET['album'] : 0;
-        $context['elga_albums'] = $albums;
+        $context['elga_albums'] =& $albums;
+        $context['elga_sa'] = 'add_file';
     }
 
     public function action_album()
@@ -184,6 +189,7 @@ class Elga_Controller extends Action_Controller
         SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
         FROM {db_prefix}elga_files as f
         WHERE f.id_album = {int:album}
+        ORDER BY f.id DESC
         LIMIT 100', [
             'album' => $album['id'],
         ]);
@@ -198,7 +204,204 @@ class Elga_Controller extends Action_Controller
             }
         }
         $db->free_result($req);
-        //print_r($context['elga_files']);
+    }
+
+    // @todo: parse bbc
+    public function action_edit_file()
+    {
+        global $context, $txt, $user_info, $modSettings, $scripturl;
+
+		isAllowedTo('admin_forum');
+
+        $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
+            !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
+            ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
+
+        $albums = getAlbums();
+        $context['elga_albums'] =& $albums;
+
+		if (isset($_REQUEST['send']))
+		{
+			checkSession('post');
+			validateToken('add_file');
+			spamProtection('add_file');
+
+            if (empty($_POST['id']))
+                redirectexit('action=gallery');
+            $id = (int) $_POST['id'];
+            $db = database();
+            $req = $db->query('', '
+            SELECT
+                f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
+                a.name AS album_name
+            FROM {db_prefix}elga_files as f
+                INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+            WHERE f.id = {int:id}
+            LIMIT 1', [
+                'id' => $id,
+            ]);
+            if (!$db->num_rows($req)) {
+                $db->free_result($req);
+                fatal_error('File not found!', false);
+            }
+            $context['elga_file'] = $file = $db->fetch_assoc($req);
+            $db->free_result($req);
+            
+            // @todo: perms
+            
+			// No errors, yet.
+			$context['errors'] = [];
+			loadLanguage('Errors');
+
+			// Could they get the right send topic verification code?
+			require_once(SUBSDIR . '/VerificationControls.class.php');
+			// require_once(SUBSDIR . '/Members.subs.php');
+
+			// form validation
+			require_once(SUBSDIR . '/DataValidator.class.php');
+			$validator = new Data_Validator();
+            require_once(SUBSDIR . '/Post.subs.php');
+			$validator->sanitation_rules([
+                'album' => 'int',
+				'title' => 'trim|Util::htmlspecialchars',
+				'descr' => 'trim|Util::htmlspecialchars'
+			]);
+			$validator->validation_rules([
+                'album' => 'required|numeric',
+				'title' => 'required', // |valid_email',
+				'descr' => 'required'
+			]);
+			$validator->text_replacements([
+                'album' => 'Album not selected!',
+				'title' => 'Title is empty!',
+				'descr' => $txt['error_message']
+			]);
+
+			// Any form errors
+			if (!$validator->validate($_POST))
+				$context['errors'] = $validator->validation_errors();
+
+            if ($context['require_verification']) {
+                // How about any verification errors
+                $verificationOptions = [
+                    'id' => 'add_file',
+                ];
+                $context['require_verification'] = create_control_verification($verificationOptions, true);
+
+                if (is_array($context['require_verification']))
+                {
+                    foreach ($context['require_verification'] as $error)
+                        $context['errors'][] = $txt['error_' . $error];
+                }
+            }
+
+            if (!isset($albums[$_POST['album']]))
+                $context['errors'][] = 'Album not exists!';
+
+            $img = 0;
+            if ('' !== $_FILES['image']['name']) {
+                $img = uploadImage();
+            }
+            
+            // @todo: del old image
+
+            require_once(SUBSDIR . '/Post.subs.php');
+            preparsecode($validator->descr);
+
+			// No errors, then send the PM to the admins
+			if (empty($context['errors']))
+			{
+                $db->query('', '
+                    UPDATE {db_prefix}elga_files
+                    SET ' . ($img ? '
+                        orig_name = {string:oname},
+                        fname = {string:fname},
+                        fsize = {raw:fsize},' : '') . '
+                        id_album = {int:album},
+                        title = {string:title},
+                        description = {string:descr},
+                        id_member = {int:mem_id},
+                        member_name = {string:mem_name}
+                    WHERE id = {int:id}',
+                    [
+                        'oname' => $img ? $img['orig_name'] : '',
+                        'fname' => $img ? $img['name'] : '',
+                        'fsize' => $img ? $img['size'] : '',
+                        'album' => $validator->album,
+                        'title' => $validator->title, 
+                        'descr' => $validator->descr,
+                        'mem_id' => $user_info['id'],
+                        'mem_name' => $user_info['name'],
+                        'id' => $id,
+                    ]
+                );
+
+                redirectexit('action=gallery;sa=file;id=' . $id);
+			}
+			else
+			{
+                $context['elga_album'] = $validator->album;
+				$context['elga_title'] = $validator->title;
+				$context['elga_descr'] = $validator->descr;
+			}
+		}
+
+        // GET
+        if (empty($_GET['id']))
+            redirectexit('action=gallery');
+
+        $id = (int) $_GET['id'];
+
+        $db = database();
+        $req = $db->query('', '
+        SELECT
+            f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
+            a.name AS album_name
+        FROM {db_prefix}elga_files as f
+            INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+        WHERE f.id = {int:id}
+        LIMIT 1', [
+            'id' => $id,
+        ]);
+        if (!$db->num_rows($req)) {
+            $db->free_result($req);
+            fatal_error('File not found!', false);
+        }
+        $context['elga_file'] = $file = $db->fetch_assoc($req);
+        $db->free_result($req);
+        
+        // @todo: perms
+        
+        $context['elga_album'] = $file['id_album'];
+        $context['elga_title'] = $file['title'];
+        $context['elga_descr'] = $file['description'];
+
+        $context['sub_template'] = 'add_file';
+
+		$context['linktree'][] = [
+			'url' => $scripturl . '?action=gallery;sa=edit_file;id=' . $file['id'],
+			'name' => 'Edit ' . $file['title'],
+		];
+
+        $context['page_title'] = 'Edit ' . $file['title'];
+
+		if ($context['require_verification']) {
+            require_once(SUBSDIR . '/VerificationControls.class.php');
+            $verificationOptions = [
+                'id' => 'add_file',
+            ];
+            $context['require_verification'] = create_control_verification($verificationOptions);
+            $context['visual_verification_id'] = $verificationOptions['id'];
+        }
+		createToken('add_file');
+
+        /*
+        foreach ($albums as &$row) {
+            $row['selected'] = false;
+        }
+        */
+        $context['elga_album'] = (int) $file['id_album'];
+        $context['elga_sa'] = 'edit_file';
     }
 
     public function action_file()
@@ -229,8 +432,12 @@ class Elga_Controller extends Action_Controller
         }
 
         $dir = $boardurl . '/files/gallery';
-        $context['elga_file'] = $file = $db->fetch_assoc($req);
+        $file = $db->fetch_assoc($req);
+        $context['elga_file'] =& $file;
+        $db->free_result($req);
         $context['elga_file']['icon'] = $dir . '/' .  $context['elga_file']['fname'];
+        require_once(SUBSDIR . '/Post.subs.php');
+        $file['description'] = censorText(parse_bbc(un_preparsecode($file['description'])));
 
 		$context['linktree'][] = [
 			'url' => $scripturl . '?action=gallery;sa=album;id=' . $file['id_album'],
@@ -239,10 +446,10 @@ class Elga_Controller extends Action_Controller
 
 		$context['linktree'][] = [
 			'url' => $scripturl . '?action=gallery;sa=file;id=' . $file['id'],
-			'name' => $file['orig_name'],
+			'name' => $file['title'],
 		];
 
-        $context['page_title'] = '' . $file['orig_name'];
+        $context['page_title'] = '' . $file['title'];
 
         $context['sub_template'] = 'file';
 
@@ -256,6 +463,7 @@ function getAlbums()
 
     $db = database();
 
+    // @todo: limit
     $req = $db->query('', '
     SELECT id, name, description, icon
     FROM {db_prefix}elga_albums
