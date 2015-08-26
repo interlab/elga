@@ -206,7 +206,7 @@ class Elga_Controller extends Action_Controller
         $db->free_result($req);
     }
 
-    // @todo: parse bbc
+    // @todo: parse bbc ?
     public function action_edit_file()
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
@@ -255,12 +255,10 @@ class Elga_Controller extends Action_Controller
 
 			// Could they get the right send topic verification code?
 			require_once(SUBSDIR . '/VerificationControls.class.php');
-			// require_once(SUBSDIR . '/Members.subs.php');
 
 			// form validation
 			require_once(SUBSDIR . '/DataValidator.class.php');
 			$validator = new Data_Validator();
-            require_once(SUBSDIR . '/Post.subs.php');
 			$validator->sanitation_rules([
                 'album' => 'int',
 				'title' => 'trim|Util::htmlspecialchars',
@@ -268,7 +266,7 @@ class Elga_Controller extends Action_Controller
 			]);
 			$validator->validation_rules([
                 'album' => 'required|numeric',
-				'title' => 'required', // |valid_email',
+				'title' => 'required',
 				'descr' => 'required'
 			]);
 			$validator->text_replacements([
@@ -437,7 +435,8 @@ class Elga_Controller extends Action_Controller
         $db->free_result($req);
         $context['elga_file']['icon'] = $dir . '/' .  $context['elga_file']['fname'];
         require_once(SUBSDIR . '/Post.subs.php');
-        $file['description'] = censorText(parse_bbc(un_preparsecode($file['description'])));
+        $file['description'] = parse_bbc(un_preparsecode($file['description']));
+        censorText($file['description']);
 
 		$context['linktree'][] = [
 			'url' => $scripturl . '?action=gallery;sa=album;id=' . $file['id_album'],
