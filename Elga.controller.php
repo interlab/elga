@@ -36,12 +36,13 @@ class Elga_Controller extends Action_Controller
         $context['elga_albums'] = getAlbums();
     }
 
-    // @todo: parse bbc
+    // @todo: parse bbc ?
     public function action_add_file()
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
-		isAllowedTo('admin_forum');
+        if (!allowedTo('moderate_forum') && !allowedTo('admin_forum'))
+            fatal_error('Не хватает прав!', false);
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
@@ -107,7 +108,7 @@ class Elga_Controller extends Action_Controller
 
             require_once(SUBSDIR . '/Post.subs.php');
             preparsecode($validator->descr);
-            
+
 			// No errors, then send the PM to the admins
 			if (empty($context['errors']))
 			{
@@ -211,8 +212,6 @@ class Elga_Controller extends Action_Controller
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
-		isAllowedTo('admin_forum');
-
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
@@ -247,7 +246,9 @@ class Elga_Controller extends Action_Controller
             $context['elga_file'] = $file = $db->fetch_assoc($req);
             $db->free_result($req);
             
-            // @todo: perms
+            // perms
+            if ($user_info['id'] != $file['id_member'] && !allowedTo('moderate_forum') && !allowedTo('admin_forum'))
+                fatal_error('Вы не можете редактировать эту запись! Не хватает прав!', false);
             
 			// No errors, yet.
 			$context['errors'] = [];
@@ -368,7 +369,9 @@ class Elga_Controller extends Action_Controller
         $context['elga_file'] = $file = $db->fetch_assoc($req);
         $db->free_result($req);
         
-        // @todo: perms
+        // perms
+        if ($user_info['id'] != $file['id_member'] && !allowedTo('moderate_forum') && !allowedTo('admin_forum'))
+            fatal_error('Вы не можете редактировать эту запись! Не хватает прав!', false);
         
         $context['elga_album'] = $file['id_album'];
         $context['elga_title'] = $file['title'];
