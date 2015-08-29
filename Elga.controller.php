@@ -116,9 +116,9 @@ class Elga_Controller extends Action_Controller
                 $db = database();
 
                 $db->insert('', '{db_prefix}elga_files',
-                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'id_album' => 'int',
+                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 'id_album' => 'int',
                       'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string', ],
-                    [ $img['orig_name'], $img['name'], $img['size'], $validator->album, $validator->title, 
+                    [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $validator->album, $validator->title, 
                       $descr, $user_info['id'], $user_info['name'], ],
                     [ 'id_member', 'id_topic' ]
                 );
@@ -302,8 +302,6 @@ class Elga_Controller extends Action_Controller
             if ('' !== $_FILES['image']['name']) {
                 $img = uploadImage();
             }
-            
-            // @todo: del old image
 
             require_once(SUBSDIR . '/Post.subs.php');
             $descr = $validator->descr;
@@ -317,7 +315,8 @@ class Elga_Controller extends Action_Controller
                     SET ' . ($img ? '
                         orig_name = {string:oname},
                         fname = {string:fname},
-                        fsize = {raw:fsize},' : '') . '
+                        fsize = {raw:fsize},
+                        thumb = {string:thumb},' : '') . '
                         id_album = {int:album},
                         title = {string:title},
                         description = {string:descr},
@@ -328,6 +327,7 @@ class Elga_Controller extends Action_Controller
                         'oname' => $img ? $img['orig_name'] : '',
                         'fname' => $img ? $img['name'] : '',
                         'fsize' => $img ? $img['size'] : '',
+                        'thumb' => $img ? 'thumb' : '',
                         'album' => $validator->album,
                         'title' => $validator->title, 
                         'descr' => $descr,
@@ -336,6 +336,11 @@ class Elga_Controller extends Action_Controller
                         'id' => $id,
                     ]
                 );
+
+                // del old image
+                if ($db->affected_rows() && '' !== $file['fname'] && $img && $file['fname'] !== $img['name']) {
+                    delOldImage($file);
+                }
 
                 redirectexit('action=gallery;sa=file;id=' . $id);
 			}
@@ -473,7 +478,8 @@ function getAlbums()
     FROM {db_prefix}elga_albums
     LIMIT 100', []);
 
-    $data = new Foo();
+    // $data = new Foo();
+    $data = [];
     if ($db->num_rows($req) > 0)
     {
         while ($row = $db->fetch_assoc($req)) {
@@ -561,15 +567,73 @@ function uploadImage()
         if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
             fatal_error('Ошибка копирования временного файла!', false);
         } else {
+
+            // create thumb image
+            $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME) . '_thumb.' . pathinfo($dest_name, PATHINFO_EXTENSION);
+            $width = 350;
+            $height = 350;
+            thumb($dest_name, $dest_dir . '/' . $thumb_name, $width, $height);
+
             return [
     'name' => $date . '/' . $nfname,
     'orig_name' => $_FILES['image']['name'], // ? need sanitize?
     'size' => $fsize,
+    'thumb' => $date . '/' . $thumb_name,
             ];
         }
     }
 
     return false;
+}
+
+function delOldImage($img)
+{
+    $path = BOARDDIR . '/files/gallery';
+    $orig = $path . '/' . $img['fname'];
+    $thumb = $path . '/' . $img['thumb'];
+    foreach ([$orig, $thumb] as $file) {
+        if (file_exists($file)) {
+            @unlink($file);
+        }
+    }
+}
+
+# Создаем мини-постер
+# http://imagine.readthedocs.org/en/latest/index.html
+# https://speakerdeck.com/avalanche123/introduction-to-imagine
+/*
+thumb(
+    $dir . '/' . $new_name,
+    $dir . '/' . $thumb_name,
+    $maxWidth,
+    $maxHeight
+    );
+*/
+function thumb($img, $thumb,  $width = 300, $height = 300)
+{
+    # Check if GD extension is loaded
+    if (!extension_loaded('gd') && !extension_loaded('gd2')) {
+        trigger_error("GD is not loaded", E_USER_WARNING);
+
+        return false;
+    }
+
+    $loader = require_once(EXTDIR . '/elga_lib/vendor/autoload.php');
+
+    $imagine = new \Imagine\Gd\Imagine();
+    $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET; # THUMBNAIL_OUTBOUND
+    $image = $imagine->open($img);
+    $size = $image->getSize();
+
+    # Если размеры меньше, то масштабирования не нужно
+    if ($size->getWidth() <= $width && $size->getHeight() <= $height)
+        $image->copy()
+              ->save($thumb);
+    else
+        $image->thumbnail(new \Imagine\Image\Box($width, $height), $mode)
+              ->save($thumb);
+
+    return true;
 }
 
 class Foo extends ArrayObject

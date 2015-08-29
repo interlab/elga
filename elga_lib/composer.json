@@ -1,5 +1,6 @@
 {
     "require": {
-       "gargron/fileupload": "1.0.*"
+       "gargron/fileupload": "1.0.*",
+       "imagine/Imagine": "*"
     }
 }
