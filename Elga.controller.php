@@ -24,6 +24,19 @@ class Elga_Controller extends Action_Controller
         loadCSSFile('elga.css');
         loadTemplate('Elga');
 
+        loadJavascriptFile('jscroll-2.3.4/jquery.jscroll.js');
+        // JavaScriptEscape(...)
+        addInlineJavascript('
+$(document).ready(function(){
+    $(\'.elga_scroll\').jscroll({
+        loadingHtml: \'<img src="loading.gif" alt="Loading" /> Loading...\',
+        padding: 20,
+        nextSelector: \'a.jscroll-next:last\',
+        contentSelector: \'\'
+    });
+});
+        ');
+
         $context['sub_template'] = 'home';
 
         if (isset($_REQUEST['sa'])) {
@@ -117,9 +130,9 @@ class Elga_Controller extends Action_Controller
 
                 $db->insert('', '{db_prefix}elga_files',
                     [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 'id_album' => 'int',
-                      'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string', ],
+                      'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string', 'exif' => 'string' ],
                     [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $validator->album, $validator->title, 
-                      $descr, $user_info['id'], $user_info['name'], ],
+                      $descr, $user_info['id'], $user_info['name'], '' ],
                     [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
@@ -186,13 +199,55 @@ class Elga_Controller extends Action_Controller
 
         $db = database();
 
+        // $limit = 20;
+        $per_page = 4;
+
+        $req = $db->query('', '
+            SELECT COUNT(*)
+            FROM {db_prefix}elga_files
+            WHERE id_album = {int:id}
+            LIMIT 1',
+            ['id' => $album['id']]);
+        if (!$db->num_rows($req)) {
+            $totalfiles = 0;
+        }
+        else {
+            $totalfiles = $db->fetch_row($req)[0];
+        }
+        $db->free_result($req);
+
+        $context['elga']['total'] = $totalfiles;
+        $context['elga']['per_page'] = $per_page;
+        $context['elga']['is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
+        // echo $context['elga']['is_next_start'], ' ', $_REQUEST['start'], ' ', $totalfiles;
+
+		$context['page_index'] = constructPageIndex(
+            $scripturl . '?action=gallery;sa=album;id=' . $album['id'],
+            $_REQUEST['start'],
+            $totalfiles,
+            $per_page,
+            true
+        );
+		$context['start'] = $_REQUEST['start'];
+
+        $context['elga']['next_start'] = $context['start'] + $per_page;
+        //echo $context['elga']['next_start'], ' из ', $totalfiles;
+
+		// This is information about which page is current, and which page we're on - in case you don't like the constructed page index. (again, wireles..)
+		$context['page_info'] = array(
+			'current_page' => $_REQUEST['start'] / $per_page + 1,
+			'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
+		);
+
+        // echo ' LIMIT ' . $context['start'] . ', ' . $per_page;
+
         // @todo limit
         $req = $db->query('', '
         SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
         FROM {db_prefix}elga_files as f
         WHERE f.id_album = {int:album}
         ORDER BY f.id DESC
-        LIMIT 100', [
+        LIMIT ' . $context['start'] . ', ' . $per_page, [
             'album' => $album['id'],
         ]);
 
@@ -206,6 +261,17 @@ class Elga_Controller extends Action_Controller
             }
         }
         $db->free_result($req);
+        // print_r($context['elga_files']);
+
+        if ($_GET['type'] === 'json') {
+            // Clear the templates
+            Template_Layers::getInstance()->removeAll();
+            $context['sub_template'] = 'album_json';
+            // sleep(1);
+            // $context['json_data'] = [];
+            // loadTemplate('Json');
+            // $context['sub_template'] = 'send_json';
+        }
     }
 
     // @todo: parse bbc ?
@@ -246,11 +312,11 @@ class Elga_Controller extends Action_Controller
             }
             $context['elga_file'] = $file = $db->fetch_assoc($req);
             $db->free_result($req);
-            
+
             // perms
             if ($user_info['id'] != $file['id_member'] && !allowedTo('moderate_forum') && !allowedTo('admin_forum'))
                 fatal_error('Вы не можете редактировать эту запись! Не хватает прав!', false);
-            
+
 			// No errors, yet.
 			$context['errors'] = [];
 			loadLanguage('Errors');
@@ -375,11 +441,11 @@ class Elga_Controller extends Action_Controller
         }
         $context['elga_file'] = $file = $db->fetch_assoc($req);
         $db->free_result($req);
-        
+
         // perms
         if ($user_info['id'] != $file['id_member'] && !allowedTo('moderate_forum') && !allowedTo('admin_forum'))
             fatal_error('Вы не можете редактировать эту запись! Не хватает прав!', false);
-        
+
         $context['elga_album'] = $file['id_album'];
         $context['elga_title'] = $file['title'];
         $context['elga_descr'] = $file['description'];
@@ -603,8 +669,8 @@ function delOldImage($img)
 # https://speakerdeck.com/avalanche123/introduction-to-imagine
 /*
 thumb(
-    $dir . '/' . $new_name,
-    $dir . '/' . $thumb_name,
+    $dir . '/' . $fname,
+    $dir . '/' . $thumb_fname,
     $maxWidth,
     $maxHeight
     );

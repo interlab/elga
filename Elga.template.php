@@ -125,10 +125,12 @@ function template_add_file()
 function template_album()
 {
     global $context, $scripturl, $txt, $boardurl;
-
+    
     echo '
     <h1>', $context['elga_album']['name'], '</h1>
     <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '">Add new file</a>';
+
+    // echo '<h3>Page ', $context['page_info']['current_page'], '</h3>';
 
     echo '<div class="thumbnails">';
     foreach ($context['elga_files'] as $row) {
@@ -143,7 +145,57 @@ function template_album()
             </div>
         </ins>';
     }
-    echo '</div>';
+    echo '
+    </div>';
+
+    if ($context['elga']['is_next_start']) {
+        echo '
+    <div class="elga_scroll">
+        <a href="', $scripturl, '?action=gallery;sa=album;type=json;id=', $context['elga_album']['id'], ';start=', $context['elga']['next_start'],
+            '" class="jscroll-next">next page</a>
+    </div>';
+    }
+}
+
+function template_album_json()
+{
+    global $context, $scripturl, $txt, $boardurl, $modSettings;
+
+    // @ob_end_clean();
+    // if (!empty($modSettings['enableCompressedOutput']))
+        // ob_start('ob_gzhandler');
+    // else
+        // ob_start();
+ 
+    // if (!$context['elga']['is_next_start'])
+        // die('');
+
+    // echo '<h3>Page ', $context['page_info']['current_page'], '</h3>';
+
+    echo '<br><div class="thumbnails">';
+    foreach ($context['elga_files'] as $row) {
+        echo '
+        <ins class="thumbnail">
+            <div class="r">
+                <a href="', $row['icon'], '" class="fancybox" rel="group">
+                    <img src="', $row['icon'], '" alt="..." height="100px" width="100px" class="fancybox" />
+                </a>
+                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
+                Author: ', $row['member_name'], '
+            </div>
+        </ins>';
+    }
+    echo '
+    </div>';
+
+    if (!$context['elga']['is_next_start'])
+        die(''); // end
+    else {
+        echo '
+    <a href="'. $scripturl. '?action=gallery;sa=album;type=json;id='. $context['elga_album']['id']. ';start='. $context['elga']['next_start'].
+        '" class="jscroll-next">next page</a>';
+        die('');
+    }
 }
 
 function template_file()
