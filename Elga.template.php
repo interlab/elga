@@ -26,7 +26,7 @@ function template_home()
                     <img src="', $row['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">' . $row['name'] . '</a></h4>
-                text for text ...
+                ', $row['description'], '
             </div>
         </ins>';
     }
@@ -130,15 +130,24 @@ function template_album()
     <h1>', $context['elga_album']['name'], '</h1>
     <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '">Add new file</a>';
 
+    if (empty($context['elga_files'])) {
+        echo '<h1>В этом альбоме нет загруженных файлов.</h1>';
+
+        return;
+    }
+
     // echo '<h3>Page ', $context['page_info']['current_page'], '</h3>';
 
+	// Show the page index... "Pages: [1]".
+	template_pagesection('normal_buttons', 'right');
+    
     echo '<div class="thumbnails">';
     foreach ($context['elga_files'] as $row) {
         echo '
         <ins class="thumbnail">
             <div class="r">
                 <a href="', $row['icon'], '" class="fancybox" rel="group">
-                    <img src="', $row['icon'], '" alt="..." height="100px" width="100px" class="fancybox" />
+                    <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
                 Author: ', $row['member_name'], '
@@ -148,10 +157,10 @@ function template_album()
     echo '
     </div>';
 
-    if ($context['elga']['is_next_start']) {
+    if ($context['elga_is_next_start']) {
         echo '
     <div class="elga_scroll">
-        <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=', $context['elga_album']['id'], ';start=', $context['elga']['next_start'],
+        <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=', $context['elga_album']['id'], ';start=', $context['elga_next_start'],
             '" class="jscroll-next">next page</a>
     </div>';
     }
@@ -178,7 +187,7 @@ function template_album_js()
         <ins class="thumbnail">
             <div class="r">
                 <a href="', $row['icon'], '" class="fancybox" rel="group">
-                    <img src="', $row['icon'], '" alt="..." height="100px" width="100px" class="fancybox" />
+                    <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
                 Author: ', $row['member_name'], '
@@ -188,12 +197,12 @@ function template_album_js()
     echo '
     </div>';
 
-    if (!$context['elga']['is_next_start']) {
+    if (!$context['elga_is_next_start']) {
         // die(''); // end
     }
     else {
         echo '
-    <a href="'. $scripturl. '?action=gallery;sa=album;type=js;id='. $context['elga_album']['id']. ';start='. $context['elga']['next_start'].
+    <a href="'. $scripturl. '?action=gallery;sa=album;type=js;id='. $context['elga_album']['id']. ';start='. $context['elga_next_start'].
         '" class="jscroll-next">next page</a>';
         // die('');
     }

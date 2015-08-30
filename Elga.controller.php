@@ -197,6 +197,16 @@ $(document).ready(function(){
 
         $context['sub_template'] = 'album';
 
+        if (isset($_GET['type']) && $_GET['type'] === 'js') {
+            // Clear the templates
+            Template_Layers::getInstance()->removeAll();
+            $context['sub_template'] = 'album_js';
+            // sleep(1);
+            // $context['json_data'] = [];
+            // loadTemplate('Json');
+            // $context['sub_template'] = 'send_json';
+        }
+
         $db = database();
 
         // $limit = 20;
@@ -216,11 +226,13 @@ $(document).ready(function(){
         }
         $db->free_result($req);
 
-        $context['elga']['total'] = $totalfiles;
-        $context['elga']['per_page'] = $per_page;
-        $context['elga']['is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
-        // echo $context['elga']['is_next_start'], ' ', $_REQUEST['start'], ' ', $totalfiles;
+        if (!$totalfiles) {
+            return;
+        }
 
+        $context['elga_total'] = $totalfiles;
+        $context['elga_per_page'] = $per_page;
+        $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
 		$context['page_index'] = constructPageIndex(
             $scripturl . '?action=gallery;sa=album;id=' . $album['id'] . ';start=%1$d',
             $_REQUEST['start'],
@@ -229,17 +241,11 @@ $(document).ready(function(){
             true
         );
 		$context['start'] = $_REQUEST['start'];
-
-        $context['elga']['next_start'] = $context['start'] + $per_page;
-        //echo $context['elga']['next_start'], ' из ', $totalfiles;
-
-		// This is information about which page is current, and which page we're on - in case you don't like the constructed page index. (again, wireles..)
-		$context['page_info'] = array(
+        $context['elga_next_start'] = $context['start'] + $per_page;
+		$context['page_info'] = [
 			'current_page' => $_REQUEST['start'] / $per_page + 1,
 			'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
-		);
-
-        // echo ' LIMIT ' . $context['start'] . ', ' . $per_page;
+		];
 
         $req = $db->query('', '
             SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
@@ -259,22 +265,12 @@ $(document).ready(function(){
         if ($db->num_rows($req) > 0)
         {
             while ($row = $db->fetch_assoc($req)) {
+                $row['thumb'] = $dir . '/' . $row['thumb'];
                 $row['icon'] = $dir . '/' . $row['fname'];
                 $context['elga_files'][$row['id']] = $row;
             }
         }
         $db->free_result($req);
-        // print_r($context['elga_files']);
-
-        if (isset($_GET['type']) && $_GET['type'] === 'js') {
-            // Clear the templates
-            Template_Layers::getInstance()->removeAll();
-            $context['sub_template'] = 'album_js';
-            // sleep(1);
-            // $context['json_data'] = [];
-            // loadTemplate('Json');
-            // $context['sub_template'] = 'send_json';
-        }
     }
 
     // @todo: parse bbc ?
