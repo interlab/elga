@@ -241,15 +241,14 @@ $(document).ready(function(){
 
         // echo ' LIMIT ' . $context['start'] . ', ' . $per_page;
 
-        // @todo limit
         $req = $db->query('', '
-        SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
-        FROM {db_prefix}elga_files as f
-        WHERE f.id_album = {int:album}
-        ORDER BY f.id DESC
-        LIMIT ' . $context['start'] . ', ' . $per_page, [
-            'album' => $album['id'],
-        ]);
+            SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
+            FROM {db_prefix}elga_files as f
+            WHERE f.id_album = {int:album}
+            ORDER BY f.id DESC
+            LIMIT ' . $context['start'] . ', ' . $per_page,
+            [ 'album' => $album['id'], ]
+        );
 
         $dir = $boardurl . '/files/gallery';
         $context['elga_files'] = [];
@@ -263,10 +262,10 @@ $(document).ready(function(){
         $db->free_result($req);
         // print_r($context['elga_files']);
 
-        if ($_GET['type'] === 'json') {
+        if ($_GET['type'] === 'js') {
             // Clear the templates
             Template_Layers::getInstance()->removeAll();
-            $context['sub_template'] = 'album_json';
+            $context['sub_template'] = 'album_js';
             // sleep(1);
             // $context['json_data'] = [];
             // loadTemplate('Json');

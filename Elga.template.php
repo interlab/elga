@@ -151,13 +151,13 @@ function template_album()
     if ($context['elga']['is_next_start']) {
         echo '
     <div class="elga_scroll">
-        <a href="', $scripturl, '?action=gallery;sa=album;type=json;id=', $context['elga_album']['id'], ';start=', $context['elga']['next_start'],
+        <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=', $context['elga_album']['id'], ';start=', $context['elga']['next_start'],
             '" class="jscroll-next">next page</a>
     </div>';
     }
 }
 
-function template_album_json()
+function template_album_js()
 {
     global $context, $scripturl, $txt, $boardurl, $modSettings;
 
@@ -188,13 +188,14 @@ function template_album_json()
     echo '
     </div>';
 
-    if (!$context['elga']['is_next_start'])
-        die(''); // end
+    if (!$context['elga']['is_next_start']) {
+        // die(''); // end
+    }
     else {
         echo '
-    <a href="'. $scripturl. '?action=gallery;sa=album;type=json;id='. $context['elga_album']['id']. ';start='. $context['elga']['next_start'].
+    <a href="'. $scripturl. '?action=gallery;sa=album;type=js;id='. $context['elga_album']['id']. ';start='. $context['elga']['next_start'].
         '" class="jscroll-next">next page</a>';
-        die('');
+        // die('');
     }
 }
 
