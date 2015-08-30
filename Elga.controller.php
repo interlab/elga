@@ -222,7 +222,7 @@ $(document).ready(function(){
         // echo $context['elga']['is_next_start'], ' ', $_REQUEST['start'], ' ', $totalfiles;
 
 		$context['page_index'] = constructPageIndex(
-            $scripturl . '?action=gallery;sa=album;id=' . $album['id'],
+            $scripturl . '?action=gallery;sa=album;id=' . $album['id'] . ';start=%1$d',
             $_REQUEST['start'],
             $totalfiles,
             $per_page,
@@ -246,8 +246,12 @@ $(document).ready(function(){
             FROM {db_prefix}elga_files as f
             WHERE f.id_album = {int:album}
             ORDER BY f.id DESC
-            LIMIT ' . $context['start'] . ', ' . $per_page,
-            [ 'album' => $album['id'], ]
+            LIMIT {int:start}, {int:per_page}',
+            [
+                'album' => $album['id'],
+                'start' => $context['start'],
+                'per_page' => $per_page,
+            ]
         );
 
         $dir = $boardurl . '/files/gallery';
@@ -262,7 +266,7 @@ $(document).ready(function(){
         $db->free_result($req);
         // print_r($context['elga_files']);
 
-        if ($_GET['type'] === 'js') {
+        if (isset($_GET['type']) && $_GET['type'] === 'js') {
             // Clear the templates
             Template_Layers::getInstance()->removeAll();
             $context['sub_template'] = 'album_js';
