@@ -1,4 +1,4 @@
-# ElkArte Gallery
+# ElkArte Gallery (elga)
 
 ## Introduction:
 Simple image gallery for ElkArte
