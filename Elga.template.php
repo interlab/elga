@@ -214,9 +214,13 @@ function template_file()
 
     $row = $context['elga_file'];
 
-    echo '
-    <a href="', $scripturl, '?action=gallery;sa=edit_file;id=', $row['id'], '">Edit</a>';
-    
+    if ($context['elga_is_author']) {
+        echo '
+    <a href="', $scripturl, '?action=gallery;sa=edit_file;id=', $row['id'], '">Edit</a> | 
+    <a href="', $scripturl, '?action=gallery;sa=remove_file;id=', $row['id'], ';', $context['session_var'], '=', $context['session_id'],
+        '" onclick="return confirm(\'Remove this file?\');">Remove</a>';
+    }
+
     echo '
     <div class="thumbnails">
         <ins class="thumbnail">

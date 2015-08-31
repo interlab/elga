@@ -28,11 +28,16 @@ class Elga_Controller extends Action_Controller
         // JavaScriptEscape(...)
         addInlineJavascript('
 $(document).ready(function(){
+    // var i = 0;
     $(\'.elga_scroll\').jscroll({
         loadingHtml: \'<img src="loading.gif" alt="Loading" /> Loading...\',
         padding: 20,
         nextSelector: \'a.jscroll-next:last\',
-        contentSelector: \'\'
+        contentSelector: \'\',
+        // callback: function(){
+            // i++;
+            // console.log(i + \'test jscroll\')
+        // }
     });
 });
         ');
@@ -54,8 +59,10 @@ $(document).ready(function(){
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
-        if (!allowedTo('moderate_forum') && !allowedTo('admin_forum'))
-            fatal_error('Не хватает прав!', false);
+        is_not_guest();
+
+        // if (!allowedTo('moderate_forum') && !allowedTo('admin_forum'))
+            // fatal_error('Не хватает прав!', false);
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
@@ -278,6 +285,8 @@ $(document).ready(function(){
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
+        is_not_guest();
+
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
@@ -477,9 +486,47 @@ $(document).ready(function(){
         $context['elga_sa'] = 'edit_file';
     }
 
+    public function action_remove_file()
+    {
+        global $context, $txt, $user_info, $modSettings, $scripturl;
+
+        is_not_guest();
+
+        checkSession('get');
+
+        if (!is_numeric($_GET['id']))
+            fatal_error('Bad id value. Required int type.', false);
+
+        $id = $_REQUEST['id'] = abs(intval($_GET['id']));
+
+        $file = getFile($id);
+        if (!$file)
+            fatal_error('File not found.', false);
+
+        $db = database();
+        $req = $db->query('', '
+            DELETE FROM {db_prefix}elga_files
+            WHERE id = {int:id}',
+            [
+                'id' => $id,
+            ]
+        );
+
+        $dir = BOARDDIR . '/files/gallery';
+        $img = $dir . '/' . $file['fname'];
+        $thumb = $dir . '/' . $file['thumb'];
+        foreach ([$img, $thumb] as $f) {
+            if (is_file($f)) {
+                @unlink($f);
+            }
+        }
+
+        redirectexit('action=gallery');
+    }
+
     public function action_file()
     {
-        global $context, $scripturl, $boardurl;
+        global $context, $scripturl, $boardurl, $user_info;
 
         if (empty($_GET['id']))
             redirectexit('action=gallery');
@@ -527,8 +574,33 @@ $(document).ready(function(){
 
         $context['sub_template'] = 'file';
 
-        return;
+        $context['elga_is_author'] = $user_info['id'] == $file['id_member'] || allowedTo('moderate_forum') || allowedTo('admin_forum');
     }
+}
+
+function getFile($id)
+{
+    $db = database();
+    $req = $db->query('', '
+    SELECT
+        f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
+        a.name AS album_name
+    FROM {db_prefix}elga_files as f
+        INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+    WHERE f.id = {int:id}
+    LIMIT 1', [
+        'id' => $id,
+    ]);
+    if (!$db->num_rows($req)) {
+        $db->free_result($req);
+
+        return false;
+    }
+
+    $file = $db->fetch_assoc($req);
+    $db->free_result($req);
+
+    return $file;
 }
 
 function getAlbums()
