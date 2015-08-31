@@ -69,6 +69,7 @@ $(document).ready(function(){
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
 
         $albums = getAlbums();
+        $context['elga_sa'] = 'add_file';
 
         if (isset($_REQUEST['send'])) {
             checkSession('post');
@@ -179,7 +180,6 @@ $(document).ready(function(){
         */
         $context['elga_album'] = isset($_GET['album']) ? (int) $_GET['album'] : 0;
         $context['elga_albums'] = & $albums;
-        $context['elga_sa'] = 'add_file';
     }
 
     public function action_album()
@@ -292,6 +292,7 @@ $(document).ready(function(){
 
         $albums = getAlbums();
         $context['elga_albums'] = & $albums;
+        $context['elga_sa'] = 'edit_file';
 
         if (isset($_REQUEST['send'])) {
             checkSession('post');
@@ -423,7 +424,27 @@ $(document).ready(function(){
                 $context['elga_album'] = $validator->album;
                 $context['elga_title'] = $title;
                 $context['elga_descr'] = $descr;
+
+                $context['sub_template'] = 'add_file';
+
+                $context['linktree'][] = [
+                    'url' => $scripturl.'?action=gallery;sa=edit_file;id='.$file['id'],
+                    'name' => 'Edit '.$title,
+                ];
+
+                $context['page_title'] = 'Edit '.$title;
+
+                if ($context['require_verification']) {
+                    $verificationOptions = [
+                        'id' => 'add_file',
+                    ];
+                    $context['require_verification'] = create_control_verification($verificationOptions);
+                    $context['visual_verification_id'] = $verificationOptions['id'];
+                }
+                createToken('add_file');
             }
+
+            return;
         }
 
         // GET
@@ -456,7 +477,6 @@ $(document).ready(function(){
             fatal_error('Вы не можете редактировать эту запись! Не хватает прав!', false);
         }
 
-        $context['elga_album'] = $file['id_album'];
         require_once SUBSDIR.'/Post.subs.php';
         $context['elga_title'] = $file['title']; // @todo: need "title" parse?
         censorText($file['description']);
@@ -483,7 +503,6 @@ $(document).ready(function(){
         createToken('add_file');
 
         $context['elga_album'] = (int) $file['id_album'];
-        $context['elga_sa'] = 'edit_file';
     }
 
     public function action_remove_file()
