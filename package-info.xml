@@ -22,18 +22,20 @@
 		<require-file name="Elga.template.php" destination="THEMEDIR" />
         <require-file name="Elga.subs.php" destination="SUBSDIR" />
 		<!--<require-dir name="blablabla" destination="BOARDDIR" />-->
-		<code>Hooks.php</code>
+        <hook hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
+		<!--<code>Hooks.php</code>-->
 		<database>install.php</database>
 		<redirect url="?area=addonsettings;sa=general" timeout="500" />
 	</install>
 
 	<uninstall for="1.0.4 - 1.0.99">
 		<readme type="inline">This will uninstall Elga</readme>
+        <hook reverse="true" hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
 		<remove-file name="CONTROLLERDIR/Elga.controller.php" />
 		<remove-file name="THEMEDIR/Elga.template.php" />
 		<remove-file name="SUBSDIR/Elga.subs.php" />
 		<!--<remove-dir name="blablabla" />-->
-		<code>Hooks.php</code>
+		<!--<code>Hooks.php</code>-->
 		<!--<database>uninstall.php</database>-->
 		<redirect url="?action=admin;area=packages" timeout="500" />
 	</uninstall>
