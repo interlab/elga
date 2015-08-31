@@ -127,6 +127,7 @@ $(document).ready(function(){
 
             $img = uploadImage();
 
+            $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
             require_once SUBSDIR.'/Post.subs.php';
             $descr = $validator->descr;
             preparsecode($descr);
@@ -138,7 +139,7 @@ $(document).ready(function(){
                 $db->insert('', '{db_prefix}elga_files',
                     [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 'id_album' => 'int',
                       'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string', 'exif' => 'string', ],
-                    [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $validator->album, $validator->title,
+                    [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $validator->album, $title,
                       $descr, $user_info['id'], $user_info['name'], '', ],
                     [ 'id_member', 'id_topic' ]
                 );
@@ -147,7 +148,7 @@ $(document).ready(function(){
                 redirectexit('action=gallery;sa=file;id='.$insert_id);
             } else {
                 $context['elga_album'] = $validator->album;
-                $context['elga_title'] = $validator->title;
+                $context['elga_title'] = $title;
                 $context['elga_descr'] = $descr;
             }
         }
@@ -378,6 +379,7 @@ $(document).ready(function(){
                 $img = uploadImage();
             }
 
+            $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
             require_once SUBSDIR.'/Post.subs.php';
             $descr = $validator->descr;
             preparsecode($descr);
@@ -403,7 +405,7 @@ $(document).ready(function(){
                         'fsize' => $img ? $img['size'] : '',
                         'thumb' => $img ? 'thumb' : '',
                         'album' => $validator->album,
-                        'title' => $validator->title,
+                        'title' => $title,
                         'descr' => $descr,
                         'mem_id' => $user_info['id'],
                         'mem_name' => $user_info['name'],
@@ -419,7 +421,7 @@ $(document).ready(function(){
                 redirectexit('action=gallery;sa=file;id='.$id);
             } else {
                 $context['elga_album'] = $validator->album;
-                $context['elga_title'] = $validator->title;
+                $context['elga_title'] = $title;
                 $context['elga_descr'] = $descr;
             }
         }
@@ -457,8 +459,8 @@ $(document).ready(function(){
         $context['elga_album'] = $file['id_album'];
         require_once SUBSDIR.'/Post.subs.php';
         $context['elga_title'] = $file['title']; // @todo: need "title" parse?
-        $file['description'] = parse_bbc(un_preparsecode($file['description']));
         censorText($file['description']);
+        $file['description'] = un_preparsecode($file['description']);
         $context['elga_descr'] = $file['description'];
 
         $context['sub_template'] = 'add_file';
@@ -556,8 +558,8 @@ $(document).ready(function(){
         $db->free_result($req);
         $context['elga_file']['icon'] = $dir.'/'.$context['elga_file']['fname'];
         require_once SUBSDIR.'/Post.subs.php';
-        $file['description'] = parse_bbc(un_preparsecode($file['description']));
         censorText($file['description']);
+        $file['description'] = parse_bbc($file['description']);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=album;id='.$file['id_album'],
