@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.elkarte.net/site/package-info">
+<!--
+/**
+ * @package elga
+ *
+ * @author inter
+ * @copyright 2015 inter
+ * @license MIT
+ * @version 0.0.1
+ *
+ */
+-->
+<package-info xmlns="http://www.elkarte.net/site/package-info" xmlns:elk="http://www.elkarte.net/">
+    <id>inter:elga</id>
+    <name>Elga</name>
+    <version>0.0.1</version>
+    <type>modification</type>
+	<install for="1.0.4 - 1.0.99">
+		<readme type="inline">This will install Elga</readme>
+		<require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
+		<require-file name="Elga.template.php" destination="THEMEDIR" />
+        <require-file name="Elga.subs.php" destination="SUBSDIR" />
+		<!--<require-dir name="blablabla" destination="BOARDDIR" />-->
+		<code>Hooks.php</code>
+		<database>install.php</database>
+		<redirect url="?area=addonsettings;sa=general" timeout="500" />
+	</install>
+
+	<uninstall for="1.0.4 - 1.0.99">
+		<readme type="inline">This will uninstall Elga</readme>
+		<remove-file name="CONTROLLERDIR/Elga.controller.php" />
+		<remove-file name="THEMEDIR/Elga.template.php" />
+		<remove-file name="SUBSDIR/Elga.subs.php" />
+		<!--<remove-dir name="blablabla" />-->
+		<code>Hooks.php</code>
+		<!--<database>uninstall.php</database>-->
+		<redirect url="?action=admin;area=packages" timeout="500" />
+	</uninstall>
+</package-info>
