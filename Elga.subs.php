@@ -53,7 +53,7 @@ function elga_whos_online($actions)
     $txt['who_gallery_file'] = 'Просматривает файл <a href="%s">%s</a>';
 
     if ('gallery' === $actions['action'])
-        $action = sprintf($txt['st_who_torrents'], $scripturl . '?action=gallery');
+        $action = sprintf($txt['who_gallery'], $scripturl . '?action=gallery');
 
     if (!empty($actions['sa']) and 'gallery' === $actions['action']) {
         switch ($actions['sa']) {
