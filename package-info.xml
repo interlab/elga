@@ -16,7 +16,7 @@
     <name>Elga</name>
     <version>0.0.1</version>
     <type>modification</type>
-    <install for="1.0.4 - 1.0.99">
+    <install for="1.0.1 - 1.0.99">
         <readme type="inline">This will install Elga</readme>
         <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
         <require-file name="Elga.template.php" destination="THEMEDIR" />
@@ -26,12 +26,13 @@
         <require-dir name="elga_lib" destination="EXTDIR" />
         <hook hook="integrate_actions" file="SUBSDIR/Elga.subs.php" function="elga_actions" />
         <hook hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
+        <hook hook="integrate_whos_online" file="SUBSDIR/Elga.subs.php" function="elga_whos_online" />
         <!--<code>Hooks.php</code>-->
         <database>install.php</database>
         <redirect url="?area=addonsettings;sa=general" timeout="500" />
     </install>
 
-    <uninstall for="1.0.4 - 1.0.99">
+    <uninstall for="1.0.1 - 1.0.99">
         <readme type="inline">This will uninstall Elga</readme>
         <hook reverse="true" hook="integrate_actions" file="SUBSDIR/Elga.subs.php" function="elga_actions" />
         <hook reverse="true" hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
@@ -43,6 +44,7 @@
         <remove-dir name="EXTDIR/elga_lib" />
         <hook reverse="true" hook="integrate_actions" file="SUBSDIR/Elga.subs.php" function="elga_actions" />
         <hook reverse="true" hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
+        <hook reverse="true" hook="integrate_whos_online" file="SUBSDIR/Elga.subs.php" function="elga_whos_online" />
         <!--<code>Hooks.php</code>-->
         <!--<database>uninstall.php</database>-->
         <redirect url="?action=admin;area=packages" timeout="500" />
