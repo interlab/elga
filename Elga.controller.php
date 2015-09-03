@@ -279,6 +279,21 @@ $(document).ready(function(){
         $db->free_result($req);
     }
 
+    public function action_add_album()
+    {
+        
+    }
+
+    public function action_edit_album()
+    {
+        
+    }
+
+    public function action_remove_album()
+    {
+        
+    }
+
     // @todo: parse bbc ?
     public function action_edit_file()
     {
@@ -600,6 +615,10 @@ $(document).ready(function(){
 
 function getFile($id)
 {
+    if (!is_numeric($id)) {
+        fatal_error('Bad id value. Required int type.', false);
+    }
+
     $db = database();
     $req = $db->query('', '
     SELECT
@@ -646,6 +665,33 @@ function getAlbums()
     $db->free_result($req);
 
     return $data;
+}
+
+function getAlbum($id)
+{
+    global $boardurl;
+
+    if (!is_numeric($id)) {
+        fatal_error('Bad id value. Required int type.', false);
+    }
+
+    $db = database();
+    $req = $db->query('', '
+    SELECT id, name, description, icon
+    FROM {db_prefix}elga_albums
+    WHERE id = {int:id}
+    LIMIT 1', [
+        'id' => $id,
+    ]);
+
+    $row = false;
+    if ($db->num_rows($req) > 0) {
+        $row = $db->fetch_assoc($req);
+    }
+    $db->free_result($req);
+    $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $boardurl.'/files/gallery/icons/'.$row['icon'];
+
+    return $row;
 }
 
 function uploadImage()

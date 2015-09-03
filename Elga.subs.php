@@ -145,11 +145,16 @@ function elga_addon_settings()
 {
 	global $txt, $context, $scripturl, $modSettings;
 
+    $context['valid_elga_files_path'] = is_dir($modSettings['elga_files_path']);
+    $context['valid_elga_icons_path'] = is_dir($modSettings['elga_icons_path']);
+
 	// loadlanguage('Elga');
     $txt['elga_title'] = 'Gallery Settings';
     $txt['elga_desc'] = 'This addon adds a images gallery.';
     $txt['elga_enabled'] = 'Enable Gallery';
     $txt['elga_enabled_desc'] = '';
+    $txt['elga_files_path'] = 'Путь к папке с файлами';
+    $txt['elga_icons_path'] = 'Путь к папке с иконками альбомов';
     $txt['elga_max_width_img'] = 'Максимальная ширина изображения';
     $txt['elga_max_height_img'] = 'Максимальная высота изображения';
     
@@ -164,6 +169,8 @@ function elga_addon_settings()
 	// All the options, well at least some of them!
 	$config_vars = [
 		['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
+        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/files/gallery/'],
+        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/files/gallery/icons/'],
         [ 'int', 'elga_max_width_img', ],
         [ 'int', 'elga_max_height_img', ],
 	];
@@ -183,6 +190,15 @@ function elga_addon_settings()
 			$_POST['elga_max_height_img'] = 350;
 
 		Settings_Form::save_db($config_vars);
+
+        if (!is_dir($modSettings['elga_files_path'])) {
+            mkdir($_POST['elga_files_path'], 0777, true);
+        }
+
+        if (!is_dir($modSettings['elga_icons_path'])) {
+            mkdir($_POST['elga_icons_path'], 0777, true);
+        }
+
 		redirectexit('action=admin;area=addonsettings;sa=elga');
 	}
 
@@ -208,8 +224,7 @@ function elga_load_illegal_guest_permissions()
     ]);
 }
 
-// integrate_load_permissions
-// ManagePermissions.subs.php
+// integrate_load_permissions - ManagePermissions.subs.php
 function elga_load_permissions(&$permissionGroups, &$permissionList, &$leftPermissionGroups,
     &$hiddenPermissions, &$relabelPermissions)
 {
@@ -218,20 +233,26 @@ function elga_load_permissions(&$permissionGroups, &$permissionList, &$leftPermi
     $txt['permissiongroup_elga'] = 'Галерея';
 
     $txt['permissionname_elga_manage_albums'] = 'Управлять альбомами';
-    $txt['permissionname_simple_elga_manage_albums'] = 'Управлять альбомами';
+    $txt['permissionname_elga_manage_albums_own'] = 'Управлять своими альбомами';
+    $txt['permissionname_elga_manage_albums_any'] = 'Управлять любыми альбомами';
     $txt['cannot_elga_manage_albums'] = 'Вы не можете управлять альбомами';
-    
+    $txt['cannot_elga_manage_albums_own'] = 'Вы не можете управлять своими альбомами';
+    $txt['cannot_elga_manage_albums_any'] = 'Вы не можете управлять чужими альбомами';
+
     $txt['permissionname_elga_manage_files'] = 'Управлять файлами';
     $txt['permissionname_elga_manage_files_own'] = 'Управлять своими файлами';
     $txt['permissionname_elga_manage_files_any'] = 'Управлять любыми файлами';
-    $txt['permissionname_simple_elga_manage_files_own'] = 'Управлять своими файлами';
-    $txt['permissionname_simple_elga_manage_files_any'] = 'Управлять любыми файлами';
     $txt['cannot_elga_manage_files'] = 'Доступ запрещён!';
     $txt['cannot_elga_manage_files_own'] = 'Доступ запрещён!';
     $txt['cannot_elga_manage_files_any'] = 'Доступ запрещён!';
 
     $permissionList['membergroup'] = array_merge($permissionList['membergroup'], [
-        'elga_manage_albums' => [false, 'elga', 'elga'],
-        'elga_manage_files' => [true, 'elga', 'elga'],
+        'elga_manage_albums' => [true, 'elga'],
+        'elga_manage_files' => [true, 'elga'],
     ]);
+
+    // $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
+    // dump($permissionGroups, $permissionList, $leftPermissionGroups, $hiddenPermissions, $relabelPermissions);
 }
+
+

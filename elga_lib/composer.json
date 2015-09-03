@@ -1,6 +1,10 @@
 {
     "require": {
-       "gargron/fileupload": "1.0.*",
-       "imagine/Imagine": "*"
+        "php": ">=5.3.0",
+        "gargron/fileupload": "1.0.*",
+        "imagine/Imagine": "*"
+    },
+    "require-dev": {
+        "symfony/var-dumper" : "2.*"
     }
 }
