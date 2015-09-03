@@ -18,33 +18,37 @@
     <type>modification</type>
     <install for="1.0.1 - 1.0.99">
         <readme type="inline">This will install Elga</readme>
+        <require-file name="Elga.subs.php" destination="SUBSDIR" />
         <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
         <require-file name="Elga.template.php" destination="THEMEDIR" />
-        <require-file name="Elga.subs.php" destination="SUBSDIR" />
         <require-file name="elga.css" destination="THEMEDIR/css" />
         <require-file name="jquery.jscroll.min.js" destination="THEMEDIR/scripts" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <hook hook="integrate_actions" file="SUBSDIR/Elga.subs.php" function="elga_actions" />
         <hook hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
         <hook hook="integrate_whos_online" file="SUBSDIR/Elga.subs.php" function="elga_whos_online" />
+		<hook hook="integrate_admin_areas" file="SUBSDIR/Elga.subs.php" function="elga_admin_areas" />
+		<hook hook="integrate_sa_modify_modifications" file="SUBSDIR/Elga.subs.php" function="elga_sa_modify_modifications" />
         <!--<code>Hooks.php</code>-->
         <database>install.php</database>
-        <redirect url="?area=addonsettings;sa=general" timeout="500" />
+        <redirect url="?action=admin;area=addonsettings;sa=general" timeout="500" />
     </install>
 
     <uninstall for="1.0.1 - 1.0.99">
         <readme type="inline">This will uninstall Elga</readme>
         <hook reverse="true" hook="integrate_actions" file="SUBSDIR/Elga.subs.php" function="elga_actions" />
         <hook reverse="true" hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
+        <remove-file name="SUBSDIR/Elga.subs.php" />
         <remove-file name="CONTROLLERDIR/Elga.controller.php" />
         <remove-file name="THEMEDIR/Elga.template.php" />
-        <remove-file name="SUBSDIR/Elga.subs.php" />
         <remove-file name="THEMEDIR/css/elga.css" />
         <remove-file name="THEMEDIR/scripts/jquery.jscroll.min.js" />
         <remove-dir name="EXTDIR/elga_lib" />
         <hook reverse="true" hook="integrate_actions" file="SUBSDIR/Elga.subs.php" function="elga_actions" />
         <hook reverse="true" hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
         <hook reverse="true" hook="integrate_whos_online" file="SUBSDIR/Elga.subs.php" function="elga_whos_online" />
+		<hook reverse="true" hook="integrate_admin_areas" file="SUBSDIR/Elga.subs.php" function="elga_admin_areas" />
+		<hook reverse="true" hook="integrate_sa_modify_modifications" file="SUBSDIR/Elga.subs.php" function="elga_sa_modify_modifications" />
         <!--<code>Hooks.php</code>-->
         <!--<database>uninstall.php</database>-->
         <redirect url="?action=admin;area=packages" timeout="500" />
