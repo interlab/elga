@@ -29,6 +29,8 @@
         <hook hook="integrate_whos_online" file="SUBSDIR/Elga.subs.php" function="elga_whos_online" />
 		<hook hook="integrate_admin_areas" file="SUBSDIR/Elga.subs.php" function="elga_admin_areas" />
 		<hook hook="integrate_sa_modify_modifications" file="SUBSDIR/Elga.subs.php" function="elga_sa_modify_modifications" />
+        <hook hook="integrate_load_illegal_guest_permissions" file="SUBSDIR/Elga.subs.php" function="elga_load_illegal_guest_permissions" />
+        <hook hook="integrate_load_permissions" file="SUBSDIR/Elga.subs.php" function="elga_load_permissions" />
         <!--<code>Hooks.php</code>-->
         <database>install.php</database>
         <redirect url="?action=admin;area=addonsettings;sa=general" timeout="500" />
@@ -49,6 +51,8 @@
         <hook reverse="true" hook="integrate_whos_online" file="SUBSDIR/Elga.subs.php" function="elga_whos_online" />
 		<hook reverse="true" hook="integrate_admin_areas" file="SUBSDIR/Elga.subs.php" function="elga_admin_areas" />
 		<hook reverse="true" hook="integrate_sa_modify_modifications" file="SUBSDIR/Elga.subs.php" function="elga_sa_modify_modifications" />
+        <hook reverse="true" hook="integrate_load_illegal_guest_permissions" file="SUBSDIR/Elga.subs.php" function="elga_load_illegal_guest_permissions" />
+        <hook reverse="true" hook="integrate_load_permissions" file="SUBSDIR/Elga.subs.php" function="elga_load_permissions" />
         <!--<code>Hooks.php</code>-->
         <!--<database>uninstall.php</database>-->
         <redirect url="?action=admin;area=packages" timeout="500" />

@@ -38,6 +38,26 @@ function elga_menu_buttons(&$buttons, &$menu_count)
     ], 'after');
 }
 
+// integrate_current_action
+// function elga_current_action(&$current_action)
+// {
+    // if ($current_action === 'home')
+    // {
+        // if (empty($_REQUEST['action']))
+            // $current_action = 'base';
+    // }
+// }
+
+/**
+ * Add items to the not stat action array to prevent logging in some cases
+ */
+// function elga_pre_log_stats(&$no_stat_actions)
+// {
+	// // Don't track who actions for the gallery
+	// if (isset($_REQUEST['action']) && ($_REQUEST['action'] === 'gallery' && isset($_GET['xml'])))
+		// $no_stat_actions[] = 'gallery';
+// }
+
 // integrate_whos_online
 function elga_whos_online($actions)
 {
@@ -176,5 +196,42 @@ function elga_addon_settings()
 	Settings_Form::prepare_db($config_vars);
 }
 
+// integrate_load_illegal_guest_permissions
+function elga_load_illegal_guest_permissions()
+{
+	global $context;
 
+	// Guests shouldn't be able to have any portal specific permissions.
+	$context['non_guest_permissions'] = array_merge($context['non_guest_permissions'], [
+        'elga_manage_albums',
+        'elga_manage_files',
+    ]);
+}
 
+// integrate_load_permissions
+// ManagePermissions.subs.php
+function elga_load_permissions(&$permissionGroups, &$permissionList, &$leftPermissionGroups,
+    &$hiddenPermissions, &$relabelPermissions)
+{
+    global $txt;
+
+    $txt['permissiongroup_elga'] = 'Галерея';
+
+    $txt['permissionname_elga_manage_albums'] = 'Управлять альбомами';
+    $txt['permissionname_simple_elga_manage_albums'] = 'Управлять альбомами';
+    $txt['cannot_elga_manage_albums'] = 'Вы не можете управлять альбомами';
+    
+    $txt['permissionname_elga_manage_files'] = 'Управлять файлами';
+    $txt['permissionname_elga_manage_files_own'] = 'Управлять своими файлами';
+    $txt['permissionname_elga_manage_files_any'] = 'Управлять любыми файлами';
+    $txt['permissionname_simple_elga_manage_files_own'] = 'Управлять своими файлами';
+    $txt['permissionname_simple_elga_manage_files_any'] = 'Управлять любыми файлами';
+    $txt['cannot_elga_manage_files'] = 'Доступ запрещён!';
+    $txt['cannot_elga_manage_files_own'] = 'Доступ запрещён!';
+    $txt['cannot_elga_manage_files_any'] = 'Доступ запрещён!';
+
+    $permissionList['membergroup'] = array_merge($permissionList['membergroup'], [
+        'elga_manage_albums' => [false, 'elga', 'elga'],
+        'elga_manage_files' => [true, 'elga', 'elga'],
+    ]);
+}
