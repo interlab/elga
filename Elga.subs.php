@@ -143,7 +143,7 @@ function elga_addon_settings()
 
 	// All the options, well at least some of them!
 	$config_vars = [
-		['check', 'elga_enabled', 'postinput' => $txt['fancybox_enabled_desc']],
+		['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
         [ 'int', 'elga_max_width_img', ],
         [ 'int', 'elga_max_height_img', ],
 	];
