@@ -140,17 +140,17 @@ function template_add_file()
 function template_add_album()
 {
     global $context, $scripturl, $txt;
-    
+
     echo '
     <h2 class="category_header">', $context['page_title'], '</h2>
 
     <form form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
-    
+
 	if (!empty($context['errors']))
 		echo '
     <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
-    
+
     echo '
 <div class="content">
     <dl class="settings">
@@ -179,7 +179,7 @@ function template_add_album()
 
     echo '
         </dd>
-    
+
         <dt>
             <label for="title">Title</label>
         </dt>
@@ -196,9 +196,9 @@ function template_add_album()
             <label>Добавить файл</label>
         </dt>
         <dd>
-            <input type="file" name="image" size="80" tabindex="', $context['tabindex']++, '" accept="image/*" />
+            <input type="file" name="icon" size="80" tabindex="', $context['tabindex']++, '" accept="image/*" />
         </dd>';
-        
+
 	if ($context['require_verification'])
 	{
 		template_verification_controls($context['visual_verification_id'], '
@@ -209,7 +209,7 @@ function template_add_album()
 							', '
 					</dd>');
 	}
-        
+
     echo '
     </dl>
 	<hr>

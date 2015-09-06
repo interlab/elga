@@ -88,6 +88,74 @@ function getAlbum($id)
     return $row;
 }
 
+function findFileUploadErrors($key = 'image', $path, $max_size)
+{
+    global $context;
+
+    # http://www.php.net/manual/ru/features.file-upload.errors.php
+    if (UPLOAD_ERR_OK !== $_FILES[$key]['error']) {
+        switch ($_FILES[$key]['error']) {
+            case UPLOAD_ERR_INI_SIZE:
+                $context['errors'][] = 'Слишком большой размер файла';
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $context['errors'][] = 'Слишком большой размер файла';
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $context['errors'][] = 'Файл был получен только частично';
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $context['errors'][] = 'Файл не был загружен';
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $context['errors'][] = 'Отсутствует временная папка';
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                $context['errors'][] = 'Не удалось записать файл на диск';
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                $context['errors'][] = 'PHP-расширение остановило загрузку файла';
+                break;
+            default:
+                $context['errors'][] = 'Unknown Error';
+                break;
+        }
+    }
+
+    if (!empty($context['errors'])) {
+        return false;
+    }
+
+    if (!empty($_FILES[$key]) && $_FILES[$key]['error'] === 0) {
+        $ext = pathinfo($_FILES[$key]['name'], PATHINFO_EXTENSION);
+
+        if (!is_dir($path)) {
+            fatal_error('Директория постеров указана неверно!', false);
+        }
+
+        if (!is_uploaded_file($_FILES[$key]['tmp_name'])) {
+            fatal_error('Ошибка загрузки файла на сервер. Попробуйте заново закачать файл.', false);
+        }
+
+        $fsize = filesize($_FILES[$key]['tmp_name']);
+        if ($fsize > $max_size) {
+            fatal_error('Файл превышает максимально допустимый размер!', false);
+        }
+
+        if (preg_match('~\\/:\*\?"<>|\\0~', $_FILES[$key]['name'])) {
+            fatal_error(Util::htmlspecialchars($_FILES[$key]['name']).'Недопустимые символы в имени постер-файла!', false);
+        }
+
+        if (!preg_match('~png|gif|jpg|jpeg~i', $ext)) {
+            fatal_error('Расширение постера должно быть <strong>png, gif, jpg, jpeg</strong>.', false);
+        }
+
+        return true;
+    }
+
+    return false;    
+}
+
 function uploadImage()
 {
     global $context;
@@ -195,6 +263,36 @@ function delOldImage($img)
             @unlink($file);
         }
     }
+}
+
+function delOldIcon($a)
+{
+    $path = BOARDDIR.'/files/gallery/icons';
+    $file = $path.'/'.$a['icon'];
+    if (file_exists($file)) {
+        @unlink($file);
+    }
+}
+
+function uploadIcon()
+{
+    global $modSettings;
+
+    $path = BOARDDIR.'/files/gallery/icons';
+    $name = $_FILES['icon']['name'];
+
+    $errors = findFileUploadErrors('icon', $path, 1024 * 1024 * 3);
+    if (!$errors)
+        return false;
+
+    thumb(
+        $_FILES['icon']['tmp_name'],
+        $path . '/' . $name,
+        $modSettings['elga_icons_max_width'] ? $modSettings['elga_icons_max_width'] : 60,
+        $modSettings['elga_icons_max_height'] ? $modSettings['elga_icons_max_height'] : 60
+    );
+
+    return $name;
 }
 
 # Создаем мини-постер

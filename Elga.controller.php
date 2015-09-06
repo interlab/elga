@@ -243,9 +243,9 @@ $(document).ready(function(){
                 $context['errors'][] = 'Album not exists!';
             }
 
-            $img = 0;
+            $icon = 0;
             if ('' !== $_FILES['image']['name']) {
-                // $img = uploadImage(); // @todo
+                $icon = uploadIcon(); // @todo
             }
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
@@ -259,12 +259,12 @@ $(document).ready(function(){
                 $db->query('', '
                     UPDATE {db_prefix}elga_albums
                     SET 
-                        name = {string:name},'.($img ? '
+                        name = {string:name},'.($icon ? '
                         icon = {string:icon},' : '').'
                         description = {string:descr}
                     WHERE id = {int:id}',
                     [
-                        'icon' => $img ? $img['name'] : '',
+                        'icon' => $icon ? $icon : '',
                         'name' => $title,
                         'descr' => $descr,
                         'id' => $id,
@@ -272,8 +272,8 @@ $(document).ready(function(){
                 );
 
                 // del old image
-                if ($db->affected_rows() && '' !== $a['icon'] && $img && $a['icon'] !== $img['name']) {
-                    delOldIcon($file);
+                if ($db->affected_rows() && '' !== $a['icon'] && $img && $a['icon'] !== $icon) {
+                    delOldIcon($a);
                 }
 
                 redirectexit('action=gallery;sa=album;id='.$id);
