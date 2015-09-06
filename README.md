@@ -7,4 +7,4 @@ Simple image gallery addon for [ElkArte](http://www.elkarte.net/)
 php >= 5.4.0
 
 ## License
-see LICENSE.txt
+This Elkarte addon is released under a [BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause) license.

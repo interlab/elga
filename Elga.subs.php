@@ -92,25 +92,25 @@ function uploadImage()
     if (UPLOAD_ERR_OK !== $_FILES['image']['error']) {
         switch ($_FILES['image']['error']) {
             case UPLOAD_ERR_INI_SIZE:
-                $context['errors'][] = 'Слишком большой размер файла';
+                $context['errors'][] = 'РЎР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ СЂР°Р·РјРµСЂ С„Р°Р№Р»Р°';
                 break;
             case UPLOAD_ERR_FORM_SIZE:
-                $context['errors'][] = 'Слишком большой размер файла';
+                $context['errors'][] = 'РЎР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ СЂР°Р·РјРµСЂ С„Р°Р№Р»Р°';
                 break;
             case UPLOAD_ERR_PARTIAL:
-                $context['errors'][] = 'Файл был получен только частично';
+                $context['errors'][] = 'Р¤Р°Р№Р» Р±С‹Р» РїРѕР»СѓС‡РµРЅ С‚РѕР»СЊРєРѕ С‡Р°СЃС‚РёС‡РЅРѕ';
                 break;
             case UPLOAD_ERR_NO_FILE:
-                $context['errors'][] = 'Файл не был загружен';
+                $context['errors'][] = 'Р¤Р°Р№Р» РЅРµ Р±С‹Р» Р·Р°РіСЂСѓР¶РµРЅ';
                 break;
             case UPLOAD_ERR_NO_TMP_DIR:
-                $context['errors'][] = 'Отсутствует временная папка';
+                $context['errors'][] = 'РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РІСЂРµРјРµРЅРЅР°СЏ РїР°РїРєР°';
                 break;
             case UPLOAD_ERR_CANT_WRITE:
-                $context['errors'][] = 'Не удалось записать файл на диск';
+                $context['errors'][] = 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїРёСЃР°С‚СЊ С„Р°Р№Р» РЅР° РґРёСЃРє';
                 break;
             case UPLOAD_ERR_EXTENSION:
-                $context['errors'][] = 'PHP-расширение остановило загрузку файла';
+                $context['errors'][] = 'PHP-СЂР°СЃС€РёСЂРµРЅРёРµ РѕСЃС‚Р°РЅРѕРІРёР»Рѕ Р·Р°РіСЂСѓР·РєСѓ С„Р°Р№Р»Р°';
                 break;
             default:
                 $context['errors'][] = 'Unknown Error';
@@ -129,24 +129,24 @@ function uploadImage()
         $max_size = 1024 * 1024 * 3;
 
         if (!is_dir($directory)) {
-            fatal_error('Директория постеров указана неверно!', false);
+            fatal_error('Р”РёСЂРµРєС‚РѕСЂРёСЏ РїРѕСЃС‚РµСЂРѕРІ СѓРєР°Р·Р°РЅР° РЅРµРІРµСЂРЅРѕ!', false);
         }
 
         if (!is_uploaded_file($_FILES['image']['tmp_name'])) {
-            fatal_error('Ошибка загрузки файла на сервер. Попробуйте заново закачать файл.', false);
+            fatal_error('РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё С„Р°Р№Р»Р° РЅР° СЃРµСЂРІРµСЂ. РџРѕРїСЂРѕР±СѓР№С‚Рµ Р·Р°РЅРѕРІРѕ Р·Р°РєР°С‡Р°С‚СЊ С„Р°Р№Р».', false);
         }
 
         $fsize = filesize($_FILES['image']['tmp_name']);
         if ($fsize > $max_size) {
-            fatal_error('Файл превышает максимально допустимый размер!', false);
+            fatal_error('Р¤Р°Р№Р» РїСЂРµРІС‹С€Р°РµС‚ РјР°РєСЃРёРјР°Р»СЊРЅРѕ РґРѕРїСѓСЃС‚РёРјС‹Р№ СЂР°Р·РјРµСЂ!', false);
         }
 
         if (preg_match('~\\/:\*\?"<>|\\0~', $_FILES['image']['name'])) {
-            fatal_error(Util::htmlspecialchars($_FILES['image']['name']).'Недопустимые символы в имени постер-файла!', false);
+            fatal_error(Util::htmlspecialchars($_FILES['image']['name']).'РќРµРґРѕРїСѓСЃС‚РёРјС‹Рµ СЃРёРјРІРѕР»С‹ РІ РёРјРµРЅРё РїРѕСЃС‚РµСЂ-С„Р°Р№Р»Р°!', false);
         }
 
         if (!preg_match('~png|gif|jpg|jpeg~i', $ext)) {
-            fatal_error('Расширение постера должно быть <strong>png, gif, jpg, jpeg</strong>.', false);
+            fatal_error('Р Р°СЃС€РёСЂРµРЅРёРµ РїРѕСЃС‚РµСЂР° РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ <strong>png, gif, jpg, jpeg</strong>.', false);
         }
 
         $nfname = sha1_file($_FILES['image']['tmp_name']).'.'.$ext;
@@ -154,13 +154,13 @@ function uploadImage()
         $dest_dir = $directory.'/'.$date;
         if (!is_dir($dest_dir)) {
             if (!mkdir($dest_dir, 0777, true)) {
-                fatal_error('Не получается создать директорию '.$dest_dir);
+                fatal_error('РќРµ РїРѕР»СѓС‡Р°РµС‚СЃСЏ СЃРѕР·РґР°С‚СЊ РґРёСЂРµРєС‚РѕСЂРёСЋ '.$dest_dir);
             }
         }
         $dest_name = $dest_dir.'/'.$nfname;
 
         if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
-            fatal_error('Ошибка копирования временного файла!', false);
+            fatal_error('РћС€РёР±РєР° РєРѕРїРёСЂРѕРІР°РЅРёСЏ РІСЂРµРјРµРЅРЅРѕРіРѕ С„Р°Р№Р»Р°!', false);
         } else {
 
             // create thumb image
@@ -193,7 +193,7 @@ function delOldImage($img)
     }
 }
 
-# Создаем мини-постер
+# РЎРѕР·РґР°РµРј РјРёРЅРё-РїРѕСЃС‚РµСЂ
 # http://imagine.readthedocs.org/en/latest/index.html
 # https://speakerdeck.com/avalanche123/introduction-to-imagine
 /*
@@ -220,7 +220,7 @@ function thumb($img, $thumb,  $width = 300, $height = 300)
     $image = $imagine->open($img);
     $size = $image->getSize();
 
-    # Если размеры меньше, то масштабирования не нужно
+    # Р•СЃР»Рё СЂР°Р·РјРµСЂС‹ РјРµРЅСЊС€Рµ, С‚Рѕ РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёСЏ РЅРµ РЅСѓР¶РЅРѕ
     if ($size->getWidth() <= $width && $size->getHeight() <= $height) {
         $image->copy()
               ->save($thumb);
