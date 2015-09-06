@@ -1,258 +1,258 @@
 <?php
 
-if (!defined('ELK'))
-	die('No access...');
-
-// integrate_actions
-function elga_actions(&$actions, &$adminActions)
+function getFile($id)
 {
-	$actions['gallery'] = ['Elga.controller.php', 'Elga_Controller', 'action_index'];
-}
-
-// integrate_menu_buttons
-function elga_menu_buttons(&$buttons, &$menu_count)
-{
-    global $txt, $scripturl, $user_info;
-
-    $buttons = elk_array_insert($buttons, 'home', [
-        'gallery' => [
-            'title' => '<i class="fa fa-camera-retro fa-lg"></i> Gallery',
-            'href' => $scripturl . '?action=gallery',
-            'data-icon' => '&#xf03e;',
-            'show' => true, // allowedTo('admin_forum'),
-            'sub_buttons' => [
-                'add_file' => [
-                    'title' => 'Add file',
-                    'href' => $scripturl . '?action=gallery;sa=add_file',
-                    'show' => true,
-                ],
-                /*
-                'search' => [
-                    'title' => $txt['search'],
-                    'href' => $scripturl . '?action=gallery;sa=search',
-                    'show' => $context['allow_search'],
-                ],
-                */
-            ],
-        ]
-    ], 'after');
-}
-
-// integrate_current_action
-// function elga_current_action(&$current_action)
-// {
-    // if ($current_action === 'home')
-    // {
-        // if (empty($_REQUEST['action']))
-            // $current_action = 'base';
-    // }
-// }
-
-/**
- * Add items to the not stat action array to prevent logging in some cases
- */
-// function elga_pre_log_stats(&$no_stat_actions)
-// {
-	// // Don't track who actions for the gallery
-	// if (isset($_REQUEST['action']) && ($_REQUEST['action'] === 'gallery' && isset($_GET['xml'])))
-		// $no_stat_actions[] = 'gallery';
-// }
-
-// integrate_whos_online
-function elga_whos_online($actions)
-{
-    global $scripturl, $txt;
-
-    if (empty($actions) || empty($actions['action'])) {
-        $action = $txt['who_unknown'];
-
-        return $action;
+    if (!is_numeric($id)) {
+        fatal_error('Bad id value. Required int type.', false);
     }
 
-    $txt['who_gallery'] = 'РџСЂРѕСЃРјР°С‚СЂРёРІР°РµС‚ <a href="%s">РіР°Р»РµСЂРµСЋ</a>';
-    $txt['who_gallery_search'] = 'Р’С‹РїРѕР»РЅСЏРµС‚ РїРѕРёСЃРє РІ <a href="%s">РіР°Р»РµСЂРµРµ</a>';
-    $txt['who_gallery_file'] = 'РџСЂРѕСЃРјР°С‚СЂРёРІР°РµС‚ С„Р°Р№Р» <a href="%s">%s</a>';
+    $db = database();
+    $req = $db->query('', '
+    SELECT
+        f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
+        a.name AS album_name
+    FROM {db_prefix}elga_files as f
+        INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+    WHERE f.id = {int:id}
+    LIMIT 1', [
+        'id' => _uint($id),
+    ]);
+    if (!$db->num_rows($req)) {
+        $db->free_result($req);
 
-    if ('gallery' === $actions['action'])
-        $action = sprintf($txt['who_gallery'], $scripturl . '?action=gallery');
+        return false;
+    }
 
-    if (!empty($actions['sa']) and 'gallery' === $actions['action']) {
-        switch ($actions['sa']) {
-            case 'search':
-                $action = sprintf($txt['who_gallery_search'], $scripturl . '?action=gallery;sa=search');
-            break;
+    $file = $db->fetch_assoc($req);
+    $db->free_result($req);
 
-            // @todo: album
-            // case 'album':
+    return $file;
+}
 
-            case 'file':
-                if (isset($actions['id']) and is_numeric($actions['id'])) {
-                    $db = database();
-                    $req = $db->query('', '
-                        SELECT f.id, f.title
-                        FROM {db_prefix}elga_files AS f
-                        WHERE f.id = {int:id}
-                        LIMIT 1',
-                        [
-                            'id' => (int) $actions['id'],
-                        ]
-                    );
-                    if (!$db->num_rows($req)) {
-                        $action = $txt['who_gallery'];
-                    } else {
-                        $row = $db->fetch_assoc($req);
-                        $action = sprintf($txt['who_gallery_file'], $scripturl . '?action=gallery;sa=file;id='.$row['id'], censorText($row['name']));
-                    }
-                    $db->free_result($req);
-                }
-            break;
+function getAlbums()
+{
+    global $boardurl;
 
+    $db = database();
+
+    // @todo: limit
+    $req = $db->query('', '
+    SELECT id, name, description, icon
+    FROM {db_prefix}elga_albums
+    LIMIT 100', []);
+
+    // $data = new Foo();
+    $data = [];
+    if ($db->num_rows($req) > 0) {
+        while ($row = $db->fetch_assoc($req)) {
+            $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $boardurl.'/files/gallery/icons/'.$row['icon'];
+            $data[$row['id']] = $row;
+        }
+    }
+    $db->free_result($req);
+
+    return $data;
+}
+
+function getAlbum($id)
+{
+    global $boardurl;
+
+    if (!is_numeric($id)) {
+        fatal_error('Bad id value. Required int type.', false);
+    }
+
+    $db = database();
+    $req = $db->query('', '
+    SELECT id, name, description, icon
+    FROM {db_prefix}elga_albums
+    WHERE id = {int:id}
+    LIMIT 1', [
+        'id' => _uint($id),
+    ]);
+
+    if (!$db->num_rows($req)) {
+        $db->free_result($req);
+
+        return false;
+    }
+
+    $row = $db->fetch_assoc($req);
+    $db->free_result($req);
+    $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $boardurl.'/files/gallery/icons/'.$row['icon'];
+
+    return $row;
+}
+
+function uploadImage()
+{
+    global $context;
+
+    # http://www.php.net/manual/ru/features.file-upload.errors.php
+    if (UPLOAD_ERR_OK !== $_FILES['image']['error']) {
+        switch ($_FILES['image']['error']) {
+            case UPLOAD_ERR_INI_SIZE:
+                $context['errors'][] = 'Слишком большой размер файла';
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $context['errors'][] = 'Слишком большой размер файла';
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $context['errors'][] = 'Файл был получен только частично';
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $context['errors'][] = 'Файл не был загружен';
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $context['errors'][] = 'Отсутствует временная папка';
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                $context['errors'][] = 'Не удалось записать файл на диск';
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                $context['errors'][] = 'PHP-расширение остановило загрузку файла';
+                break;
             default:
-                $action = sprintf($txt['who_gallery'], $scripturl . '?action=gallery');
+                $context['errors'][] = 'Unknown Error';
+                break;
         }
     }
 
-    if (!empty($action))
-        return $action; # !important
-}
+    if (!empty($context['errors'])) {
+        return false;
+    }
 
-// integrate_admin_areas
-// Menu.subs.php - 87
-function elga_admin_areas(&$admin_areas)
-{
-    global $txt;
+    if (!empty($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $directory = BOARDDIR.'/files/gallery';
+        $max_size = 1024 * 1024 * 3;
 
-    // loadLanguage('AdminElga');
-    // loadLanguage('HelpElga');
-    $txt['gallery_title'] = 'Р“Р°Р»РµСЂРµСЏ';
-
-    // $admin_areas['config']['areas']['modsettings']['subsections']['elga'] = [$txt['gallery_title']];
-	$admin_areas['config']['areas']['addonsettings']['subsections']['elga'] = [$txt['gallery_title']];
-}
-
-// integrate_sa_modify_modifications
-function elga_sa_modify_modifications(&$subActions)
-{
-    $subActions['elga'] = [
-		'dir' => SUBSDIR,
-		'file' => 'Elga.subs.php',
-		'function' => 'elga_addon_settings',
-		'permission' => 'admin_forum',
-	];
-}
-
-function elga_addon_settings()
-{
-	global $txt, $context, $scripturl, $modSettings;
-
-    $context['valid_elga_files_path'] = is_dir($modSettings['elga_files_path']);
-    $context['valid_elga_icons_path'] = is_dir($modSettings['elga_icons_path']);
-
-	// loadlanguage('Elga');
-    $txt['elga_title'] = 'Gallery Settings';
-    $txt['elga_desc'] = 'This addon adds a images gallery.';
-    $txt['elga_enabled'] = 'Enable Gallery';
-    $txt['elga_enabled_desc'] = '';
-    $txt['elga_files_path'] = 'РџСѓС‚СЊ Рє РїР°РїРєРµ СЃ С„Р°Р№Р»Р°РјРё';
-    $txt['elga_icons_path'] = 'РџСѓС‚СЊ Рє РїР°РїРєРµ СЃ РёРєРѕРЅРєР°РјРё Р°Р»СЊР±РѕРјРѕРІ';
-    $txt['elga_max_width_img'] = 'РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ С€РёСЂРёРЅР° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ';
-    $txt['elga_max_height_img'] = 'РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ';
-    
-	$context[$context['admin_menu_name']]['tab_data']['tabs']['elga']['description'] = $txt['elga_desc'];
-
-	// Lets build a settings form
-	require_once(SUBSDIR . '/SettingsForm.class.php');
-
-	// Instantiate the form
-	$elgaSettings = new Settings_Form();
-
-	// All the options, well at least some of them!
-	$config_vars = [
-		['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
-        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'РќР°РїСЂРёРјРµСЂ: ' . BOARDDIR.'/files/gallery/'],
-        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'РќР°РїСЂРёРјРµСЂ: ' . BOARDDIR.'/files/gallery/icons/'],
-        [ 'int', 'elga_max_width_img', ],
-        [ 'int', 'elga_max_height_img', ],
-	];
-
-	// Load the settings to the form class
-	$elgaSettings->settings($config_vars);
-
-	// Saving?
-	if (isset($_GET['save']))
-	{
-		checkSession();
-
-		// Some defaults are good to have
-		if (empty($_POST['elga_max_width_img']))
-			$_POST['elga_max_width_img'] = 350;
-		if (empty($_POST['elga_max_height_img']))
-			$_POST['elga_max_height_img'] = 350;
-
-		Settings_Form::save_db($config_vars);
-
-        if (!is_dir($modSettings['elga_files_path'])) {
-            mkdir($_POST['elga_files_path'], 0777, true);
+        if (!is_dir($directory)) {
+            fatal_error('Директория постеров указана неверно!', false);
         }
 
-        if (!is_dir($modSettings['elga_icons_path'])) {
-            mkdir($_POST['elga_icons_path'], 0777, true);
+        if (!is_uploaded_file($_FILES['image']['tmp_name'])) {
+            fatal_error('Ошибка загрузки файла на сервер. Попробуйте заново закачать файл.', false);
         }
 
-		redirectexit('action=admin;area=addonsettings;sa=elga');
-	}
+        $fsize = filesize($_FILES['image']['tmp_name']);
+        if ($fsize > $max_size) {
+            fatal_error('Файл превышает максимально допустимый размер!', false);
+        }
 
-	// Continue on to the settings template
-	$context['page_title'] = $context['settings_title'] = $txt['elga_title'];
-	$context['post_url'] = $scripturl . '?action=admin;area=addonsettings;sa=elga;save';
+        if (preg_match('~\\/:\*\?"<>|\\0~', $_FILES['image']['name'])) {
+            fatal_error(Util::htmlspecialchars($_FILES['image']['name']).'Недопустимые символы в имени постер-файла!', false);
+        }
 
-	// if (!empty($modSettings['СЋСЋСЋ']))
-		// updateSettings(array('СЋСЋСЋ' => 'СЋСЋСЋ'));
+        if (!preg_match('~png|gif|jpg|jpeg~i', $ext)) {
+            fatal_error('Расширение постера должно быть <strong>png, gif, jpg, jpeg</strong>.', false);
+        }
 
-	Settings_Form::prepare_db($config_vars);
+        $nfname = sha1_file($_FILES['image']['tmp_name']).'.'.$ext;
+        $date = date('Y/m/d', time());
+        $dest_dir = $directory.'/'.$date;
+        if (!is_dir($dest_dir)) {
+            if (!mkdir($dest_dir, 0777, true)) {
+                fatal_error('Не получается создать директорию '.$dest_dir);
+            }
+        }
+        $dest_name = $dest_dir.'/'.$nfname;
+
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
+            fatal_error('Ошибка копирования временного файла!', false);
+        } else {
+
+            // create thumb image
+            $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
+            $width = 350;
+            $height = 350;
+            thumb($dest_name, $dest_dir.'/'.$thumb_name, $width, $height);
+
+            return [
+    'name' => $date.'/'.$nfname,
+    'orig_name' => $_FILES['image']['name'], // ? need sanitize?
+    'size' => $fsize,
+    'thumb' => $date.'/'.$thumb_name,
+            ];
+        }
+    }
+
+    return false;
 }
 
-// integrate_load_illegal_guest_permissions
-function elga_load_illegal_guest_permissions()
+function delOldImage($img)
 {
-	global $context;
-
-	// Guests shouldn't be able to have any portal specific permissions.
-	$context['non_guest_permissions'] = array_merge($context['non_guest_permissions'], [
-        'elga_manage_albums',
-        'elga_manage_files',
-    ]);
+    $path = BOARDDIR.'/files/gallery';
+    $orig = $path.'/'.$img['fname'];
+    $thumb = $path.'/'.$img['thumb'];
+    foreach ([$orig, $thumb] as $file) {
+        if (file_exists($file)) {
+            @unlink($file);
+        }
+    }
 }
 
-// integrate_load_permissions - ManagePermissions.subs.php
-function elga_load_permissions(&$permissionGroups, &$permissionList, &$leftPermissionGroups,
-    &$hiddenPermissions, &$relabelPermissions)
+# Создаем мини-постер
+# http://imagine.readthedocs.org/en/latest/index.html
+# https://speakerdeck.com/avalanche123/introduction-to-imagine
+/*
+thumb(
+    $dir . '/' . $fname,
+    $dir . '/' . $thumb_fname,
+    $maxWidth,
+    $maxHeight
+    );
+*/
+function thumb($img, $thumb,  $width = 300, $height = 300)
 {
-    global $txt;
+    # Check if GD extension is loaded
+    if (!extension_loaded('gd') && !extension_loaded('gd2')) {
+        trigger_error("GD is not loaded", E_USER_WARNING);
 
-    $txt['permissiongroup_elga'] = 'Р“Р°Р»РµСЂРµСЏ';
+        return false;
+    }
 
-    $txt['permissionname_elga_manage_albums'] = 'РЈРїСЂР°РІР»СЏС‚СЊ Р°Р»СЊР±РѕРјР°РјРё';
-    $txt['permissionname_elga_manage_albums_own'] = 'РЈРїСЂР°РІР»СЏС‚СЊ СЃРІРѕРёРјРё Р°Р»СЊР±РѕРјР°РјРё';
-    $txt['permissionname_elga_manage_albums_any'] = 'РЈРїСЂР°РІР»СЏС‚СЊ Р»СЋР±С‹РјРё Р°Р»СЊР±РѕРјР°РјРё';
-    $txt['cannot_elga_manage_albums'] = 'Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ СѓРїСЂР°РІР»СЏС‚СЊ Р°Р»СЊР±РѕРјР°РјРё';
-    $txt['cannot_elga_manage_albums_own'] = 'Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ СѓРїСЂР°РІР»СЏС‚СЊ СЃРІРѕРёРјРё Р°Р»СЊР±РѕРјР°РјРё';
-    $txt['cannot_elga_manage_albums_any'] = 'Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ СѓРїСЂР°РІР»СЏС‚СЊ С‡СѓР¶РёРјРё Р°Р»СЊР±РѕРјР°РјРё';
+    $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
 
-    $txt['permissionname_elga_manage_files'] = 'РЈРїСЂР°РІР»СЏС‚СЊ С„Р°Р№Р»Р°РјРё';
-    $txt['permissionname_elga_manage_files_own'] = 'РЈРїСЂР°РІР»СЏС‚СЊ СЃРІРѕРёРјРё С„Р°Р№Р»Р°РјРё';
-    $txt['permissionname_elga_manage_files_any'] = 'РЈРїСЂР°РІР»СЏС‚СЊ Р»СЋР±С‹РјРё С„Р°Р№Р»Р°РјРё';
-    $txt['cannot_elga_manage_files'] = 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ!';
-    $txt['cannot_elga_manage_files_own'] = 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ!';
-    $txt['cannot_elga_manage_files_any'] = 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ!';
+    $imagine = new \Imagine\Gd\Imagine();
+    $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET; # THUMBNAIL_OUTBOUND
+    $image = $imagine->open($img);
+    $size = $image->getSize();
 
-    $permissionList['membergroup'] = array_merge($permissionList['membergroup'], [
-        'elga_manage_albums' => [true, 'elga'],
-        'elga_manage_files' => [true, 'elga'],
-    ]);
+    # Если размеры меньше, то масштабирования не нужно
+    if ($size->getWidth() <= $width && $size->getHeight() <= $height) {
+        $image->copy()
+              ->save($thumb);
+    } else {
+        $image->thumbnail(new \Imagine\Image\Box($width, $height), $mode)
+              ->save($thumb);
+    }
 
-    // $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
-    // dump($permissionGroups, $permissionList, $leftPermissionGroups, $hiddenPermissions, $relabelPermissions);
+    return true;
 }
 
+function _createChecks($key)
+{
+    global $context;
 
+    if ($context['require_verification']) {
+        // Could they get the right send topic verification code?
+        require_once SUBSDIR.'/VerificationControls.class.php';
+        $verificationOptions = [
+            'id' => $key,
+        ];
+        $context['require_verification'] = create_control_verification($verificationOptions);
+        $context['visual_verification_id'] = $verificationOptions['id'];
+    }
+    createToken($key);
+}
+
+function _uint($val)
+{
+    return abs(intval($val));
+}
+
+class Foo extends ArrayObject
+{
+}

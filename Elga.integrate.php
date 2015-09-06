@@ -7,6 +7,7 @@ if (!defined('ELK'))
 function elga_actions(&$actions, &$adminActions)
 {
 	$actions['gallery'] = ['Elga.controller.php', 'Elga_Controller', 'action_index'];
+    require_once SUBSDIR.'/Elga.subs.php';
 }
 
 // integrate_menu_buttons
