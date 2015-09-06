@@ -18,7 +18,7 @@
     <type>modification</type>
     <install for="1.0.1 - 1.0.99">
         <readme type="inline">This will install Elga</readme>
-        <require-file name="Elga.subs.php" destination="SUBSDIR" />
+        <require-file name="Elga.integrate.php" destination="SUBSDIR" />
         <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
         <require-file name="Elga.template.php" destination="THEMEDIR" />
         <require-file name="elga.css" destination="THEMEDIR/css" />
@@ -40,7 +40,7 @@
         <readme type="inline">This will uninstall Elga</readme>
         <hook reverse="true" hook="integrate_actions" file="SUBSDIR/Elga.subs.php" function="elga_actions" />
         <hook reverse="true" hook="integrate_menu_buttons" file="SUBSDIR/Elga.subs.php" function="elga_menu_buttons" />
-        <remove-file name="SUBSDIR/Elga.subs.php" />
+        <remove-file name="SUBSDIR/Elga.integrate.php" />
         <remove-file name="CONTROLLERDIR/Elga.controller.php" />
         <remove-file name="THEMEDIR/Elga.template.php" />
         <remove-file name="THEMEDIR/css/elga.css" />
