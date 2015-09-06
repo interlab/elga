@@ -69,7 +69,18 @@ $(document).ready(function(){
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
 
         $albums = getAlbums();
+        $context['elga_albums'] = & $albums;
+
         $context['elga_sa'] = 'add_file';
+
+        $context['sub_template'] = 'add_file';
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=add_file',
+            'name' => 'New File',
+        ];
+
+        $context['page_title'] = 'New File';
 
         if (isset($_REQUEST['send'])) {
             checkSession('post');
@@ -151,35 +162,16 @@ $(document).ready(function(){
                 $context['elga_album'] = $validator->album;
                 $context['elga_title'] = $title;
                 $context['elga_descr'] = $descr;
+
+                _createChecks('add_file');
+
+                return;
             }
         }
 
-        $context['sub_template'] = 'add_file';
+        _createChecks('add_file');
 
-        $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=add_file',
-            'name' => 'New File',
-        ];
-
-        $context['page_title'] = 'New File';
-
-        if ($context['require_verification']) {
-            require_once SUBSDIR.'/VerificationControls.class.php';
-            $verificationOptions = [
-                'id' => 'add_file',
-            ];
-            $context['require_verification'] = create_control_verification($verificationOptions);
-            $context['visual_verification_id'] = $verificationOptions['id'];
-        }
-        createToken('add_file');
-
-        /*
-        foreach ($albums as &$row) {
-            $row['selected'] = false;
-        }
-        */
         $context['elga_album'] = isset($_GET['album']) ? (int) $_GET['album'] : 0;
-        $context['elga_albums'] = & $albums;
     }
 
     public function action_album()
@@ -311,8 +303,8 @@ $(document).ready(function(){
 
         if (isset($_REQUEST['send'])) {
             checkSession('post');
-            validateToken('add_file');
-            spamProtection('add_file');
+            validateToken('edit_file');
+            spamProtection('edit_file');
 
             if (empty($_POST['id'])) {
                 redirectexit('action=gallery');
@@ -375,7 +367,7 @@ $(document).ready(function(){
             if ($context['require_verification']) {
                 // How about any verification errors
                 $verificationOptions = [
-                    'id' => 'add_file',
+                    'id' => 'edit_file',
                 ];
                 $context['require_verification'] = create_control_verification($verificationOptions, true);
 
@@ -449,14 +441,7 @@ $(document).ready(function(){
 
                 $context['page_title'] = 'Edit '.$title;
 
-                if ($context['require_verification']) {
-                    $verificationOptions = [
-                        'id' => 'add_file',
-                    ];
-                    $context['require_verification'] = create_control_verification($verificationOptions);
-                    $context['visual_verification_id'] = $verificationOptions['id'];
-                }
-                createToken('add_file');
+                _createChecks('edit_file');
             }
 
             return;
@@ -507,15 +492,7 @@ $(document).ready(function(){
 
         $context['page_title'] = 'Edit '.$file['title'];
 
-        if ($context['require_verification']) {
-            require_once SUBSDIR.'/VerificationControls.class.php';
-            $verificationOptions = [
-                'id' => 'add_file',
-            ];
-            $context['require_verification'] = create_control_verification($verificationOptions);
-            $context['visual_verification_id'] = $verificationOptions['id'];
-        }
-        createToken('add_file');
+        _createChecks('edit_file');
 
         $context['elga_album'] = (int) $file['id_album'];
     }
@@ -628,7 +605,7 @@ function getFile($id)
         INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
     WHERE f.id = {int:id}
     LIMIT 1', [
-        'id' => $id,
+        'id' => abs(intval($id)),
     ]);
     if (!$db->num_rows($req)) {
         $db->free_result($req);
@@ -681,13 +658,16 @@ function getAlbum($id)
     FROM {db_prefix}elga_albums
     WHERE id = {int:id}
     LIMIT 1', [
-        'id' => $id,
+        'id' => abs(intval($id)),
     ]);
 
-    $row = false;
-    if ($db->num_rows($req) > 0) {
-        $row = $db->fetch_assoc($req);
+    if (!$db->num_rows($req)) {
+        $db->free_result($req);
+
+        return false;
     }
+
+    $row = $db->fetch_assoc($req);
     $db->free_result($req);
     $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $boardurl.'/files/gallery/icons/'.$row['icon'];
 
@@ -840,6 +820,22 @@ function thumb($img, $thumb,  $width = 300, $height = 300)
     }
 
     return true;
+}
+
+function _createChecks($key)
+{
+    global $context;
+
+    if ($context['require_verification']) {
+        // Could they get the right send topic verification code?
+        require_once SUBSDIR.'/VerificationControls.class.php';
+        $verificationOptions = [
+            'id' => $key,
+        ];
+        $context['require_verification'] = create_control_verification($verificationOptions);
+        $context['visual_verification_id'] = $verificationOptions['id'];
+    }
+    createToken($key);
 }
 
 class Foo extends ArrayObject
