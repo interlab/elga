@@ -2,7 +2,7 @@
 
 function template_home()
 {
-    global $context, $scripturl;
+    global $context, $scripturl, $user_info;
 
     echo '
     <style>
@@ -26,7 +26,15 @@ function template_home()
                     <img src="', $row['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">' . $row['name'] . '</a></h4>
-                ', $row['description'], '
+                ', $row['description'];
+
+            if ($user_info['is_admin']) {
+                echo '
+                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $row['id'], '">
+                <i class="fa fa-edit fa-lg"></i> [Edit Album]</a></p>';
+            }
+
+        echo '
             </div>
         </ins>';
     }
@@ -118,7 +126,7 @@ function template_add_file()
     if ($context['elga_sa'] === 'add_file') {
         echo '
     <input type="hidden" name="', $context['add_file_token_var'], '" value="', $context['add_file_token'], '" />';
-    } else {
+    } elseif ($context['elga_sa'] === 'edit_file') {
         echo '
     <input type="hidden" name="', $context['edit_file_token_var'], '" value="', $context['edit_file_token'], '" />';
     }
@@ -126,6 +134,103 @@ function template_add_file()
     </div>
 </div>
     
+    </form>';
+}
+
+function template_add_album()
+{
+    global $context, $scripturl, $txt;
+    
+    echo '
+    <h2 class="category_header">', $context['page_title'], '</h2>
+
+    <form form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
+        name="new_file" id="new_file" enctype="multipart/form-data">';
+    
+	if (!empty($context['errors']))
+		echo '
+    <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
+    
+    echo '
+<div class="content">
+    <dl class="settings">
+
+        <dt>
+            <label for="album">Расположение</label>
+        </dt>
+        <dd>
+            <select name="location" id="location" tabindex="', $context['tabindex']++, '">
+            <option value="0">before</option>
+            <option value="1">after</option>
+            </select>
+
+            <select name="album" id="album" tabindex="', $context['tabindex']++, '">
+            <option value="0"></option>';
+
+        foreach ($context['elga_albums'] as $row) {
+            $selected = $context['elga_id'] == $row['id'];
+            echo '
+            <option value="', $row['id'], '"', ($selected ? ' selected="selected"' : ''), '>
+                ', $row['name'], '
+            </option>';
+        }
+        echo '
+        </select>&nbsp;&nbsp';
+
+    echo '
+        </dd>
+    
+        <dt>
+            <label for="title">Title</label>
+        </dt>
+        <dd>
+            <input type="text" name="title" id="title" value="', !empty($context['elga_title']) ? $context['elga_title'] : '', '" tabindex="', $context['tabindex']++, '">
+        </dd>
+        <dt>
+            <label for="descr">Ваше сообщение</label>
+        </dt>
+        <dd>
+            <textarea id="descr" name="descr" cols="50" rows="10" tabindex="', $context['tabindex']++, '">', !empty($context['elga_descr']) ? $context['elga_descr'] : '', '</textarea>
+        </dd>
+        <dt>
+            <label>Добавить файл</label>
+        </dt>
+        <dd>
+            <input type="file" name="image" size="80" tabindex="', $context['tabindex']++, '" accept="image/*" />
+        </dd>';
+        
+	if ($context['require_verification'])
+	{
+		template_verification_controls($context['visual_verification_id'], '
+					<dt>
+							' . $txt['verification'] . ':
+					</dt>
+					<dd>
+							', '
+					</dd>');
+	}
+        
+    echo '
+    </dl>
+	<hr>
+    <div class="submitbutton">
+    <input type="submit" value="', $txt['sendtopic_send'], '" name="send" tabindex="', $context['tabindex']++, '" class="button_submit" />
+    <input type="hidden" name="sa" value="', $context['elga_sa'], '">';
+    echo '
+    <input type="hidden" name="id" value="', $context['elga_id'], '" />';
+    echo '
+    <input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />';
+    if ($context['elga_sa'] === 'add_album') {
+        echo '
+    <input type="hidden" name="', $context['add_album_token_var'], '" value="', $context['add_album_token'], '" />';
+    } else {
+        echo '
+    <input type="hidden" name="', $context['edit_album_token_var'], '" value="', $context['edit_album_token'], '" />';
+    }
+    echo '
+    </div>
+</div>
+
     </form>';
 }
 

@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ELK')) {
+    die('No access...');
+}
+
 function getFile($id)
 {
     if (!is_numeric($id)) {

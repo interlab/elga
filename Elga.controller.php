@@ -158,7 +158,182 @@ $(document).ready(function(){
 
     public function action_edit_album()
     {
-        
+        global $context, $txt, $user_info, $modSettings, $scripturl;
+
+        is_not_guest();
+
+        $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
+            !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
+            ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
+
+        $albums = getAlbums();
+        $context['elga_albums'] = & $albums;
+        $context['elga_sa'] = 'edit_album';
+
+        if (isset($_REQUEST['send'])) {
+            checkSession('post');
+            validateToken('edit_album');
+            spamProtection('edit_album');
+
+            if (empty($_POST['id'])) {
+                redirectexit('action=gallery');
+            }
+            $id = _uint($_POST['id']);
+            $a = getAlbum($id);
+            if (!$a) {
+                fatal_error('Album not found!', false);
+            }
+            $context['elga_album'] = & $a;
+
+            // perms
+            // $user_info['id'] != $file['id_member'] && 
+            if (!allowedTo('moderate_forum') && !allowedTo('admin_forum')) {
+                fatal_error('Вы не можете редактировать этот альбом! Не хватает прав!', false);
+            }
+
+            // No errors, yet.
+            $context['errors'] = [];
+            loadLanguage('Errors');
+
+            // Could they get the right send topic verification code?
+            require_once SUBSDIR.'/VerificationControls.class.php';
+
+            // form validation
+            require_once SUBSDIR.'/DataValidator.class.php';
+            $validator = new Data_Validator();
+            $validator->sanitation_rules([
+                'location' => 'int',
+                'album' => 'int',
+                'title' => 'trim|Util::htmlspecialchars',
+                'descr' => 'trim|Util::htmlspecialchars',
+            ]);
+            $validator->validation_rules([
+                'location' => 'required|numeric',
+                'album' => 'required|numeric',
+                'title' => 'required',
+                'descr' => 'required',
+            ]);
+            $validator->text_replacements([
+                'location' => 'Location not selected!',
+                'album' => 'Album not selected!',
+                'title' => 'Title is empty!',
+                'descr' => $txt['error_message'],
+            ]);
+
+            // Any form errors
+            if (!$validator->validate($_POST)) {
+                $context['errors'] = $validator->validation_errors();
+            }
+
+            if ($context['require_verification']) {
+                // How about any verification errors
+                $verificationOptions = [
+                    'id' => 'edit_album',
+                ];
+                $context['require_verification'] = create_control_verification($verificationOptions, true);
+
+                if (is_array($context['require_verification'])) {
+                    foreach ($context['require_verification'] as $error) {
+                        $context['errors'][] = $txt['error_'.$error];
+                    }
+                }
+            }
+
+            if (!isset($albums[$_POST['album']])) {
+                $context['errors'][] = 'Album not exists!';
+            }
+
+            $img = 0;
+            if ('' !== $_FILES['image']['name']) {
+                // $img = uploadImage(); // @todo
+            }
+
+            $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
+            require_once SUBSDIR.'/Post.subs.php';
+            $descr = $validator->descr;
+            preparsecode($descr);
+
+            // No errors, then send the PM to the admins
+            if (empty($context['errors'])) {
+                $db = database();
+                $db->query('', '
+                    UPDATE {db_prefix}elga_albums
+                    SET 
+                        name = {string:name},'.($img ? '
+                        icon = {string:icon},' : '').'
+                        description = {string:descr}
+                    WHERE id = {int:id}',
+                    [
+                        'icon' => $img ? $img['name'] : '',
+                        'name' => $title,
+                        'descr' => $descr,
+                        'id' => $id,
+                    ]
+                );
+
+                // del old image
+                if ($db->affected_rows() && '' !== $a['icon'] && $img && $a['icon'] !== $img['name']) {
+                    delOldIcon($file);
+                }
+
+                redirectexit('action=gallery;sa=album;id='.$id);
+            } else {
+                $context['elga_album'] = $validator->album;
+                $context['elga_title'] = $title;
+                $context['elga_descr'] = $descr;
+                $context['elga_id'] = $id;
+
+                $context['sub_template'] = 'add_album';
+
+                $context['linktree'][] = [
+                    'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
+                    'name' => 'Edit album '.$title,
+                ];
+
+                $context['page_title'] = 'Edit album '.$title;
+
+                _createChecks('edit_album');
+            }
+
+            return;
+        }
+
+        // GET
+        if (empty($_GET['id'])) {
+            redirectexit('action=gallery');
+        }
+
+        $id = _uint($_GET['id']);
+        $a = getAlbum($id);
+        if (!$a) {
+            fatal_error('Album not found!', false);
+        }
+        $context['elga_album'] = & $a;
+
+        // perms
+        // $user_info['id'] != $file['id_member'] && 
+        if (!allowedTo('moderate_forum') && !allowedTo('admin_forum')) {
+            fatal_error('Вы не можете редактировать этот альбом! Не хватает прав!', false);
+        }
+
+        require_once SUBSDIR.'/Post.subs.php';
+        $context['elga_title'] = $a['name']; // @todo: need "title" parse?
+        censorText($a['description']);
+        $a['description'] = un_preparsecode($a['description']);
+        $context['elga_descr'] = $a['description'];
+
+        $context['sub_template'] = 'add_album';
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
+            'name' => 'Edit album '.$a['name'],
+        ];
+
+        $context['page_title'] = 'Edit album '.$a['name'];
+
+        _createChecks('edit_album');
+
+        $context['elga_id'] = $id;
     }
 
     public function action_remove_album()

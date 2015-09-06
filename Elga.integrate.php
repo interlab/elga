@@ -1,7 +1,8 @@
 <?php
 
-if (!defined('ELK'))
-	die('No access...');
+if (!defined('ELK')) {
+    die('No access...');
+}
 
 // integrate_actions
 function elga_actions(&$actions, &$adminActions)
