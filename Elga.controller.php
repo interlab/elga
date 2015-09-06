@@ -54,6 +54,118 @@ $(document).ready(function(){
         $context['elga_albums'] = getAlbums();
     }
 
+    public function action_album()
+    {
+        global $context, $scripturl, $boardurl;
+
+        if (empty($_GET['id'])) {
+            redirectexit('action=gallery');
+        }
+
+        $albums = getAlbums();
+        if (empty($albums[$_GET['id']])) {
+            fatal_error('Album not found!', false);
+        }
+        $context['elga_album'] = $album = $albums[$_GET['id']];
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=album;id='.$album['id'],
+            'name' => $album['name'],
+        ];
+
+        $context['page_title'] = 'Галерея - '.$album['name'];
+
+        $context['sub_template'] = 'album';
+
+        if (isset($_GET['type']) && $_GET['type'] === 'js') {
+            // Clear the templates
+            Template_Layers::getInstance()->removeAll();
+            $context['sub_template'] = 'album_js';
+            // sleep(1);
+            // $context['json_data'] = [];
+            // loadTemplate('Json');
+            // $context['sub_template'] = 'send_json';
+        }
+
+        $db = database();
+
+        // $limit = 20;
+        $per_page = 4;
+
+        $req = $db->query('', '
+            SELECT COUNT(*)
+            FROM {db_prefix}elga_files
+            WHERE id_album = {int:id}
+            LIMIT 1',
+            ['id' => $album['id']]);
+        if (!$db->num_rows($req)) {
+            $totalfiles = 0;
+        } else {
+            $totalfiles = $db->fetch_row($req)[0];
+        }
+        $db->free_result($req);
+
+        if (!$totalfiles) {
+            return;
+        }
+
+        $context['elga_total'] = $totalfiles;
+        $context['elga_per_page'] = $per_page;
+        $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
+        $context['page_index'] = constructPageIndex(
+            $scripturl.'?action=gallery;sa=album;id='.$album['id'].';start=%1$d',
+            $_REQUEST['start'],
+            $totalfiles,
+            $per_page,
+            true
+        );
+        $context['start'] = $_REQUEST['start'];
+        $context['elga_next_start'] = $context['start'] + $per_page;
+        $context['page_info'] = [
+            'current_page' => $_REQUEST['start'] / $per_page + 1,
+            'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
+        ];
+
+        $req = $db->query('', '
+            SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
+            FROM {db_prefix}elga_files as f
+            WHERE f.id_album = {int:album}
+            ORDER BY f.id DESC
+            LIMIT {int:start}, {int:per_page}',
+            [
+                'album' => $album['id'],
+                'start' => $context['start'],
+                'per_page' => $per_page,
+            ]
+        );
+
+        $dir = $boardurl.'/files/gallery';
+        $context['elga_files'] = [];
+        if ($db->num_rows($req) > 0) {
+            while ($row = $db->fetch_assoc($req)) {
+                $row['thumb'] = $dir.'/'.$row['thumb'];
+                $row['icon'] = $dir.'/'.$row['fname'];
+                $context['elga_files'][$row['id']] = $row;
+            }
+        }
+        $db->free_result($req);
+    }
+
+    public function action_add_album()
+    {
+        
+    }
+
+    public function action_edit_album()
+    {
+        
+    }
+
+    public function action_remove_album()
+    {
+        
+    }
+
     // @todo: parse bbc ?
     public function action_add_file()
     {
@@ -172,118 +284,6 @@ $(document).ready(function(){
         _createChecks('add_file');
 
         $context['elga_album'] = isset($_GET['album']) ? (int) $_GET['album'] : 0;
-    }
-
-    public function action_album()
-    {
-        global $context, $scripturl, $boardurl;
-
-        if (empty($_GET['id'])) {
-            redirectexit('action=gallery');
-        }
-
-        $albums = getAlbums();
-        if (empty($albums[$_GET['id']])) {
-            fatal_error('Album not found!', false);
-        }
-        $context['elga_album'] = $album = $albums[$_GET['id']];
-
-        $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=album;id='.$album['id'],
-            'name' => $album['name'],
-        ];
-
-        $context['page_title'] = 'Галерея - '.$album['name'];
-
-        $context['sub_template'] = 'album';
-
-        if (isset($_GET['type']) && $_GET['type'] === 'js') {
-            // Clear the templates
-            Template_Layers::getInstance()->removeAll();
-            $context['sub_template'] = 'album_js';
-            // sleep(1);
-            // $context['json_data'] = [];
-            // loadTemplate('Json');
-            // $context['sub_template'] = 'send_json';
-        }
-
-        $db = database();
-
-        // $limit = 20;
-        $per_page = 4;
-
-        $req = $db->query('', '
-            SELECT COUNT(*)
-            FROM {db_prefix}elga_files
-            WHERE id_album = {int:id}
-            LIMIT 1',
-            ['id' => $album['id']]);
-        if (!$db->num_rows($req)) {
-            $totalfiles = 0;
-        } else {
-            $totalfiles = $db->fetch_row($req)[0];
-        }
-        $db->free_result($req);
-
-        if (!$totalfiles) {
-            return;
-        }
-
-        $context['elga_total'] = $totalfiles;
-        $context['elga_per_page'] = $per_page;
-        $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
-        $context['page_index'] = constructPageIndex(
-            $scripturl.'?action=gallery;sa=album;id='.$album['id'].';start=%1$d',
-            $_REQUEST['start'],
-            $totalfiles,
-            $per_page,
-            true
-        );
-        $context['start'] = $_REQUEST['start'];
-        $context['elga_next_start'] = $context['start'] + $per_page;
-        $context['page_info'] = [
-            'current_page' => $_REQUEST['start'] / $per_page + 1,
-            'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
-        ];
-
-        $req = $db->query('', '
-            SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
-            FROM {db_prefix}elga_files as f
-            WHERE f.id_album = {int:album}
-            ORDER BY f.id DESC
-            LIMIT {int:start}, {int:per_page}',
-            [
-                'album' => $album['id'],
-                'start' => $context['start'],
-                'per_page' => $per_page,
-            ]
-        );
-
-        $dir = $boardurl.'/files/gallery';
-        $context['elga_files'] = [];
-        if ($db->num_rows($req) > 0) {
-            while ($row = $db->fetch_assoc($req)) {
-                $row['thumb'] = $dir.'/'.$row['thumb'];
-                $row['icon'] = $dir.'/'.$row['fname'];
-                $context['elga_files'][$row['id']] = $row;
-            }
-        }
-        $db->free_result($req);
-    }
-
-    public function action_add_album()
-    {
-        
-    }
-
-    public function action_edit_album()
-    {
-        
-    }
-
-    public function action_remove_album()
-    {
-        
     }
 
     // @todo: parse bbc ?
@@ -509,7 +509,7 @@ $(document).ready(function(){
             fatal_error('Bad id value. Required int type.', false);
         }
 
-        $id = $_REQUEST['id'] = abs(intval($_GET['id']));
+        $id = $_REQUEST['id'] = _uint($_GET['id']);
 
         $file = getFile($id);
         if (!$file) {
@@ -605,7 +605,7 @@ function getFile($id)
         INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
     WHERE f.id = {int:id}
     LIMIT 1', [
-        'id' => abs(intval($id)),
+        'id' => _uint($id),
     ]);
     if (!$db->num_rows($req)) {
         $db->free_result($req);
@@ -658,7 +658,7 @@ function getAlbum($id)
     FROM {db_prefix}elga_albums
     WHERE id = {int:id}
     LIMIT 1', [
-        'id' => abs(intval($id)),
+        'id' => _uint($id),
     ]);
 
     if (!$db->num_rows($req)) {
@@ -836,6 +836,11 @@ function _createChecks($key)
         $context['visual_verification_id'] = $verificationOptions['id'];
     }
     createToken($key);
+}
+
+function _uint($val)
+{
+    return abs(intval($val));
 }
 
 class Foo extends ArrayObject

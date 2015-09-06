@@ -114,8 +114,15 @@ function template_add_file()
     <input type="hidden" name="id" value="', $context['elga_file']['id'], '" />';
     }
     echo '
-    <input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-    <input type="hidden" name="', $context['add_file_token_var'], '" value="', $context['add_file_token'], '" />
+    <input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />';
+    if ($context['elga_sa'] === 'add_file') {
+        echo '
+    <input type="hidden" name="', $context['add_file_token_var'], '" value="', $context['add_file_token'], '" />';
+    } else {
+        echo '
+    <input type="hidden" name="', $context['edit_file_token_var'], '" value="', $context['edit_file_token'], '" />';
+    }
+    echo '
     </div>
 </div>
     
