@@ -23,11 +23,12 @@
         <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
         <require-file name="Elga.template.php" destination="THEMEDIR" />
         <require-file name="elga.css" destination="THEMEDIR/css" />
+        <require-file name="elga_loading.gif" destination="IMAGESDIR" />
         <require-dir name="scripts" destination="THEMEDIR" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <code>Hooks.php</code>
         <database>install.php</database>
-        <redirect url="?action=admin;area=addonsettings;sa=general" timeout="500" />
+        <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />
     </install>
 
     <uninstall for="1.0.1 - 1.0.99">
@@ -37,6 +38,7 @@
         <remove-file name="CONTROLLERDIR/Elga.controller.php" />
         <remove-file name="THEMEDIR/Elga.template.php" />
         <remove-file name="THEMEDIR/css/elga.css" />
+        <remove-file name="IMAGESDIR/elga_loading.gif" />
         <remove-dir name="THEMEDIR/scripts/jscroll-2.3.4" />
         <remove-dir name="EXTDIR/elga_lib" />
         <code>Hooks.php</code>
