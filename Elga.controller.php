@@ -4,6 +4,8 @@ if (!defined('ELK')) {
     die('No access...');
 }
 
+// @todo: comments -> add edit delete
+
 class Elga_Controller extends Action_Controller
 {
     public function __construct()
@@ -28,9 +30,12 @@ class Elga_Controller extends Action_Controller
         // JavaScriptEscape(...)
         addInlineJavascript('
 $(document).ready(function(){
-    var i = 0;
+    var elgaimgload = new Image();
+    elgaimgload.src = elk_images_url + "/elga_loading.gif";
+    // var i = 0;
+    // console.log(elgaimgload.src);
     $(\'.elga_scroll\').jscroll({
-        loadingHtml: \'<img src="loading.gif" alt="Loading" /> Loading...\',
+        loadingHtml: \'<img src="\' + elgaimgload.src + \'" alt="Loading" /> Loading...\',
         padding: 20,
         nextSelector: \'a.jscroll-next:last\',
         contentSelector: \'\',
@@ -153,7 +158,7 @@ $(document).ready(function(){
 
     public function action_add_album()
     {
-        
+        // @todo
     }
 
     public function action_edit_album()
@@ -179,7 +184,7 @@ $(document).ready(function(){
                 redirectexit('action=gallery');
             }
             $id = _uint($_POST['id']);
-            $a = getAlbum($id);
+            $a = isset($albums[$id]) ? $albums[$id] : false;
             if (!$a) {
                 fatal_error('Album not found!', false);
             }
@@ -434,6 +439,9 @@ $(document).ready(function(){
             // No errors, then send the PM to the admins
             if (empty($context['errors'])) {
                 $db = database();
+
+                // dump($img);
+                // die();
 
                 $db->insert('', '{db_prefix}elga_files',
                     [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 'id_album' => 'int',

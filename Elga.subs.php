@@ -88,7 +88,7 @@ function getAlbum($id)
     return $row;
 }
 
-function findFileUploadErrors($key = 'image', $path, $max_size)
+function findFileUploadErrors($key, $path, $max_size)
 {
     global $context;
 
@@ -160,6 +160,7 @@ function uploadImage()
 {
     global $context;
 
+    /*
     # http://www.php.net/manual/ru/features.file-upload.errors.php
     if (UPLOAD_ERR_OK !== $_FILES['image']['error']) {
         switch ($_FILES['image']['error']) {
@@ -220,6 +221,17 @@ function uploadImage()
         if (!preg_match('~png|gif|jpg|jpeg~i', $ext)) {
             fatal_error('Расширение постера должно быть <strong>png, gif, jpg, jpeg</strong>.', false);
         }
+        */
+
+        $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $directory = BOARDDIR.'/files/gallery';
+        $max_size = 1024 * 1024 * 3;
+        $fsize = filesize($_FILES['image']['tmp_name']);
+
+        if ( ! findFileUploadErrors('image', $directory, $max_size) ) {
+            return false;
+        }
 
         $nfname = sha1_file($_FILES['image']['tmp_name']).'.'.$ext;
         $date = date('Y/m/d', time());
@@ -248,9 +260,9 @@ function uploadImage()
     'thumb' => $date.'/'.$thumb_name,
             ];
         }
+    /*
     }
-
-    return false;
+    */
 }
 
 function delOldImage($img)
@@ -281,8 +293,7 @@ function uploadIcon()
     $path = BOARDDIR.'/files/gallery/icons';
     $name = $_FILES['icon']['name'];
 
-    $errors = findFileUploadErrors('icon', $path, 1024 * 1024 * 3);
-    if (!$errors)
+    if ( ! findFileUploadErrors('icon', $path, 1024 * 1024 * 3) )
         return false;
 
     thumb(
@@ -357,4 +368,5 @@ function _uint($val)
 
 class Foo extends ArrayObject
 {
+    
 }

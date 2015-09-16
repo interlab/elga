@@ -30,7 +30,7 @@ function template_home()
 
             if ($user_info['is_admin']) {
                 echo '
-                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $row['id'], '">
+                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $row['id'], '" class="elga_edit">
                 <i class="fa fa-edit fa-lg"></i> [Edit Album]</a></p>';
             }
 

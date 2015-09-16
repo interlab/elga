@@ -75,6 +75,11 @@ div.elga_cell a {
     font-size: 110%;
 }
 
+.thumbnail .r a.elga_edit {
+    font-weight: normal;
+    font-size: 90%;
+}
+
 .elga_cell {
 
 }
