@@ -171,8 +171,8 @@ function elga_addon_settings()
 	// All the options, well at least some of them!
 	$config_vars = [
 		['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
-        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/files/gallery/'],
-        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/files/gallery/icons/'],
+        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/gallery'],
+        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/gallery/icons'],
         [ 'int', 'elga_max_width_img', ],
         [ 'int', 'elga_max_height_img', ],
 	];
@@ -190,6 +190,9 @@ function elga_addon_settings()
 			$_POST['elga_max_width_img'] = 350;
 		if (empty($_POST['elga_max_height_img']))
 			$_POST['elga_max_height_img'] = 350;
+
+        $_POST['elga_files_path'] = rtrim($_POST['elga_files_path'], '/');
+        $_POST['elga_icons_path'] = rtrim($_POST['elga_icons_path'], '/');
 
 		Settings_Form::save_db($config_vars);
 

@@ -144,7 +144,8 @@ $(document).ready(function(){
             ]
         );
 
-        $dir = $boardurl.'/files/gallery';
+        // $dir = $boardurl.'/files/gallery';
+        $dir = $modSettings['elga_files_path'];
         $context['elga_files'] = [];
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
