@@ -61,7 +61,7 @@ $(document).ready(function(){
 
     public function action_album()
     {
-        global $context, $scripturl, $boardurl;
+        global $context, $scripturl, $boardurl, $modSettings;
 
         if (empty($_GET['id'])) {
             redirectexit('action=gallery');
@@ -144,12 +144,12 @@ $(document).ready(function(){
             ]
         );
 
-        $dir = $boardurl.'/files/gallery';
+        $url = $modSettings['elga_files_url'];
         $context['elga_files'] = [];
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
-                $row['thumb'] = $dir.'/'.$row['thumb'];
-                $row['icon'] = $dir.'/'.$row['fname'];
+                $row['thumb'] = $url.'/'.$row['thumb'];
+                $row['icon'] = $url.'/'.$row['fname'];
                 $context['elga_files'][$row['id']] = $row;
             }
         }
@@ -708,7 +708,7 @@ $(document).ready(function(){
             ]
         );
 
-        $dir = BOARDDIR.'/files/gallery';
+        $dir = $modSettings['elga_files_path'];
         $img = $dir.'/'.$file['fname'];
         $thumb = $dir.'/'.$file['thumb'];
         foreach ([$img, $thumb] as $f) {
@@ -722,7 +722,7 @@ $(document).ready(function(){
 
     public function action_file()
     {
-        global $context, $scripturl, $boardurl, $user_info;
+        global $context, $scripturl, $boardurl, $user_info, $modSettings;
 
         if (empty($_GET['id'])) {
             redirectexit('action=gallery');
@@ -746,11 +746,11 @@ $(document).ready(function(){
             fatal_error('File not found!', false);
         }
 
-        $dir = $boardurl.'/files/gallery';
+        $url = $modSettings['elga_files_url'];
         $file = $db->fetch_assoc($req);
         $context['elga_file'] = & $file;
         $db->free_result($req);
-        $context['elga_file']['icon'] = $dir.'/'.$context['elga_file']['fname'];
+        $context['elga_file']['icon'] = $url.'/'.$context['elga_file']['fname'];
         require_once SUBSDIR.'/Post.subs.php';
         censorText($file['description']);
         $file['description'] = parse_bbc($file['description']);

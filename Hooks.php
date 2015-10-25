@@ -5,6 +5,8 @@ if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('ELK'))
 elseif (!defined('ELK'))
 	die('<b>Error:</b> Cannot install - please verify you put this in the same place as ELK\'s index.php.');
 
+set_time_limit(90);
+
 $hooks = [
     'integrate_pre_include' => 'SUBSDIR/Elga.integrate.php',
     'integrate_actions' => 'elga_actions',

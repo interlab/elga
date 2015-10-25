@@ -26,6 +26,7 @@
         <require-file name="elga_loading.gif" destination="IMAGESDIR" />
         <require-dir name="scripts" destination="THEMEDIR" />
         <require-dir name="elga_lib" destination="EXTDIR" />
+        <require-dir name="elga_files" destination="BOARDDIR" />
         <code>Hooks.php</code>
         <database>install.php</database>
         <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />

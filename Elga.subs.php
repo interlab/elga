@@ -35,7 +35,7 @@ function getFile($id)
 
 function getAlbums()
 {
-    global $boardurl;
+    global $boardurl, $modSettings;
 
     $db = database();
 
@@ -49,7 +49,7 @@ function getAlbums()
     $data = [];
     if ($db->num_rows($req) > 0) {
         while ($row = $db->fetch_assoc($req)) {
-            $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $boardurl.'/files/gallery/icons/'.$row['icon'];
+            $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
             $data[$row['id']] = $row;
         }
     }
@@ -60,7 +60,7 @@ function getAlbums()
 
 function getAlbum($id)
 {
-    global $boardurl;
+    global $modSettings;
 
     if (!is_numeric($id)) {
         fatal_error('Bad id value. Required int type.', false);
@@ -83,7 +83,7 @@ function getAlbum($id)
 
     $row = $db->fetch_assoc($req);
     $db->free_result($req);
-    $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $boardurl.'/files/gallery/icons/'.$row['icon'];
+    $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
 
     return $row;
 }
@@ -158,7 +158,7 @@ function findFileUploadErrors($key, $path, $max_size)
 
 function uploadImage()
 {
-    global $context;
+    global $context, $modSettings;
 
     /*
     # http://www.php.net/manual/ru/features.file-upload.errors.php
@@ -225,7 +225,7 @@ function uploadImage()
 
         $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
         $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $directory = BOARDDIR.'/files/gallery';
+        $directory = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
         $max_size = 1024 * 1024 * 3;
         $fsize = filesize($_FILES['image']['tmp_name']);
 
@@ -267,7 +267,9 @@ function uploadImage()
 
 function delOldImage($img)
 {
-    $path = BOARDDIR.'/files/gallery';
+    global $modSettings;
+
+    $path = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
     $orig = $path.'/'.$img['fname'];
     $thumb = $path.'/'.$img['thumb'];
     foreach ([$orig, $thumb] as $file) {
@@ -279,7 +281,9 @@ function delOldImage($img)
 
 function delOldIcon($a)
 {
-    $path = BOARDDIR.'/files/gallery/icons';
+    global $modSettings;
+
+    $path = $modSettings['elga_icons_path']; //BOARDDIR.'/files/gallery/icons';
     $file = $path.'/'.$a['icon'];
     if (file_exists($file)) {
         @unlink($file);
@@ -290,7 +294,7 @@ function uploadIcon()
 {
     global $modSettings;
 
-    $path = BOARDDIR.'/files/gallery/icons';
+    $path = $modSettings['elga_icons_path']; //BOARDDIR.'/files/gallery/icons';
     $name = $_FILES['icon']['name'];
 
     if ( ! findFileUploadErrors('icon', $path, 1024 * 1024 * 3) )
