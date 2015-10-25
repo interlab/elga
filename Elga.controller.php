@@ -722,7 +722,7 @@ $(document).ready(function(){
 
     public function action_file()
     {
-        global $context, $scripturl, $boardurl, $user_info;
+        global $context, $scripturl, $boardurl, $user_info, $modSettings;
 
         if (empty($_GET['id'])) {
             redirectexit('action=gallery');
