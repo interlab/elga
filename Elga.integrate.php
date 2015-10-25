@@ -28,6 +28,11 @@ function elga_menu_buttons(&$buttons, &$menu_count)
                     'href' => $scripturl . '?action=gallery;sa=add_file',
                     'show' => true,
                 ],
+                'admin' => [
+                    'title' => 'Admin',
+                    'href' => $scripturl.'?action=admin;area=addonsettings;sa=elga',
+                    'show' => $user_info['is_admin'],
+                ]
                 /*
                 'search' => [
                     'title' => $txt['search'],
@@ -145,10 +150,12 @@ function elga_sa_modify_modifications(&$subActions)
 
 function elga_addon_settings()
 {
-	global $txt, $context, $scripturl, $modSettings;
+	global $txt, $context, $scripturl, $modSettings, $boardurl;
 
     $context['valid_elga_files_path'] = is_dir($modSettings['elga_files_path']);
+    $context['valid_elga_files_url'] = filter_var($modSettings['elga_files_url'], FILTER_VALIDATE_URL);
     $context['valid_elga_icons_path'] = is_dir($modSettings['elga_icons_path']);
+    $context['valid_elga_icons_url'] = filter_var($modSettings['elga_icons_url'], FILTER_VALIDATE_URL);
 
 	// loadlanguage('Elga');
     $txt['elga_title'] = 'Gallery Settings';
@@ -156,7 +163,9 @@ function elga_addon_settings()
     $txt['elga_enabled'] = 'Enable Gallery';
     $txt['elga_enabled_desc'] = '';
     $txt['elga_files_path'] = 'Путь к папке с файлами';
+    $txt['elga_files_url'] = 'URL адрес к папке с изображениями';
     $txt['elga_icons_path'] = 'Путь к папке с иконками альбомов';
+    $txt['elga_icons_url'] = 'URL адрес к папке с иконками';
     $txt['elga_max_width_img'] = 'Максимальная ширина изображения';
     $txt['elga_max_height_img'] = 'Максимальная высота изображения';
     
@@ -171,8 +180,10 @@ function elga_addon_settings()
 	// All the options, well at least some of them!
 	$config_vars = [
 		['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
-        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/gallery'],
-        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/gallery/icons'],
+        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/gallery/'],
+        [ 'text', 'elga_files_url', 'invalid' => !$context['valid_elga_files_url'], 'label' => $txt['elga_files_url'], 'subtext' => 'Например: ' . $boardurl.'/elga_files/upload/'],
+        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/icons/'],
+        [ 'text', 'elga_icons_url', 'invalid' => !$context['valid_elga_icons_url'], 'label' => $txt['elga_icons_url'], 'subtext' => 'Например: '.$boardurl.'/elga_files/icons/'],
         [ 'int', 'elga_max_width_img', ],
         [ 'int', 'elga_max_height_img', ],
 	];
