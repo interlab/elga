@@ -61,7 +61,7 @@ $(document).ready(function(){
 
     public function action_album()
     {
-        global $context, $scripturl, $boardurl;
+        global $context, $scripturl, $boardurl, $modSettings;
 
         if (empty($_GET['id'])) {
             redirectexit('action=gallery');
@@ -144,7 +144,7 @@ $(document).ready(function(){
             ]
         );
 
-        $url = $modSettings['elga_icons_url'];
+        $url = $modSettings['elga_files_url'];
         $context['elga_files'] = [];
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
