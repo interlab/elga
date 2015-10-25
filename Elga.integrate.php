@@ -203,7 +203,9 @@ function elga_addon_settings()
 			$_POST['elga_max_height_img'] = 350;
 
         $_POST['elga_files_path'] = rtrim($_POST['elga_files_path'], '/');
+        $_POST['elga_files_url'] = rtrim($_POST['elga_files_url'], '/');
         $_POST['elga_icons_path'] = rtrim($_POST['elga_icons_path'], '/');
+        $_POST['elga_icons_url'] = rtrim($_POST['elga_icons_url'], '/');
 
 		Settings_Form::save_db($config_vars);
 

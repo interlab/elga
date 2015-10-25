@@ -49,7 +49,7 @@ function getAlbums()
     $data = [];
     if ($db->num_rows($req) > 0) {
         while ($row = $db->fetch_assoc($req)) {
-            $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_path'].'/'.$row['icon'];
+            $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
             $data[$row['id']] = $row;
         }
     }
@@ -83,7 +83,7 @@ function getAlbum($id)
 
     $row = $db->fetch_assoc($req);
     $db->free_result($req);
-    $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_path'].'/'.$row['icon'];
+    $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
 
     return $row;
 }
