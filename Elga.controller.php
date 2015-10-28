@@ -53,6 +53,8 @@ $(document).ready(function(){
             $sa = 'action_'.$_REQUEST['sa'];
             if (method_exists($this, $sa)) {
                 $this->$sa();
+
+                return;
             }
         }
 

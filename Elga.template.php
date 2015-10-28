@@ -4,33 +4,29 @@ function template_home()
 {
     global $context, $scripturl, $user_info;
 
+    // http://www.artlebedev.ru/tools/technogrette/html/thumbnails-center/
     echo '
     <style>
     </style>';
-    
+
     echo '
     <h1>ElkArte Gallery</h1>
-    <a href="', $scripturl, '?action=gallery;sa=add_file">Add new file</a>';
+    <a href="', $scripturl, '?action=gallery;sa=add_file">Add new file</a>
+    <div class="thumbnails">';
 
-    $albums = $context['elga_albums'];
-
-    // http://www.artlebedev.ru/tools/technogrette/html/thumbnails-center/
-    
-    echo '<div class="thumbnails">';
-    $def_icon = 'http://simaru.tk/themes/MostlyBlue/images/_blue/logo_elk.png';
-    foreach ($albums as $row) {
+    foreach ($context['elga_albums'] as $album) {
         echo '
         <ins class="thumbnail">
             <div class="r">
-                <a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">
-                    <img src="', $row['icon'], '" alt="icon" height="64px" width="64px" />
+                <a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">
+                    <img src="', $album['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
-                <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $row['id'], '">' . $row['name'] . '</a></h4>
-                ', $row['description'];
+                <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">' . $album['name'] . '</a></h4>
+                ', $album['description'];
 
             if ($user_info['is_admin']) {
                 echo '
-                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $row['id'], '" class="elga_edit">
+                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="elga_edit">
                 <i class="fa fa-edit fa-lg"></i> [Edit Album]</a></p>';
             }
 
@@ -38,8 +34,7 @@ function template_home()
             </div>
         </ins>';
     }
-    echo '</div>';
-    
+    echo '</div>'; 
 }
 
 function template_add_file()
