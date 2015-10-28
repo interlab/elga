@@ -601,7 +601,7 @@ $(document).ready(function(){
                         'oname' => $img ? $img['orig_name'] : '',
                         'fname' => $img ? $img['name'] : '',
                         'fsize' => $img ? $img['size'] : '',
-                        'thumb' => $img ? 'thumb' : '',
+                        'thumb' => $img ? $img['thumb'] : '',
                         'album' => $validator->album,
                         'title' => $title,
                         'descr' => $descr,
