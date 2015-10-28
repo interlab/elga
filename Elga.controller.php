@@ -26,7 +26,7 @@ class Elga_Controller extends Action_Controller
         loadCSSFile('elga.css');
         loadTemplate('Elga');
 
-        loadJavascriptFile('jscroll-2.3.4/jquery.jscroll.js');
+        loadJavascriptFile('elga/jscroll-2.3.4/jquery.jscroll.js');
         // JavaScriptEscape(...)
         addInlineJavascript('
 $(document).ready(function(){
@@ -161,6 +161,11 @@ $(document).ready(function(){
     public function action_add_album()
     {
         // @todo
+        global $context;
+
+        $context['sub_template'] = 'add_album';
+
+        $context['elga_albums'] = getAlbums();
     }
 
     public function action_edit_album()

@@ -40,7 +40,7 @@
         <remove-file name="THEMEDIR/Elga.template.php" />
         <remove-file name="THEMEDIR/css/elga.css" />
         <remove-file name="IMAGESDIR/elga_loading.gif" />
-        <remove-dir name="THEMEDIR/scripts/jscroll-2.3.4" />
+        <remove-dir name="THEMEDIR/scripts/elga" />
         <remove-dir name="EXTDIR/elga_lib" />
         <code>Hooks.php</code>
         <!--<database>uninstall.php</database>-->
