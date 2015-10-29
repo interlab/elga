@@ -160,12 +160,117 @@ $(document).ready(function(){
 
     public function action_add_album()
     {
-        // @todo
-        global $context;
+        global $context, $txt, $user_info, $modSettings, $scripturl;
+
+        is_not_guest();
+
+        $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
+            !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
+            ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
+
+
 
         $context['sub_template'] = 'add_album';
-
+        $context['elga_sa'] = 'add_album';
+        $context['page_title'] = 'New album';
+        $context['elga_id'] = 0;
         $context['elga_albums'] = getAlbums();
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=add_album',
+            'name' => 'New album',
+        ];
+
+        if (!allowedTo('moderate_forum') && !allowedTo('admin_forum')) {
+            fatal_error('Вы не можете создавать альбомы! Не хватает прав!', false);
+        }
+
+        if (isset($_REQUEST['send'])) {
+            checkSession('post');
+            validateToken('add_album');
+            spamProtection('add_album');
+
+            $context['errors'] = [];
+            loadLanguage('Errors');
+
+            // Could they get the right send topic verification code?
+            require_once SUBSDIR.'/VerificationControls.class.php';
+
+            // form validation
+            require_once SUBSDIR.'/DataValidator.class.php';
+            $validator = new Data_Validator();
+            $validator->sanitation_rules([
+                'location' => 'int',
+                'album' => 'int',
+                'title' => 'trim|Util::htmlspecialchars',
+                'descr' => 'trim|Util::htmlspecialchars',
+            ]);
+            $validator->validation_rules([
+                'location' => 'required|numeric',
+                'album' => 'required|numeric',
+                'title' => 'required',
+                'descr' => 'required',
+            ]);
+            $validator->text_replacements([
+                'location' => 'Location not selected!',
+                'album' => 'Album not selected!',
+                'title' => 'Title is empty!',
+                'descr' => $txt['error_message'],
+            ]);
+
+            // Any form errors
+            if (!$validator->validate($_POST)) {
+                $context['errors'] = $validator->validation_errors();
+            }
+
+            if ($context['require_verification']) {
+                // How about any verification errors
+                $verificationOptions = [
+                    'id' => 'add_album',
+                ];
+                $context['require_verification'] = create_control_verification($verificationOptions, true);
+
+                if (is_array($context['require_verification'])) {
+                    foreach ($context['require_verification'] as $error) {
+                        $context['errors'][] = $txt['error_'.$error];
+                    }
+                }
+            }
+
+            $icon = 0;
+            if ('' !== $_FILES['icon']['name']) {
+                $icon = uploadIcon(); // @todo
+            }
+
+            $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
+            require_once SUBSDIR.'/Post.subs.php';
+            $descr = $validator->descr;
+            preparsecode($descr);
+            
+            if (empty($context['errors'])) {
+                $db = database();
+
+                $db->insert('', '{db_prefix}elga_albums',
+                    [ 'name' => 'string', 'icon' => 'string', 'description' => 'string', ],
+                    [ $title, ($icon ? $icon : ''), $descr, ],
+                    [ ]
+                );
+                $id = $db->insert_id('{db_prefix}elga_albums', 'id');
+
+                redirectexit('action=gallery;sa=album;id='.$id);
+            } else {
+                $context['elga_album'] = $validator->album;
+                $context['elga_title'] = $title;
+                $context['elga_descr'] = $descr;
+                $context['elga_id'] = 0;
+
+                _createChecks('add_album');
+            }
+        }
+
+        // GET
+        _createChecks('add_album');
+
     }
 
     public function action_edit_album()
@@ -256,7 +361,7 @@ $(document).ready(function(){
             }
 
             $icon = 0;
-            if ('' !== $_FILES['image']['name']) {
+            if ('' !== $_FILES['icon']['name']) {
                 $icon = uploadIcon(); // @todo
             }
 
@@ -284,7 +389,7 @@ $(document).ready(function(){
                 );
 
                 // del old image
-                if ($db->affected_rows() && '' !== $a['icon'] && $img && $a['icon'] !== $icon) {
+                if ($db->affected_rows() && '' !== $a['icon'] && $a['icon'] !== $icon) {
                     delOldIcon($a);
                 }
 
