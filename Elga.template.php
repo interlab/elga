@@ -31,10 +31,9 @@ function template_home()
     echo '
     </ul>
     </div>
-    <br style="content: ""; display: inline-block; width: 100%;">
     <div style="clear: both;"></div>';
     }
-    
+
     echo '
     <div class="thumbnails">';
 
@@ -58,7 +57,7 @@ function template_home()
             </div>
         </ins>';
     }
-    echo '</div>'; 
+    echo '</div>';
 }
 
 function template_add_file()
@@ -71,8 +70,8 @@ function template_add_file()
     <form form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
     
-	if (!empty($context['errors']))
-		echo '
+    if (!empty($context['errors']))
+        echo '
     <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
 
     echo '
@@ -311,8 +310,8 @@ function template_album_js()
         // die('');
 
     // echo '<h3>Page ', $context['page_info']['current_page'], '</h3>';
-
-    echo '<br><div class="thumbnails">';
+    // <br>
+    echo '<div class="thumbnails">';
     foreach ($context['elga_files'] as $row) {
         echo '
         <ins class="thumbnail">
