@@ -5,13 +5,37 @@ function template_home()
     global $context, $scripturl, $user_info;
 
     // http://www.artlebedev.ru/tools/technogrette/html/thumbnails-center/
-    echo '
-    <style>
-    </style>';
+    // echo '
+    // <style>
+    // </style>';
+    // echo '<h1>ElkArte Gallery</h1>';
+
+    $links = [];
+    if (allowedTo('elga_create_files')) {
+            $links[] = [$scripturl . '?action=gallery;sa=add_file', 'Add new file'];
+    }
+    if (allowedTo('elga_create_albums')) {
+        $links[] = [$scripturl . '?action=gallery;sa=add_album', 'Add new album'];
+    }
+
+    if (!empty($links)) {
+        echo '
+    <div style="position: block;">
+    <ul class="sf-js-enabled sf-arrows">';
+
+    foreach ($links as $link) {
+        echo '
+        <li class="listlevel1"><a href="', $link[0], '"  class="linklevel1">', $link[1], '</a></li>';
+    }
 
     echo '
-    <h1>ElkArte Gallery</h1>
-    <a href="', $scripturl, '?action=gallery;sa=add_file">Add new file</a>
+    </ul>
+    </div>
+    <br style="content: ""; display: inline-block; width: 100%;">
+    <div style="clear: both;"></div>';
+    }
+    
+    echo '
     <div class="thumbnails">';
 
     foreach ($context['elga_albums'] as $album) {
@@ -22,7 +46,7 @@ function template_home()
                     <img src="', $album['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">' . $album['name'] . '</a></h4>
-                ', $album['description'];
+                ', Util::substr($album['description'], 0, 25);
 
             if ($user_info['is_admin']) {
                 echo '
@@ -49,8 +73,8 @@ function template_add_file()
     
 	if (!empty($context['errors']))
 		echo '
-				<div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
-    
+    <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
+
     echo '
 <div class="content">
     <dl class="settings">

@@ -25,7 +25,8 @@ div.elga_cell a {
 
 .thumbnails {
     /*  омпенсируем отступы между float-блоками, чтобы они занимали все доступное пространство */
-    margin: -3em 0 0 -2em;
+    /*margin: -3em 0 0 -2em;*/
+    margin: 0;
 
     /* ¬ыравнивание по центру */
     text-align: center;
@@ -41,15 +42,12 @@ div.elga_cell a {
 
     /* а это дл€ остальных */
     display: inline-block;
-
     vertical-align: top;
 
     /* ”бираем выравнивание по центру */
     /*text-align: left;*/
 
-    /* ќтступы между блоками */
-    margin: 3em 0 0 2em;
-    
+    margin: 2em 0 0 2em;
     padding: 4px;
     background-color: #FFF;
     border: 1px solid #DDD;
