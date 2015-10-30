@@ -1,14 +1,8 @@
 <?php
 
-function template_home()
+function elga_html_buttons()
 {
     global $context, $scripturl, $user_info;
-
-    // http://www.artlebedev.ru/tools/technogrette/html/thumbnails-center/
-    // echo '
-    // <style>
-    // </style>';
-    // echo '<h1>ElkArte Gallery</h1>';
 
     $links = [];
     if (allowedTo('elga_create_files')) {
@@ -33,14 +27,26 @@ function template_home()
     </div>
     <div style="clear: both;"></div>';
     }
+}
+
+function template_home()
+{
+    global $context, $scripturl, $user_info;
+
+    // http://www.artlebedev.ru/tools/technogrette/html/thumbnails-center/
+    // echo '
+    // <style>
+    // </style>';
+
+    elga_html_buttons();
 
     echo '
-    <div class="thumbnails">';
+    <div class="elga_thumbnails">';
 
     foreach ($context['elga_albums'] as $album) {
         echo '
-        <ins class="thumbnail">
-            <div class="r">
+        <ins class="elga_thumbnail">
+            <div class="elga_r">
                 <a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">
                     <img src="', $album['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
@@ -72,7 +78,7 @@ function template_add_file()
     
     if (!empty($context['errors']))
         echo '
-    <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
+                <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
 
     echo '
 <div class="content">
@@ -118,20 +124,20 @@ function template_add_file()
             <input type="file" name="image" size="80" tabindex="', $context['tabindex']++, '" accept="image/*" />
         </dd>';
         
-	if ($context['require_verification'])
-	{
-		template_verification_controls($context['visual_verification_id'], '
-					<dt>
-							' . $txt['verification'] . ':
-					</dt>
-					<dd>
-							', '
-					</dd>');
-	}
+    if ($context['require_verification'])
+    {
+        template_verification_controls($context['visual_verification_id'], '
+                    <dt>
+                            ' . $txt['verification'] . ':
+                    </dt>
+                    <dd>
+                            ', '
+                    </dd>');
+    }
         
     echo '
     </dl>
-	<hr>
+    <hr>
     <div class="submitbutton">
     <input type="submit" value="', $txt['sendtopic_send'], '" name="send" tabindex="', $context['tabindex']++, '" class="button_submit" />
     <input type="hidden" name="sa" value="', $context['elga_sa'], '">';
@@ -165,8 +171,8 @@ function template_add_album()
     <form form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
 
-	if (!empty($context['errors']))
-		echo '
+    if (!empty($context['errors']))
+        echo '
     <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
 
     echo '
@@ -217,20 +223,20 @@ function template_add_album()
             <input type="file" name="icon" size="80" tabindex="', $context['tabindex']++, '" accept="image/*" />
         </dd>';
 
-	if ($context['require_verification'])
-	{
-		template_verification_controls($context['visual_verification_id'], '
-					<dt>
-							' . $txt['verification'] . ':
-					</dt>
-					<dd>
-							', '
-					</dd>');
-	}
+    if ($context['require_verification'])
+    {
+        template_verification_controls($context['visual_verification_id'], '
+                    <dt>
+                            ' . $txt['verification'] . ':
+                    </dt>
+                    <dd>
+                            ', '
+                    </dd>');
+    }
 
     echo '
     </dl>
-	<hr>
+    <hr>
     <div class="submitbutton">
     <input type="submit" value="', $txt['sendtopic_send'], '" name="send" tabindex="', $context['tabindex']++, '" class="button_submit" />
     <input type="hidden" name="sa" value="', $context['elga_sa'], '">';
@@ -257,7 +263,6 @@ function template_album()
     global $context, $scripturl, $txt, $boardurl;
     
     echo '
-    <h1>', $context['elga_album']['name'], '</h1>
     <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '">Add new file</a>';
 
     if (empty($context['elga_files'])) {
@@ -266,16 +271,14 @@ function template_album()
         return;
     }
 
-    // echo '<h3>Page ', $context['page_info']['current_page'], '</h3>';
-
-	// Show the page index... "Pages: [1]".
-	template_pagesection('normal_buttons', 'right');
+    // Show the page index... "Pages: [1]".
+    template_pagesection('normal_buttons', 'right');
     
-    echo '<div class="thumbnails">';
+    echo '<div class="elga_thumbnails">';
     foreach ($context['elga_files'] as $row) {
         echo '
-        <ins class="thumbnail">
-            <div class="r">
+        <ins class="elga_thumbnail elga_item">
+            <div class="elga_r">
                 <a href="', $row['icon'], '" class="fancybox" rel="group">
                     <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
                 </a>
@@ -309,13 +312,11 @@ function template_album_js()
     // if (!$context['elga']['is_next_start'])
         // die('');
 
-    // echo '<h3>Page ', $context['page_info']['current_page'], '</h3>';
-    // <br>
-    echo '<div class="thumbnails">';
+    //echo '<div class="elga_thumbnails">';
     foreach ($context['elga_files'] as $row) {
         echo '
-        <ins class="thumbnail">
-            <div class="r">
+        <ins class="elga_thumbnail elga_item">
+            <div class="elga_r">
                 <a href="', $row['icon'], '" class="fancybox" rel="group">
                     <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
                 </a>
@@ -324,8 +325,7 @@ function template_album_js()
             </div>
         </ins>';
     }
-    echo '
-    </div>';
+    //echo '</div>';
 
     if (!$context['elga_is_next_start']) {
         // die(''); // end
@@ -352,9 +352,9 @@ function template_file()
     }
 
     echo '
-    <div class="thumbnails">
-        <ins class="thumbnail">
-            <div class="r">
+    <div class="elga_thumbnails">
+        <ins class="elga_thumbnail">
+            <div class="elga_r">
     <a href="', $row['icon'], '" class="fancybox" rel="group">
         <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
     </a>

@@ -39,10 +39,11 @@ $(document).ready(function(){
         padding: 20,
         nextSelector: \'a.jscroll-next:last\',
         contentSelector: \'\',
-        // callback: function(){
+        callback: function(){
+            jQuery("div.jscroll-added").children().not("div.jscroll-next-parent").appendTo("div.elga_thumbnails");
             // i++;
-            // console.log(i + \'test jscroll\')
-        // }
+            // console.log(i + \'test jscroll\');
+        },
     });
 });
         ');
@@ -97,7 +98,7 @@ $(document).ready(function(){
         $db = database();
 
         // $limit = 20;
-        $per_page = 4;
+        $per_page = 20;
 
         $req = $db->query('', '
             SELECT COUNT(*)

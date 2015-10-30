@@ -23,7 +23,7 @@ div.elga_cell a {
 }
 
 
-.thumbnails {
+.elga_thumbnails {
     /* Компенсируем отступы между float-блоками, чтобы они занимали все доступное пространство */
     /*margin: -3em 0 0 -2em;*/
     margin: 0;
@@ -32,21 +32,14 @@ div.elga_cell a {
     text-align: center;
 }
 
-.thumbnail {
+.elga_thumbnail {
     /* Убираем подчеркивание у элемента ins,
     который был использован для совместимости со старыми версиями Internet Explorer */
     text-decoration: none;
 
-    /* Следующее правило для Firefox 2 */
-    display: -moz-inline-box;
-
     /* а это для остальных */
     display: inline-block;
     vertical-align: top;
-
-    /* Убираем выравнивание по центру */
-    /*text-align: left;*/
-
     margin: 1.3em 0 0 1.5em;
     padding: 4px;
     background-color: #FFF;
@@ -54,7 +47,7 @@ div.elga_cell a {
     border-radius: 4px;
 }
 
-.thumbnail .r {
+.elga_thumbnail .elga_r {
     /* Если есть необходимость, то свойства padding, border, background и position со значением relative
     лучше задавать у этого элемента -- это несколько расширит количество поддерживаемых версий браузеров */
 
@@ -68,16 +61,35 @@ div.elga_cell a {
     border: 1px solid #C4C4C4;
 }
 
-.thumbnail .r a {
+.elga_thumbnail .elga_r a {
     font-weight: bold;
     font-size: 110%;
 }
 
-.thumbnail .r a.elga_edit {
+.elga_thumbnail .elga_r a.elga_edit {
     font-weight: normal;
     font-size: 90%;
 }
 
 .elga_cell {
 
+}
+
+.elga_item {
+    text-decoration: none;
+    display: inline-block;
+    vertical-align: top;
+    margin: 1.3em 0px 0px 0.5em;
+    padding: 4px;
+    background-color: #FFF;
+    border: 1px solid #C4C4C4;
+    border-radius: 6px;
+    box-shadow: 0px 0px 1px 0px rgba(99,99,99,0.77);
+}
+
+.elga_item .elga_r {
+    min-height: 8em;
+    display: inline-block;
+    border: none;
+    min-width: 8em;
 }
