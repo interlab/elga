@@ -303,8 +303,8 @@ function uploadIcon()
     thumb(
         $_FILES['icon']['tmp_name'],
         $path . '/' . $name,
-        $modSettings['elga_icons_max_width'] ? $modSettings['elga_icons_max_width'] : 60,
-        $modSettings['elga_icons_max_height'] ? $modSettings['elga_icons_max_height'] : 60
+        $modSettings['elga_icon_max_width'] ? $modSettings['elga_icon_max_width'] : 60,
+        $modSettings['elga_icon_max_height'] ? $modSettings['elga_icon_max_height'] : 60
     );
 
     return $name;

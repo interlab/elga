@@ -166,8 +166,10 @@ function elga_addon_settings()
     $txt['elga_files_url'] = 'URL адрес к папке с изображениями';
     $txt['elga_icons_path'] = 'Путь к папке с иконками альбомов';
     $txt['elga_icons_url'] = 'URL адрес к папке с иконками';
-    $txt['elga_max_width_img'] = 'Максимальная ширина изображения';
-    $txt['elga_max_height_img'] = 'Максимальная высота изображения';
+    $txt['elga_img_max_width'] = 'Максимальная ширина изображения';
+    $txt['elga_img_max_height'] = 'Максимальная высота изображения';
+    $txt['elga_icon_max_width'] = 'Максимальная ширина иконки альбома';
+    $txt['elga_icon_max_height'] = 'Максимальная высота иконки альбома';
     
 	$context[$context['admin_menu_name']]['tab_data']['tabs']['elga']['description'] = $txt['elga_desc'];
 
@@ -184,8 +186,10 @@ function elga_addon_settings()
         [ 'text', 'elga_files_url', 'invalid' => !$context['valid_elga_files_url'], 'label' => $txt['elga_files_url'], 'subtext' => 'Например: ' . $boardurl.'/elga_files/upload'],
         [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/icons'],
         [ 'text', 'elga_icons_url', 'invalid' => !$context['valid_elga_icons_url'], 'label' => $txt['elga_icons_url'], 'subtext' => 'Например: '.$boardurl.'/elga_files/icons'],
-        [ 'int', 'elga_max_width_img', ],
-        [ 'int', 'elga_max_height_img', ],
+        [ 'int', 'elga_img_max_width', ],
+        [ 'int', 'elga_img_max_height', ],
+        [ 'int', 'elga_icon_max_width', ],
+        [ 'int', 'elga_icon_max_height', ],
 	];
 
 	// Load the settings to the form class
@@ -197,10 +201,14 @@ function elga_addon_settings()
 		checkSession();
 
 		// Some defaults are good to have
-		if (empty($_POST['elga_max_width_img']))
-			$_POST['elga_max_width_img'] = 350;
-		if (empty($_POST['elga_max_height_img']))
-			$_POST['elga_max_height_img'] = 350;
+		if (empty($_POST['elga_img_max_width']))
+			$_POST['elga_img_max_width'] = 350;
+		if (empty($_POST['elga_img_max_height']))
+			$_POST['elga_img_max_height'] = 350;
+		if (empty($_POST['elga_icon_max_width']))
+			$_POST['elga_icon_max_width'] = 60;
+		if (empty($_POST['elga_icon_max_height']))
+			$_POST['elga_icon_max_height'] = 60;
 
         $_POST['elga_files_path'] = rtrim($_POST['elga_files_path'], '/');
         $_POST['elga_files_url'] = rtrim($_POST['elga_files_url'], '/');
