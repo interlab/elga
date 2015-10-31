@@ -51,7 +51,7 @@ function template_home()
                     <img src="', $album['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">' . $album['name'] . '</a></h4>
-                ', Util::substr($album['description'], 0, 25);
+                <p class="elga_album_descr">', Util::substr($album['description'], 0, 100), '</p>';
 
             if ($user_info['is_admin']) {
                 echo '
@@ -354,7 +354,7 @@ function template_file()
     echo '
     <div class="elga_thumbnails">
         <ins class="elga_thumbnail">
-            <div class="elga_r">
+            <div class="elga_display">
     <a href="', $row['icon'], '" class="fancybox" rel="group">
         <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
     </a>

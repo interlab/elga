@@ -24,41 +24,42 @@ div.elga_cell a {
 
 
 .elga_thumbnails {
-    /* Компенсируем отступы между float-блоками, чтобы они занимали все доступное пространство */
+    /* РљРѕРјРїРµРЅСЃРёСЂСѓРµРј РѕС‚СЃС‚СѓРїС‹ РјРµР¶РґСѓ float-Р±Р»РѕРєР°РјРё, С‡С‚РѕР±С‹ РѕРЅРё Р·Р°РЅРёРјР°Р»Рё РІСЃРµ РґРѕСЃС‚СѓРїРЅРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ */
     /*margin: -3em 0 0 -2em;*/
     margin: 0;
-
-    /* Выравнивание по центру */
     text-align: center;
 }
 
 .elga_thumbnail {
-    /* Убираем подчеркивание у элемента ins,
-    который был использован для совместимости со старыми версиями Internet Explorer */
+    /* РЈР±РёСЂР°РµРј РїРѕРґС‡РµСЂРєРёРІР°РЅРёРµ Сѓ СЌР»РµРјРµРЅС‚Р° ins,
+    РєРѕС‚РѕСЂС‹Р№ Р±С‹Р» РёСЃРїРѕР»СЊР·РѕРІР°РЅ РґР»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё СЃРѕ СЃС‚Р°СЂС‹РјРё РІРµСЂСЃРёСЏРјРё Internet Explorer */
     text-decoration: none;
-
-    /* а это для остальных */
     display: inline-block;
     vertical-align: top;
     margin: 1.3em 0 0 1.5em;
     padding: 4px;
     background-color: #FFF;
-    border: 1px solid #DDD;
+    border: 1px solid #CECECE;
     border-radius: 4px;
 }
 
 .elga_thumbnail .elga_r {
-    /* Если есть необходимость, то свойства padding, border, background и position со значением relative
-    лучше задавать у этого элемента -- это несколько расширит количество поддерживаемых версий браузеров */
+    /* Р•СЃР»Рё РµСЃС‚СЊ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚СЊ, С‚Рѕ СЃРІРѕР№СЃС‚РІР° padding, border, background Рё position СЃРѕ Р·РЅР°С‡РµРЅРёРµРј relative
+    Р»СѓС‡С€Рµ Р·Р°РґР°РІР°С‚СЊ Сѓ СЌС‚РѕРіРѕ СЌР»РµРјРµРЅС‚Р° -- СЌС‚Рѕ РЅРµСЃРєРѕР»СЊРєРѕ СЂР°СЃС€РёСЂРёС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРґРґРµСЂР¶РёРІР°РµРјС‹С… РІРµСЂСЃРёР№ Р±СЂР°СѓР·РµСЂРѕРІ */
 
+    width: 14em;
+    min-height: 10em;
+    display: inline-block;
+    background-color: #FFF;
+    border: 1px solid #CECECE; /*#DDD; #C4C4C4; */
+}
+
+.elga_thumbnail .elga_display {
     min-width: 14em;
     min-height: 10em;
-
-    /* Минимальная ширина в пикселях будет автоматически рассчитываться по ширине картинки */
-    /*float: left;*/
     display: inline-block;
-
-    border: 1px solid #C4C4C4;
+    background-color: #FFF;
+    border: 1px solid #CECECE;
 }
 
 .elga_thumbnail .elga_r a {
@@ -69,10 +70,6 @@ div.elga_cell a {
 .elga_thumbnail .elga_r a.elga_edit {
     font-weight: normal;
     font-size: 90%;
-}
-
-.elga_cell {
-
 }
 
 .elga_item {
@@ -92,4 +89,14 @@ div.elga_cell a {
     display: inline-block;
     border: none;
     min-width: 8em;
+}
+
+.elga_album_descr {
+    text-transform: none;
+    font-size: 0.8em;
+    line-height: 1.29em;
+    font-weight: bold;
+    color: #555;
+    text-decoration: none;
+    /*display: block;*/
 }
