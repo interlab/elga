@@ -30,12 +30,10 @@ class Elga_Controller extends Action_Controller
         // JavaScriptEscape(...)
         addInlineJavascript('
 $(document).ready(function(){
-    var elgaimgload = new Image();
-    elgaimgload.src = elk_images_url + "/elga_loading.gif";
     // var i = 0;
     // console.log(elgaimgload.src);
     $(\'.elga_scroll\').jscroll({
-        loadingHtml: \'<img src="\' + elgaimgload.src + \'" alt="Loading" /> Loading...\',
+        loadingHtml: \'<i class="fa fa-spinner fa-pulse"></i> Loading...\',
         padding: 20,
         nextSelector: \'a.jscroll-next:last\',
         contentSelector: \'\',

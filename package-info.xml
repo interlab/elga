@@ -23,7 +23,6 @@
         <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
         <require-file name="Elga.template.php" destination="THEMEDIR" />
         <require-file name="elga.css" destination="THEMEDIR/css" />
-        <require-file name="elga_loading.gif" destination="IMAGESDIR" />
         <require-dir name="scripts" destination="THEMEDIR" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <require-dir name="elga_files" destination="BOARDDIR" />
@@ -39,7 +38,6 @@
         <remove-file name="CONTROLLERDIR/Elga.controller.php" />
         <remove-file name="THEMEDIR/Elga.template.php" />
         <remove-file name="THEMEDIR/css/elga.css" />
-        <remove-file name="IMAGESDIR/elga_loading.gif" />
         <remove-dir name="THEMEDIR/scripts/elga" />
         <remove-dir name="EXTDIR/elga_lib" />
         <code>Hooks.php</code>
