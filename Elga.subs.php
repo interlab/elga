@@ -13,7 +13,8 @@ function getFile($id)
     $db = database();
     $req = $db->query('', '
     SELECT
-        f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
+        f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views,
+        f.id_member, f.member_name, f.time_added,
         a.name AS album_name
     FROM {db_prefix}elga_files as f
         INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
@@ -31,6 +32,66 @@ function getFile($id)
     $db->free_result($req);
 
     return $file;
+}
+
+function getPrevId($id, $idalbum)
+{
+    if (!is_numeric($id)) {
+        fatal_error('Bad id value. Required int type.', false);
+    }
+
+    $db = database();
+    $req = $db->query('', '
+    SELECT MAX(f.id)
+    FROM {db_prefix}elga_files as f
+        INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+    WHERE f.id < {int:id}
+        AND f.id_album = {int:album}
+    LIMIT 1', [
+        'id' => _uint($id),
+        'album' => _uint($idalbum),
+    ]);
+
+    if (!$db->num_rows($req)) {
+        $db->free_result($req);
+
+        return 0;
+    }
+
+    $id = (int) $db->fetch_row($req)[0];
+    $db->free_result($req);
+
+    return $id;
+}
+
+function getNextId($id, $idalbum)
+{
+    if (!is_numeric($id)) {
+        fatal_error('Bad id value. Required int type.', false);
+    }
+
+    $db = database();
+    $req = $db->query('', '
+    SELECT f.id
+    FROM {db_prefix}elga_files as f
+        INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+    WHERE f.id > {int:id}
+        AND f.id_album = {int:album}
+    LIMIT 1', [
+        'id' => _uint($id),
+        'album' => _uint($idalbum),
+    ]);
+
+    if (!$db->num_rows($req)) {
+        $db->free_result($req);
+
+        return 0;
+    }
+
+    $id = (int) $db->fetch_row($req)[0];
+    $db->free_result($req);
+
+    return $id;
 }
 
 function getAlbums()

@@ -362,13 +362,13 @@ function template_file()
 
     echo '
     <div class="elga-photo-container">
-        <div class="elga-arrow"><a href="#">&#8592; Пред.</a></div>
+        <div class="elga-arrow' . ($row['prev_id'] ? '' : ' elga-disabled') . '">' . ($row['prev_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['prev_id']. '">' : '') . '&#8592; Пред.</a></div>
         <div class="elga_display">
     <a href="', $row['icon'], '" class="fancybox" rel="group">
         <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
     </a>
         </div>
-        <div class="elga-arrow"><a href="#">След. &#8594;</a></div>
+        <div class="elga-arrow' . ($row['next_id'] ? '' : ' elga-disabled') . '">' . ($row['next_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['next_id']. '">' : '') . 'След. &#8594;</a></div>
     </div>';
 
     echo '

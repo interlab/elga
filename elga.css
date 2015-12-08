@@ -124,7 +124,7 @@ div.elga_cell a {
     background-color: #EEE;
     border: 1px solid #CCC;
     text-align: center;
-    margin: 0 0 1rem 0;
+    margin: 0.8rem 0 1rem 0;
     padding: 1rem 10px;
 }
 
@@ -145,16 +145,21 @@ div.elga_cell a {
     -ms-flex-item-align: auto;
     align-self: auto;
 
-    color: #4B863C; /*white; #222;*/
-    text-shadow: 1px 1px 1px #184E0A; /*#899087; #1B1A1A;*/
-    font-size: 2rem; /* 4 rem */
+    color: #354172;
+    line-height: 1;
+    background: #F4F4F4 linear-gradient(to bottom, #FFF, #E4E4E4) repeat scroll 0% 0%;
+    box-shadow: 1px 1px 2px #E5E5E5;
+    font-size: 1rem;
     font-family: arial,sans-serif !important;
     border: 1px solid #C4C4C4;
     border-radius: 6px;
+    border-color: #CFCFCF #AFAFAF #AFAFAF #BFBFBF;
     padding: 10px;
-    background: #DCDBDB;
-    line-height: 1;
     white-space: nowrap;
+}
+
+.elga-arrow:hover {
+    box-shadow: 0px 0px 3px 0px #2991EA;
 }
 
 .elga-file-descr {
@@ -162,5 +167,10 @@ div.elga_cell a {
     box-shadow: 0px 0em 0.4em rgba(0, 0, 0, 0.3);
     margin: 15px 0px;
     padding: 0px 10px 15px;
+}
+
+.elga-disabled:hover, a.elga-disabled:hover {
+    color:#777 !important;
+    cursor:not-allowed;
 }
 

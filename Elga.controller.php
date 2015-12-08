@@ -556,9 +556,10 @@ $(document).ready(function(){
 
                 $db->insert('', '{db_prefix}elga_files',
                     [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 'id_album' => 'int',
-                      'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string', 'exif' => 'string', ],
+                      'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string',
+                      'time_added' => 'int', 'exif' => 'string', ],
                     [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $validator->album, $title,
-                      $descr, $user_info['id'], $user_info['name'], '', ],
+                      $descr, $user_info['id'], $user_info['name'], time(), '', ],
                     [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
@@ -841,26 +842,23 @@ $(document).ready(function(){
 
         $id = (int) $_GET['id'];
 
-        $db = database();
-        $req = $db->query('', '
-        SELECT
-            f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
-            a.name AS album_name
-        FROM {db_prefix}elga_files as f
-            INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
-        WHERE f.id = {int:id}
-        LIMIT 1', [
-            'id' => $id,
-        ]);
-        if (!$db->num_rows($req)) {
-            $db->free_result($req);
-            fatal_error('File not found!', false);
+        /*
+        $pn = '';
+        if (isset($_GET['prev_next'])) {
+            $pn = $_GET['prev_next'] === 'prev' ? '<' : '>';
         }
+        */
 
+        $file = getFile($id);
+
+        $file['prev_id'] = getPrevId($file['id'], $file['id_album']);
+        $file['next_id'] = getNextId($file['id'], $file['id_album']);
+
+        if (!$file) {
+            fatal_error('File not found.', false);
+        }
         $url = $modSettings['elga_files_url'];
-        $file = $db->fetch_assoc($req);
         $context['elga_file'] = & $file;
-        $db->free_result($req);
         $context['elga_file']['icon'] = $url.'/'.$context['elga_file']['fname'];
         require_once SUBSDIR.'/Post.subs.php';
         censorText($file['description']);
