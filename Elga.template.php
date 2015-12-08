@@ -25,7 +25,7 @@ function elga_html_buttons()
     echo '
     </ul>
     </div>
-    <div style="clear: both;"></div>';
+    <div class="clear"></div>';
     }
 }
 
@@ -261,7 +261,7 @@ function template_add_album()
 function template_album()
 {
     global $context, $scripturl, $txt, $boardurl;
-    
+
     echo '
     <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '">Add new file</a>';
 
@@ -273,7 +273,7 @@ function template_album()
 
     // Show the page index... "Pages: [1]".
     template_pagesection('normal_buttons', 'right');
-    
+
     echo '<div class="elga_thumbnails">';
     foreach ($context['elga_files'] as $row) {
         echo '
@@ -361,23 +361,23 @@ function template_file()
     }
 
     echo '
-    <div class="elga_thumbnails elga-photo">
-        <ins class="elga_thumbnail">
-            <div class="elga_display">
+    <div class="elga-photo-container">
+        <div class="elga-arrow"><a href="#">&#8592; Пред.</a></div>
+        <div class="elga_display">
     <a href="', $row['icon'], '" class="fancybox" rel="group">
         <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
     </a>
-            </div>
-        </ins>
+        </div>
+        <div class="elga-arrow"><a href="#">След. &#8594;</a></div>
     </div>';
 
     echo '
     <div class="elga-file-descr">
     <strong>Имя файла:</strong> <a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a><br>
     <strong>Size:</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
+    <strong>Author:</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
     <strong>Дата загрузки:</strong> ', standardTime($row['time_added']), '<br>
     <strong>Title:</strong> ', $row['title'], '<br>
     <strong>Description:</strong> ', $row['description'], '<br>
-    <strong>Author:</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
     </div>';
 }

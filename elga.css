@@ -101,12 +101,60 @@ div.elga_cell a {
     /*display: block;*/
 }
 
-.elga-photo {
+.elga-photo-container {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: space-around;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    -webkit-align-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+
     background-color: #EEE;
     border: 1px solid #CCC;
     text-align: center;
-    margin: 15px 0px;
-    padding: 0px 10px 15px;
+    margin: 0 0 1rem 0;
+    padding: 1rem 10px;
+}
+
+.elga-photo-container a,
+.elga-photo-container a:hover {
+    color: unset;
+    text-decoration: none;
+}
+
+.elga-arrow {
+    -webkit-order: 0;
+    -ms-flex-order: 0;
+    order: 0;
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -webkit-align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+
+    color: #4B863C; /*white; #222;*/
+    text-shadow: 1px 1px 1px #184E0A; /*#899087; #1B1A1A;*/
+    font-size: 2rem; /* 4 rem */
+    font-family: arial,sans-serif !important;
+    border: 1px solid #C4C4C4;
+    border-radius: 6px;
+    padding: 10px;
+    background: #DCDBDB;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .elga-file-descr {
@@ -115,3 +163,4 @@ div.elga_cell a {
     margin: 15px 0px;
     padding: 0px 10px 15px;
 }
+
