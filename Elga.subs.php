@@ -34,7 +34,7 @@ function getFile($id)
     return $file;
 }
 
-function getPrevId($id, $idalbum)
+function getNextId($id, $idalbum)
 {
     if (!is_numeric($id)) {
         fatal_error('Bad id value. Required int type.', false);
@@ -64,7 +64,7 @@ function getPrevId($id, $idalbum)
     return $id;
 }
 
-function getNextId($id, $idalbum)
+function getPrevId($id, $idalbum)
 {
     if (!is_numeric($id)) {
         fatal_error('Bad id value. Required int type.', false);
