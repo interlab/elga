@@ -34,6 +34,10 @@ function getFile($id)
     return $file;
 }
 
+/*
+ * @return int
+ *
+ */
 function getNextId($id, $idalbum)
 {
     if (!is_numeric($id)) {
@@ -64,6 +68,10 @@ function getNextId($id, $idalbum)
     return $id;
 }
 
+/*
+ * @return int
+ *
+ */
 function getPrevId($id, $idalbum)
 {
     if (!is_numeric($id)) {
@@ -100,11 +108,15 @@ function getAlbums()
 
     $db = database();
 
+    
+
     // @todo: limit
     $req = $db->query('', '
-    SELECT id, name, description, icon
-    FROM {db_prefix}elga_albums
-    LIMIT 100', []);
+    SELECT a.id, a.name, a.description, a.icon, COUNT(f.id) as total
+    FROM {db_prefix}elga_albums AS a, {db_prefix}elga_files AS f
+    WHERE a.id = f.id_album
+    GROUP BY a.id
+    LIMIT 100 ', []);
 
     // $data = new Foo();
     $data = [];

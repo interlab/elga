@@ -51,6 +51,7 @@ function template_home()
                     <img src="', $album['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">' . $album['name'] . '</a></h4>
+                <p class="elga-total">', $album['total'], ' файл(ов)</p>
                 <p class="elga_album_descr">', Util::substr($album['description'], 0, 100), '</p>';
 
             if ($user_info['is_admin']) {

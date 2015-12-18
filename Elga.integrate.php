@@ -18,7 +18,7 @@ function elga_menu_buttons(&$buttons, &$menu_count)
 
     $buttons = elk_array_insert($buttons, 'home', [
         'gallery' => [
-            'title' => '<i class="fa fa-camera-retro fa-lg"></i> Gallery',
+            'title' => '<i class="fa fa-camera-retro"></i> Gallery', // fa-lg
             'href' => $scripturl . '?action=gallery',
             'data-icon' => '&#xf03e;',
             'show' => true, // allowedTo('admin_forum'),
