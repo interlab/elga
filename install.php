@@ -50,7 +50,8 @@ $tables = array(
 		),
 		'indexes' => array(
 			array('type' => 'primary', 'columns' => array('id')),
-			array('type' => 'index', 'columns' => array('id', 'id_album')),
+			array('type' => 'index', 'columns' => array('id', 'id_album'), 'name' => 'filealbum'),
+            array('type' => 'index', 'columns' => array('id_album'), 'name' => 'idalbum'),
 		),
 	),
 );

@@ -108,15 +108,13 @@ function getAlbums()
 
     $db = database();
 
-    
-
-    // @todo: limit
     $req = $db->query('', '
     SELECT a.id, a.name, a.description, a.icon, COUNT(f.id) as total
-    FROM {db_prefix}elga_albums AS a, {db_prefix}elga_files AS f
-    WHERE a.id = f.id_album
+    FROM {db_prefix}elga_albums AS a
+        LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
     GROUP BY a.id
-    LIMIT 100 ', []);
+    ORDER BY a.id ASC
+    LIMIT 100', []);
 
     // $data = new Foo();
     $data = [];
