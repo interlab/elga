@@ -74,7 +74,7 @@ function template_add_file()
     echo '
     <h2 class="category_header">', $context['page_title'], '</h2>
 
-    <form form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
+    <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
     
     if (!empty($context['errors']))
@@ -169,7 +169,7 @@ function template_add_album()
     echo '
     <h2 class="category_header">', $context['page_title'], '</h2>
 
-    <form form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
+    <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
 
     if (!empty($context['errors']))
