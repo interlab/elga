@@ -1,3 +1,4 @@
+/*
 .elga_table {
     border: 1px solid black;
     width: 100%;
@@ -21,7 +22,7 @@ div.elga_cell a {
     font-weight: bold;
     font-size: 110%;
 }
-
+*/
 
 .elga_thumbnails {
     /* Компенсируем отступы между float-блоками, чтобы они занимали все доступное пространство */
@@ -52,14 +53,6 @@ div.elga_cell a {
     display: inline-block;
     background-color: #FFF;
     border: 1px solid #CECECE; /*#DDD; #C4C4C4; */
-}
-
-.elga_thumbnail .elga_display {
-    min-width: 14em;
-    min-height: 10em;
-    display: inline-block;
-    background-color: #FFF;
-    border: 1px solid #CECECE;
 }
 
 .elga_thumbnail .elga_r a {

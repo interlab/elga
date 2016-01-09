@@ -288,7 +288,8 @@ function template_album()
         <li class="listlevel1">
     <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '" class="linklevel1">Add new file</a>
         </li>
-    </ul>';
+    </ul>
+    </div>';
 
     echo elga_show_select_cats();
 

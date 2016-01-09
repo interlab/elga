@@ -4,6 +4,8 @@ if (!defined('ELK')) {
     die('No access...');
 }
 
+
+
 function elga_json_response(array $data)
 {
     /*ob_end_clean();

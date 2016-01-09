@@ -1,4 +1,4 @@
-(function($){
+;(function($){
     $(document).ready(function(){
         var $select = $('div.elga-select-cats form select');
         $select.on("click", function(){
