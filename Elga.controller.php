@@ -26,6 +26,7 @@ class Elga_Controller extends Action_Controller
         loadCSSFile('elga.css');
         loadTemplate('Elga');
 
+        loadJavascriptFile('elga/elga.js');
         loadJavascriptFile('elga/jscroll-2.3.4/jquery.jscroll.js');
         // JavaScriptEscape(...)
         addInlineJavascript('
@@ -58,6 +59,27 @@ $(document).ready(function(){
         }
 
         $context['elga_albums'] = getAlbums();
+    }
+
+    public function action_ajax()
+    {
+        global $context, $scripturl, $boardurl, $modSettings;
+
+        Template_Layers::getInstance()->removeAll();
+        $context['sub_template'] = 'empty';
+
+        $res = ['status' => 'error', 'result' => []];
+
+        if (empty($_REQUEST['m'])) {
+            return elga_json_response($res);
+        }
+
+        switch ($_REQUEST['m']) {
+            case 'loadcats':
+                return elga_json_response(['status' => 'ok', 'result' => getAlbumsSimple()]);
+            default:
+                return elga_json_response($res);
+        }
     }
 
     public function action_album()

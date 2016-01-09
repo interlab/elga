@@ -174,3 +174,11 @@ div.elga_cell a {
     cursor:not-allowed;
 }
 
+.elga-select-cats {
+    float: right;
+    white-space: nowrap;
+}
+
+.elga-buttons {
+  position: block;
+}

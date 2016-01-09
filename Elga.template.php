@@ -14,8 +14,8 @@ function elga_html_buttons()
 
     if (!empty($links)) {
         echo '
-    <div style="position: block;">
-    <ul class="sf-js-enabled sf-arrows">';
+    <div class="elga-buttons">
+    <ul>';
 
     foreach ($links as $link) {
         echo '
@@ -27,6 +27,25 @@ function elga_html_buttons()
     </div>
     <div class="clear"></div>';
     }
+}
+
+function template_empty()
+{
+    
+}
+
+function elga_show_select_cats()
+{
+     global $context, $scripturl, $user_info;
+     
+     echo '
+     <div class="elga-select-cats">
+     <form>
+     <select>
+        <option value="0" data-elgaseltxt="Выберите альбом для перехода">Выберите альбом для перехода</option>
+     </select>
+     </form>
+     </div>';
 }
 
 function template_home()
@@ -264,7 +283,14 @@ function template_album()
     global $context, $scripturl, $txt, $boardurl;
 
     echo '
-    <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '">Add new file</a>';
+    <div class="elga-buttons">
+    <ul>
+        <li class="listlevel1">
+    <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '" class="linklevel1">Add new file</a>
+        </li>
+    </ul>';
+
+    echo elga_show_select_cats();
 
     if (empty($context['elga_files'])) {
         echo '<h1>В этом альбоме нет загруженных файлов.</h1>';
@@ -349,7 +375,7 @@ function template_file()
     
     if ($context['elga_is_author']) {
         echo '
-    <ul class="sf-js-enabled sf-arrows">
+    <ul>
     <li class="listlevel1">
         <a href="', $scripturl, '?action=gallery;sa=edit_file;id=', $row['id'], '" class="linklevel1">Edit</a>
     </li>
@@ -381,4 +407,6 @@ function template_file()
     <strong>Title:</strong> ', $row['title'], '<br>
     <strong>Description:</strong> ', $row['description'], '<br>
     </div>';
+
+    echo elga_show_select_cats();
 }

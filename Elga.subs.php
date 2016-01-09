@@ -4,6 +4,15 @@ if (!defined('ELK')) {
     die('No access...');
 }
 
+function elga_json_response(array $data)
+{
+    /*ob_end_clean();
+      ob_start('ob_gzhandler');*/
+    if (empty($data))
+        log_error('$data is empty!');
+    die(json_encode($data));
+}
+
 function getFile($id)
 {
     if (!is_numeric($id)) {
@@ -122,6 +131,29 @@ function getAlbums()
         while ($row = $db->fetch_assoc($req)) {
             $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
             $data[$row['id']] = $row;
+        }
+    }
+    $db->free_result($req);
+
+    return $data;
+}
+
+function getAlbumsSimple()
+{
+    global $boardurl, $modSettings;
+
+    $db = database();
+
+    // @todo: limit
+    $req = $db->query('', '
+    SELECT id, name
+    FROM {db_prefix}elga_albums
+    LIMIT 250', []);
+
+    $data = [];
+    if ($db->num_rows($req) > 0) {
+        while ($row = $db->fetch_assoc($req)) {
+            $data[] = $row;
         }
     }
     $db->free_result($req);
