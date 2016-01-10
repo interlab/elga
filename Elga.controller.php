@@ -6,7 +6,7 @@ if (!defined('ELK')) {
 
 // @todo: comments -> add edit delete
 
-class Elga_Controller extends Action_Controller
+class ElgaController extends Action_Controller
 {
     public function __construct()
     {
@@ -14,7 +14,7 @@ class Elga_Controller extends Action_Controller
 
     public function action_index()
     {
-        global $context, $scripturl;
+        global $context, $scripturl, $modSettings;
 
         $context['page_title'] = 'Галерея - Дом';
 
@@ -47,6 +47,12 @@ $(document).ready(function(){
 });
         ');
 
+        if ( ! $modSettings['elga_enabled'] ) {
+            $context['sub_template'] = 'gallery_off';
+
+            return;
+        }
+
         $context['sub_template'] = 'home';
 
         if (isset($_REQUEST['sa'])) {
@@ -58,7 +64,7 @@ $(document).ready(function(){
             }
         }
 
-        $context['elga_albums'] = getAlbums();
+        $context['elga_albums'] = ElgaSubs::getAlbums();
     }
 
     public function action_ajax()
@@ -71,14 +77,14 @@ $(document).ready(function(){
         $res = ['status' => 'error', 'result' => []];
 
         if (empty($_REQUEST['m'])) {
-            return elga_json_response($res);
+            return ElgaSubs::json_response($res);
         }
 
         switch ($_REQUEST['m']) {
             case 'loadcats':
-                return elga_json_response(['status' => 'ok', 'result' => getAlbumsSimple()]);
+                return ElgaSubs::json_response(['status' => 'ok', 'result' => ElgaSubs::getAlbumsSimple()]);
             default:
-                return elga_json_response($res);
+                return ElgaSubs::response($res);
         }
     }
 
@@ -90,7 +96,7 @@ $(document).ready(function(){
             redirectexit('action=gallery');
         }
 
-        $albums = getAlbums();
+        $albums = ElgaSubs::getAlbums();
         if (empty($albums[$_GET['id']])) {
             fatal_error('Album not found!', false);
         }
@@ -185,26 +191,23 @@ $(document).ready(function(){
 
         is_not_guest();
 
+        $txt['cannot_elga_create_albums'] = 'Вы не можете создавать альбомы! Не хватает прав!';
+        isAllowedTo('elga_create_albums');
+
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
-
-
 
         $context['sub_template'] = 'add_album';
         $context['elga_sa'] = 'add_album';
         $context['page_title'] = 'New album';
         $context['elga_id'] = 0;
-        $context['elga_albums'] = getAlbums();
+        $context['elga_albums'] = ElgaSubs::getAlbums();
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=add_album',
             'name' => 'New album',
         ];
-
-        if (!allowedTo('moderate_forum') && !allowedTo('admin_forum')) {
-            fatal_error('Вы не можете создавать альбомы! Не хватает прав!', false);
-        }
 
         if (isset($_REQUEST['send'])) {
             checkSession('post');
@@ -260,7 +263,7 @@ $(document).ready(function(){
 
             $icon = 0;
             if ('' !== $_FILES['icon']['name']) {
-                $icon = uploadIcon(); // @todo
+                $icon = ElgaSubs::uploadIcon(); // @todo
             }
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
@@ -285,12 +288,12 @@ $(document).ready(function(){
                 $context['elga_descr'] = $descr;
                 $context['elga_id'] = 0;
 
-                _createChecks('add_album');
+                ElgaSubs::createChecks('add_album');
             }
         }
 
         // GET
-        _createChecks('add_album');
+        ElgaSubs::createChecks('add_album');
 
     }
 
@@ -299,12 +302,13 @@ $(document).ready(function(){
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
         is_not_guest();
+        isAllowedTo('elga_edit_albums');
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
 
-        $albums = getAlbums();
+        $albums = ElgaSubs::getAlbums();
         $context['elga_albums'] = & $albums;
         $context['elga_sa'] = 'edit_album';
 
@@ -316,7 +320,7 @@ $(document).ready(function(){
             if (empty($_POST['id'])) {
                 redirectexit('action=gallery');
             }
-            $id = _uint($_POST['id']);
+            $id = ElgaSubs::uint($_POST['id']);
             $a = isset($albums[$id]) ? $albums[$id] : false;
             if (!$a) {
                 fatal_error('Album not found!', false);
@@ -383,7 +387,7 @@ $(document).ready(function(){
 
             $icon = 0;
             if ('' !== $_FILES['icon']['name']) {
-                $icon = uploadIcon(); // @todo
+                $icon = ElgaSubs::uploadIcon(); // @todo
             }
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
@@ -430,7 +434,7 @@ $(document).ready(function(){
 
                 $context['page_title'] = 'Edit album '.$title;
 
-                _createChecks('edit_album');
+                ElgaSubs::createChecks('edit_album');
             }
 
             return;
@@ -441,8 +445,8 @@ $(document).ready(function(){
             redirectexit('action=gallery');
         }
 
-        $id = _uint($_GET['id']);
-        $a = getAlbum($id);
+        $id = ElgaSubs::uint($_GET['id']);
+        $a = ElgaSubs::getAlbum($id);
         if (!$a) {
             fatal_error('Album not found!', false);
         }
@@ -469,14 +473,14 @@ $(document).ready(function(){
 
         $context['page_title'] = 'Edit album '.$a['name'];
 
-        _createChecks('edit_album');
+        ElgaSubs::createChecks('edit_album');
 
         $context['elga_id'] = $id;
     }
 
     public function action_remove_album()
     {
-        
+        isAllowedTo('elga_delete_albums');
     }
 
     // @todo: parse bbc ?
@@ -486,6 +490,10 @@ $(document).ready(function(){
 
         is_not_guest();
 
+        $txt['cannot_elga_create_files'] = 'Вы не можете создавать файлы';
+        isAllowedTo('elga_create_files');
+        //echo allowedTo('elga_create_files');
+
         // if (!allowedTo('moderate_forum') && !allowedTo('admin_forum'))
             // fatal_error('Не хватает прав!', false);
 
@@ -493,7 +501,7 @@ $(document).ready(function(){
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
 
-        $albums = getAlbums();
+        $albums = ElgaSubs::getAlbums();
         $context['elga_albums'] = & $albums;
 
         $context['elga_sa'] = 'add_file';
@@ -562,7 +570,7 @@ $(document).ready(function(){
                 $context['errors'][] = 'Album not exists!';
             }
 
-            $img = uploadImage();
+            $img = ElgaSubs::uploadImage();
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
             require_once SUBSDIR.'/Post.subs.php';
@@ -592,13 +600,13 @@ $(document).ready(function(){
                 $context['elga_title'] = $title;
                 $context['elga_descr'] = $descr;
 
-                _createChecks('add_file');
+                ElgaSubs::createChecks('add_file');
 
                 return;
             }
         }
 
-        _createChecks('add_file');
+        ElgaSubs::createChecks('add_file');
 
         $context['elga_album'] = isset($_GET['album']) ? (int) $_GET['album'] : 0;
     }
@@ -609,12 +617,13 @@ $(document).ready(function(){
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
         is_not_guest();
+        isAllowedTo('elga_edit_files');
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
             ($user_info['is_guest'] && $modSettings['posts_require_captcha'] == -1));
 
-        $albums = getAlbums();
+        $albums = ElgaSubs::getAlbums();
         $context['elga_albums'] = & $albums;
         $context['elga_sa'] = 'edit_file';
 
@@ -701,7 +710,7 @@ $(document).ready(function(){
 
             $img = 0;
             if ('' !== $_FILES['image']['name']) {
-                $img = uploadImage();
+                $img = ElgaSubs::uploadImage();
             }
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
@@ -740,7 +749,7 @@ $(document).ready(function(){
 
                 // del old image
                 if ($db->affected_rows() && '' !== $file['fname'] && $img && $file['fname'] !== $img['name']) {
-                    delOldImage($file);
+                    ElgaSubs::delOldImage($file);
                 }
 
                 redirectexit('action=gallery;sa=file;id='.$id);
@@ -758,7 +767,7 @@ $(document).ready(function(){
 
                 $context['page_title'] = 'Edit '.$title;
 
-                _createChecks('edit_file');
+                ElgaSubs::createChecks('edit_file');
             }
 
             return;
@@ -809,7 +818,7 @@ $(document).ready(function(){
 
         $context['page_title'] = 'Edit '.$file['title'];
 
-        _createChecks('edit_file');
+        ElgaSubs::createChecks('edit_file');
 
         $context['elga_album'] = (int) $file['id_album'];
     }
@@ -819,6 +828,7 @@ $(document).ready(function(){
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
         is_not_guest();
+        isAllowedTo('elga_delete_files');
 
         checkSession('get');
 
@@ -826,9 +836,9 @@ $(document).ready(function(){
             fatal_error('Bad id value. Required int type.', false);
         }
 
-        $id = $_REQUEST['id'] = _uint($_GET['id']);
+        $id = $_REQUEST['id'] = ElgaSubs::uint($_GET['id']);
 
-        $file = getFile($id);
+        $file = ElgaSubs::getFile($id);
         if (!$file) {
             fatal_error('File not found.', false);
         }
@@ -871,10 +881,10 @@ $(document).ready(function(){
         }
         */
 
-        $file = getFile($id);
+        $file = ElgaSubs::getFile($id);
 
-        $file['prev_id'] = getPrevId($file['id'], $file['id_album']);
-        $file['next_id'] = getNextId($file['id'], $file['id_album']);
+        $file['prev_id'] = ElgaSubs::getPrevId($file['id'], $file['id_album']);
+        $file['next_id'] = ElgaSubs::getNextId($file['id'], $file['id_album']);
 
         if (!$file) {
             fatal_error('File not found.', false);

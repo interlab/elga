@@ -36,16 +36,21 @@ function template_empty()
 
 function elga_show_select_cats()
 {
-     global $context, $scripturl, $user_info;
-     
-     echo '
-     <div class="elga-select-cats">
-     <form>
-     <select>
-        <option value="0" data-elgaseltxt="Выберите альбом для перехода">Выберите альбом для перехода</option>
-     </select>
-     </form>
-     </div>';
+    // global $context, $scripturl, $user_info;
+
+    echo '
+    <div class="elga-select-cats">
+    <form>
+    <select>
+    <option value="0">Выберите альбом для перехода</option>
+    </select>
+    </form>
+    </div>';
+}
+
+function template_gallery_off()
+{
+    echo 'Галерея отключена.';
 }
 
 function template_home()
@@ -282,7 +287,8 @@ function template_album()
 {
     global $context, $scripturl, $txt, $boardurl;
 
-    echo '
+    if (allowedTo('elga_create_files')) {
+        echo '
     <div class="elga-buttons">
     <ul>
         <li class="listlevel1">
@@ -290,6 +296,7 @@ function template_album()
         </li>
     </ul>
     </div>';
+    }
 
     echo elga_show_select_cats();
 
