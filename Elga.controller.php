@@ -33,13 +33,13 @@ class ElgaController extends Action_Controller
 $(document).ready(function(){
     // var i = 0;
     // console.log(elgaimgload.src);
-    $(\'.elga_scroll\').jscroll({
+    $(\'.elga-scroll\').jscroll({
         loadingHtml: \'<i class="fa fa-spinner fa-pulse"></i> Loading...\',
         padding: 20,
         nextSelector: \'a.jscroll-next:last\',
         contentSelector: \'\',
         callback: function(){
-            jQuery("div.jscroll-added").children().not("div.jscroll-next-parent").appendTo("div.elga_thumbnails");
+            jQuery("div.jscroll-added").children().not("div.jscroll-next-parent").appendTo("div.elga-thumbs");
             // i++;
             // console.log(i + \'test jscroll\');
         },

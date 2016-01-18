@@ -1,39 +1,10 @@
-/*
-.elga_table {
-    border: 1px solid black;
-    width: 100%;
-    border-collapse: collapse;
-}
-.elga_table td {
-    border: 1px solid #C4C4C4;
-}
 
-div.elga_content {
-    margin: 0 auto;
-    width: 100%;
-}
-div.elga_cell {
-    min-width: 25%;
-    min-height: 10em;
-    border: 1px solid #C4C4C4;
-    border-radius: 8px;
-}
-div.elga_cell a {
-    font-weight: bold;
-    font-size: 110%;
-}
-*/
-
-.elga_thumbnails {
-    /* Компенсируем отступы между float-блоками, чтобы они занимали все доступное пространство */
-    /*margin: -3em 0 0 -2em;*/
+.elga-thumbs {
     margin: 0;
     text-align: center;
 }
 
-.elga_thumbnail {
-    /* Убираем подчеркивание у элемента ins,
-    который был использован для совместимости со старыми версиями Internet Explorer */
+.elga-thumb-album {
     text-decoration: none;
     display: inline-block;
     vertical-align: top;
@@ -44,47 +15,42 @@ div.elga_cell a {
     border-radius: 4px;
 }
 
-.elga_thumbnail .elga_r {
-    /* Если есть необходимость, то свойства padding, border, background и position со значением relative
-    лучше задавать у этого элемента -- это несколько расширит количество поддерживаемых версий браузеров */
-
+.elga-r {
     width: 14em;
     min-height: 10em;
-    display: inline-block;
     background-color: #FFF;
     border: 1px solid #CECECE; /*#DDD; #C4C4C4; */
+    display: inline-block;
 }
 
-.elga_thumbnail .elga_r a {
+.elga-thumb-album a,
+.elga-thumb-file a {
     font-weight: bold;
     font-size: 110%;
 }
 
-.elga_thumbnail .elga_r a.elga_edit {
+.elga-thumb-album a.elga-edit,
+.elga-thumb-file a.elga-edit {
     font-weight: normal;
     font-size: 90%;
 }
 
-.elga_item {
-    text-decoration: none;
+.elga-thumb-file {
     display: inline-block;
     vertical-align: top;
+	min-height: 8em;
+	min-width: 8em;
+    width: 14em;
+    text-decoration: none;
     margin: 1.3em 0px 0px 0.5em;
     padding: 4px;
     background-color: #FFF;
     border: 1px solid #C4C4C4;
     border-radius: 6px;
-    box-shadow: 0px 0px 1px 0px rgba(99,99,99,0.77);
+    box-shadow: 0px 0px 1px 0px rgba(99, 99, 99, 0.77);
 }
 
-.elga_item .elga_r {
-    min-height: 8em;
-    display: inline-block;
-    border: none;
-    min-width: 8em;
-}
-
-.elga_album_descr {
+.elga-album-descr {
     text-transform: none;
     font-size: 0.8em;
     line-height: 1.29em;
@@ -159,7 +125,7 @@ div.elga_cell a {
     background: #FFF none repeat scroll 0% 0%;
     box-shadow: 0px 0em 0.4em rgba(0, 0, 0, 0.3);
     margin: 15px 0px;
-    padding: 0px 10px 15px;
+    padding: 0.5rem 0.75rem;
 }
 
 .elga-disabled:hover, a.elga-disabled:hover {
@@ -173,5 +139,5 @@ div.elga_cell a {
 }
 
 .elga-buttons {
-  position: block;
+
 }
