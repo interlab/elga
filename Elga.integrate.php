@@ -17,6 +17,8 @@ function elga_menu_buttons(&$buttons, &$menu_count)
 {
     global $txt, $scripturl, $user_info, $modSettings;
 
+    loadLanguage('Elga');
+
     $buttons = elk_array_insert($buttons, 'home', [
         'gallery' => [
             'title' => $txt['elga_title'],
@@ -129,8 +131,8 @@ function elga_admin_areas(&$admin_areas)
     // loadLanguage('AdminElga');
     // loadLanguage('HelpElga');
 
-    // $admin_areas['config']['areas']['modsettings']['subsections']['elga'] = [$txt['gallery_title']];
-	$admin_areas['config']['areas']['addonsettings']['subsections']['elga'] = [$txt['gallery_title']];
+    // $admin_areas['config']['areas']['modsettings']['subsections']['elga'] = [$txt['elga_title']];
+	$admin_areas['config']['areas']['addonsettings']['subsections']['elga'] = [$txt['elga_title']];
 }
 
 // integrate_sa_modify_modifications
