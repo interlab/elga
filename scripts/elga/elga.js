@@ -1,12 +1,12 @@
 ;(function($){
     $(document).ready(function(){
         var $select = $('div.elga-select-cats form select');
-        $select.on("click", function(){
-            if (this.length === 1 && ( ! arguments.callee.loadCats ) ) {
+        $select.on("click", function loadCats(){
+            if (this.length === 1 && ( ! loadCats.isLoaded ) ) {
                 var $first = $select.find(":selected"),
                       selecttext = $first.text();
                 $first.text('Loading');
-                arguments.callee.loadCats = 1;
+                loadCats.isLoaded = 1;
                 $.getJSON(elk_scripturl + "?action=gallery;sa=ajax;m=loadcats", function(data) {
                     data.result.forEach(function(val){
                         $select.append( $('<option value="' + val.id + '">' + val.name + '</option>') );
