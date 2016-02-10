@@ -26,7 +26,7 @@
         <require-dir name="scripts" destination="THEMEDIR" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <require-dir name="elga_files" destination="BOARDDIR" />
-        <require-dir name="languages" destination="THEMEDIR/languages" />
+        <require-dir name="languages" destination="LANGUAGEDIR" />
         <code>Hooks.php</code>
         <database>install.php</database>
         <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />
