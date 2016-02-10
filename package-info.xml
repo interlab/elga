@@ -26,6 +26,7 @@
         <require-dir name="scripts" destination="THEMEDIR" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <require-dir name="elga_files" destination="BOARDDIR" />
+        <require-dir name="languages" destination="THEMEDIR/languages" />
         <code>Hooks.php</code>
         <database>install.php</database>
         <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />
@@ -40,6 +41,8 @@
         <remove-file name="THEMEDIR/css/elga.css" />
         <remove-dir name="THEMEDIR/scripts/elga" />
         <remove-dir name="EXTDIR/elga_lib" />
+		<remove-file name="LANGUAGEDIR/english/Elga.english.php" />
+		<remove-file name="LANGUAGEDIR/russian/Elga.russian.php" />
         <code>Hooks.php</code>
         <!--<database>uninstall.php</database>-->
         <redirect url="?action=admin;area=packages" timeout="500" />
