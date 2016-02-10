@@ -26,8 +26,8 @@
         <require-dir name="scripts" destination="THEMEDIR" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <require-dir name="elga_files" destination="BOARDDIR" />
-        <require-file name="Elga.english.php" destination="LANGUAGEDIR/english" />
-        <require-file name="Elga.russian.php" destination="LANGUAGEDIR/russian" />
+        <require-file name="languages/english/Elga.english.php" destination="LANGUAGEDIR/english" />
+        <require-file name="languages/russian/Elga.russian.php" destination="LANGUAGEDIR/russian" />
         <code>Hooks.php</code>
         <database>install.php</database>
         <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />
