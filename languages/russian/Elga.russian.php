@@ -1,8 +1,17 @@
 <?php
 
 $txt['elga_title'] = 'Галерея';
+$txt['elga_off'] = 'Галерея отключена.';
 $txt['elga_add_file'] = 'Добавить файл';
 $txt['elga_admin'] = 'Админ';
+$txt['elga_edit'] = 'Редактировать';
+$txt['elga_remove'] = 'Удалить';
+$txt['elga_size'] = 'Размер:';
+$txt['elga_author'] = 'Автор:';
+$txt['elga_ftitle'] = 'Название:';
+$txt['elga_date'] = 'Дата загрузки:';
+$txt['elga_descr'] = 'Описание:';
+$txt['elga_fname'] = 'Имя файла:';
 
 $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';
 $txt['who_gallery_search'] = 'Выполняет поиск в <a href="%s">галерее</a>';

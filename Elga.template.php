@@ -50,7 +50,9 @@ function elga_show_select_cats()
 
 function template_gallery_off()
 {
-    echo 'Галерея отключена.';
+    global $txt;
+
+    echo $txt['elga_off'];
 }
 
 function template_home()
@@ -65,28 +67,28 @@ function template_home()
     elga_html_buttons();
 
     echo '
-    <div class="elga_thumbnails">';
+    <div class="elga-thumbs">';
 
     foreach ($context['elga_albums'] as $album) {
         echo '
-        <ins class="elga_thumbnail">
-            <div class="elga_r">
+        <div class="elga-thumb-album">
+            <div class="elga-r">
                 <a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">
                     <img src="', $album['icon'], '" alt="icon" height="64px" width="64px" />
                 </a>
                 <h4><a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">' . $album['name'] . '</a></h4>
                 <p class="elga-total">', $album['total'], ' файл(ов)</p>
-                <p class="elga_album_descr">', Util::substr($album['description'], 0, 100), '</p>';
+                <p class="elga-album-descr">', Util::substr($album['description'], 0, 100), '</p>';
 
             if ($user_info['is_admin']) {
                 echo '
-                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="elga_edit">
+                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="elga-edit">
                 <i class="fa fa-edit fa-lg"></i> [Edit Album]</a></p>';
             }
 
         echo '
             </div>
-        </ins>';
+        </div>';
     }
     echo '</div>';
 }
@@ -309,26 +311,24 @@ function template_album()
     // Show the page index... "Pages: [1]".
     template_pagesection('normal_buttons', 'right');
 
-    echo '<div class="elga_thumbnails">';
+    echo '<div class="elga-thumbs">';
     foreach ($context['elga_files'] as $row) {
         echo '
-        <ins class="elga_thumbnail elga_item">
-            <div class="elga_r">
-                <a href="', $row['icon'], '" class="fancybox" rel="group">
-                    <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
-                </a>
-                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
-                Size: ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
-                Author: ', $row['member_name'], '
-            </div>
-        </ins>';
+        <div class="elga-thumb-file">
+            <a href="', $row['icon'], '" class="fancybox" rel="group">
+                <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
+            </a>
+            <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
+            <strong>', $txt['elga_size'], '</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
+            <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a>
+        </div>';
     }
     echo '
     </div>';
 
     if ($context['elga_is_next_start']) {
         echo '
-    <div class="elga_scroll">
+    <div class="elga-scroll">
         <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=', $context['elga_album']['id'], ';start=', $context['elga_next_start'],
             '" class="jscroll-next">next page</a>
     </div>';
@@ -348,19 +348,17 @@ function template_album_js()
     // if (!$context['elga']['is_next_start'])
         // die('');
 
-    //echo '<div class="elga_thumbnails">';
+    //echo '<div class="elga-thumbs">';
     foreach ($context['elga_files'] as $row) {
         echo '
-        <ins class="elga_thumbnail elga_item">
-            <div class="elga_r">
-                <a href="', $row['icon'], '" class="fancybox" rel="group">
-                    <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
-                </a>
-                <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
-                Size: ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
-                Author: ', $row['member_name'], '
-            </div>
-        </ins>';
+        <div class="elga-thumb-file">
+            <a href="', $row['icon'], '" class="fancybox" rel="group">
+                <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
+            </a>
+            <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
+            <strong>', $txt['elga_size'], '</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
+            <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a>
+        </div>';
     }
     //echo '</div>';
 
@@ -385,11 +383,11 @@ function template_file()
         echo '
     <ul>
     <li class="listlevel1">
-        <a href="', $scripturl, '?action=gallery;sa=edit_file;id=', $row['id'], '" class="linklevel1">Edit</a>
+        <a href="', $scripturl, '?action=gallery;sa=edit_file;id=', $row['id'], '" class="linklevel1">', $txt['elga_edit'], '</a>
     </li>
     <li class="listlevel1">
     <a href="', $scripturl, '?action=gallery;sa=remove_file;id=', $row['id'], ';', $context['session_var'], '=', $context['session_id'],
-        '" onclick="return confirm(\'Remove this file?\');" class="linklevel1">Remove</a>
+        '" onclick="return confirm(\'Remove this file?\');" class="linklevel1">', $txt['elga_remove'], '</a>
     </li>
     </ul>
     <div class="clear"></div>';
@@ -398,7 +396,7 @@ function template_file()
     echo '
     <div class="elga-photo-container">
         <div class="elga-arrow' . ($row['prev_id'] ? '' : ' elga-disabled') . '">' . ($row['prev_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['prev_id']. '">' : '') . '&#8592; Пред.</a></div>
-        <div class="elga_display">
+        <div class="elga-display">
     <a href="', $row['icon'], '" class="fancybox" rel="group">
         <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
     </a>
@@ -408,12 +406,12 @@ function template_file()
 
     echo '
     <div class="elga-file-descr">
-    <strong>Имя файла:</strong> <a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a><br>
-    <strong>Size:</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
-    <strong>Author:</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
-    <strong>Дата загрузки:</strong> ', standardTime($row['time_added']), '<br>
-    <strong>Title:</strong> ', $row['title'], '<br>
-    <strong>Description:</strong> ', $row['description'], '<br>
+    <strong>', $txt['elga_fname'], '</strong> <a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a><br>
+    <strong>', $txt['elga_size'], '</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
+    <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
+    <strong>', $txt['elga_date'], '</strong> ', standardTime($row['time_added']), '<br>
+    <strong>', $txt['elga_ftitle'], '</strong> ', $row['title'], '<br>
+    <strong>', $txt['elga_descr'], '</strong> ', $row['description'], '<br>
     </div>';
 
     echo elga_show_select_cats();

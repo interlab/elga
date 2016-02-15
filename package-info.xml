@@ -42,8 +42,8 @@
         <remove-file name="THEMEDIR/css/elga.css" />
         <remove-dir name="THEMEDIR/scripts/elga" />
         <remove-dir name="EXTDIR/elga_lib" />
-		<remove-file name="LANGUAGEDIR/english/Elga.english.php" />
-		<remove-file name="LANGUAGEDIR/russian/Elga.russian.php" />
+        <remove-file name="LANGUAGEDIR/english/Elga.english.php" />
+        <remove-file name="LANGUAGEDIR/russian/Elga.russian.php" />
         <code>Hooks.php</code>
         <!--<database>uninstall.php</database>-->
         <redirect url="?action=admin;area=packages" timeout="500" />
