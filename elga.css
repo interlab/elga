@@ -1,85 +1,143 @@
-.elga_table {
-    border: 1px solid black;
-    width: 100%;
-    border-collapse: collapse;
-}
-.elga_table td {
-    border: 1px solid #C4C4C4;
-}
 
-div.elga_content {
-    margin: 0 auto;
-    width: 100%;
-}
-div.elga_cell {
-    min-width: 25%;
-    min-height: 10em;
-    border: 1px solid #C4C4C4;
-    border-radius: 8px;
-}
-div.elga_cell a {
-    font-weight: bold;
-    font-size: 110%;
-}
-
-
-.thumbnails {
-    /* Компенсируем отступы между float-блоками, чтобы они занимали все доступное пространство */
-    margin: -3em 0 0 -2em;
-
-    /* Выравнивание по центру */
+.elga-thumbs {
+    margin: 0;
     text-align: center;
 }
 
-.thumbnail {
-    /* Убираем подчеркивание у элемента ins,
-    который был использован для совместимости со старыми версиями Internet Explorer */
+.elga-thumb-album {
     text-decoration: none;
-
-    /* Следующее правило для Firefox 2 */
-    display: -moz-inline-box;
-
-    /* а это для остальных */
     display: inline-block;
-
     vertical-align: top;
-
-    /* Убираем выравнивание по центру */
-    /*text-align: left;*/
-
-    /* Отступы между блоками */
-    margin: 3em 0 0 2em;
-    
+    margin: 1.3em 0 0 1.5em;
     padding: 4px;
     background-color: #FFF;
-    border: 1px solid #DDD;
+    border: 1px solid #CECECE;
     border-radius: 4px;
 }
 
-.thumbnail .r {
-    /* Если есть необходимость, то свойства padding, border, background и position со значением relative
-    лучше задавать у этого элемента -- это несколько расширит количество поддерживаемых версий браузеров */
-
-    min-width: 14em;
+.elga-r {
+    width: 14em;
     min-height: 10em;
-
-    /* Минимальная ширина в пикселях будет автоматически рассчитываться по ширине картинки */
-    /*float: left;*/
+    background-color: #FFF;
+    border: 1px solid #CECECE; /*#DDD; #C4C4C4; */
     display: inline-block;
-
-    border: 1px solid #C4C4C4;
 }
 
-.thumbnail .r a {
+.elga-thumb-album a,
+.elga-thumb-file a {
     font-weight: bold;
     font-size: 110%;
 }
 
-.thumbnail .r a.elga_edit {
+.elga-thumb-album a.elga-edit,
+.elga-thumb-file a.elga-edit {
     font-weight: normal;
     font-size: 90%;
 }
 
-.elga_cell {
+.elga-thumb-file {
+    display: inline-block;
+    vertical-align: top;
+	min-height: 8em;
+	min-width: 8em;
+    width: 14em;
+    text-decoration: none;
+    margin: 1.3em 0px 0px 0.5em;
+    padding: 4px;
+    background-color: #FFF;
+    border: 1px solid #C4C4C4;
+    border-radius: 6px;
+    box-shadow: 0px 0px 1px 0px rgba(99, 99, 99, 0.77);
+}
+
+.elga-album-descr {
+    text-transform: none;
+    font-size: 0.8em;
+    line-height: 1.29em;
+    font-weight: bold;
+    color: #555;
+    text-decoration: none;
+    /*display: block;*/
+}
+
+.elga-photo-container {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: space-around;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    -webkit-align-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+
+    background-color: #EEE;
+    border: 1px solid #CCC;
+    text-align: center;
+    margin: 0.8rem 0 1rem 0;
+    padding: 1rem 10px;
+}
+
+.elga-photo-container a,
+.elga-photo-container a:hover {
+    color: unset;
+    text-decoration: none;
+}
+
+.elga-arrow {
+    -webkit-order: 0;
+    -ms-flex-order: 0;
+    order: 0;
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -webkit-align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+
+    color: #354172;
+    line-height: 1;
+    background: #F4F4F4 linear-gradient(to bottom, #FFF, #E4E4E4) repeat scroll 0% 0%;
+    box-shadow: 1px 1px 2px #E5E5E5;
+    font-size: 1rem;
+    font-family: arial,sans-serif !important;
+    border: 1px solid #C4C4C4;
+    border-radius: 6px;
+    border-color: #CFCFCF #AFAFAF #AFAFAF #BFBFBF;
+    padding: 10px;
+    white-space: nowrap;
+}
+
+.elga-arrow:hover {
+    box-shadow: 0px 0px 3px 0px #2991EA;
+}
+
+.elga-file-descr {
+    background: #FFF none repeat scroll 0% 0%;
+    box-shadow: 0px 0em 0.4em rgba(0, 0, 0, 0.3);
+    margin: 15px 0px;
+    padding: 0.5rem 0.75rem;
+}
+
+.elga-disabled:hover, a.elga-disabled:hover {
+    color:#777 !important;
+    cursor:not-allowed;
+}
+
+.elga-select-cats {
+    float: right;
+    white-space: nowrap;
+}
+
+.elga-buttons {
 
 }

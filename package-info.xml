@@ -23,10 +23,11 @@
         <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
         <require-file name="Elga.template.php" destination="THEMEDIR" />
         <require-file name="elga.css" destination="THEMEDIR/css" />
-        <require-file name="elga_loading.gif" destination="IMAGESDIR" />
         <require-dir name="scripts" destination="THEMEDIR" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <require-dir name="elga_files" destination="BOARDDIR" />
+        <require-file name="languages/english/Elga.english.php" destination="LANGUAGEDIR/english" />
+        <require-file name="languages/russian/Elga.russian.php" destination="LANGUAGEDIR/russian" />
         <code>Hooks.php</code>
         <database>install.php</database>
         <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />
@@ -39,9 +40,10 @@
         <remove-file name="CONTROLLERDIR/Elga.controller.php" />
         <remove-file name="THEMEDIR/Elga.template.php" />
         <remove-file name="THEMEDIR/css/elga.css" />
-        <remove-file name="IMAGESDIR/elga_loading.gif" />
-        <remove-dir name="THEMEDIR/scripts/jscroll-2.3.4" />
+        <remove-dir name="THEMEDIR/scripts/elga" />
         <remove-dir name="EXTDIR/elga_lib" />
+        <remove-file name="LANGUAGEDIR/english/Elga.english.php" />
+        <remove-file name="LANGUAGEDIR/russian/Elga.russian.php" />
         <code>Hooks.php</code>
         <!--<database>uninstall.php</database>-->
         <redirect url="?action=admin;area=packages" timeout="500" />

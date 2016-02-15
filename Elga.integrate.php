@@ -7,29 +7,32 @@ if (!defined('ELK')) {
 // integrate_actions
 function elga_actions(&$actions, &$adminActions)
 {
-	$actions['gallery'] = ['Elga.controller.php', 'Elga_Controller', 'action_index'];
+	$actions['gallery'] = ['Elga.controller.php', 'ElgaController', 'action_index'];
     require_once SUBSDIR.'/Elga.subs.php';
+    loadLanguage('Elga');
 }
 
 // integrate_menu_buttons
 function elga_menu_buttons(&$buttons, &$menu_count)
 {
-    global $txt, $scripturl, $user_info;
+    global $txt, $scripturl, $user_info, $modSettings;
+
+    loadLanguage('Elga');
 
     $buttons = elk_array_insert($buttons, 'home', [
         'gallery' => [
-            'title' => '<i class="fa fa-camera-retro fa-lg"></i> Gallery',
+            'title' => $txt['elga_title'],
             'href' => $scripturl . '?action=gallery',
             'data-icon' => '&#xf03e;',
-            'show' => true, // allowedTo('admin_forum'),
+            'show' => $modSettings['elga_enabled'], // true, // allowedTo('admin_forum'),
             'sub_buttons' => [
                 'add_file' => [
-                    'title' => 'Add file',
+                    'title' => $txt['elga_add_file'],
                     'href' => $scripturl . '?action=gallery;sa=add_file',
                     'show' => true,
                 ],
                 'admin' => [
-                    'title' => 'Admin',
+                    'title' => $txt['elga_admin'],
                     'href' => $scripturl.'?action=admin;area=addonsettings;sa=elga',
                     'show' => $user_info['is_admin'],
                 ]
@@ -75,10 +78,6 @@ function elga_whos_online($actions)
 
         return $action;
     }
-
-    $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';
-    $txt['who_gallery_search'] = 'Выполняет поиск в <a href="%s">галерее</a>';
-    $txt['who_gallery_file'] = 'Просматривает файл <a href="%s">%s</a>';
 
     if ('gallery' === $actions['action'])
         $action = sprintf($txt['who_gallery'], $scripturl . '?action=gallery');
@@ -131,10 +130,9 @@ function elga_admin_areas(&$admin_areas)
 
     // loadLanguage('AdminElga');
     // loadLanguage('HelpElga');
-    $txt['gallery_title'] = 'Галерея';
 
-    // $admin_areas['config']['areas']['modsettings']['subsections']['elga'] = [$txt['gallery_title']];
-	$admin_areas['config']['areas']['addonsettings']['subsections']['elga'] = [$txt['gallery_title']];
+    // $admin_areas['config']['areas']['modsettings']['subsections']['elga'] = [$txt['elga_title']];
+	$admin_areas['config']['areas']['addonsettings']['subsections']['elga'] = [$txt['elga_title']];
 }
 
 // integrate_sa_modify_modifications
@@ -142,7 +140,7 @@ function elga_sa_modify_modifications(&$subActions)
 {
     $subActions['elga'] = [
 		'dir' => SUBSDIR,
-		'file' => 'Elga.subs.php',
+		// 'file' => 'Elga.subs.php',
 		'function' => 'elga_addon_settings',
 		'permission' => 'admin_forum',
 	];
@@ -156,20 +154,8 @@ function elga_addon_settings()
     $context['valid_elga_files_url'] = filter_var($modSettings['elga_files_url'], FILTER_VALIDATE_URL);
     $context['valid_elga_icons_path'] = is_dir($modSettings['elga_icons_path']);
     $context['valid_elga_icons_url'] = filter_var($modSettings['elga_icons_url'], FILTER_VALIDATE_URL);
-
-	// loadlanguage('Elga');
-    $txt['elga_title'] = 'Gallery Settings';
-    $txt['elga_desc'] = 'This addon adds a images gallery.';
-    $txt['elga_enabled'] = 'Enable Gallery';
-    $txt['elga_enabled_desc'] = '';
-    $txt['elga_files_path'] = 'Путь к папке с файлами';
-    $txt['elga_files_url'] = 'URL адрес к папке с изображениями';
-    $txt['elga_icons_path'] = 'Путь к папке с иконками альбомов';
-    $txt['elga_icons_url'] = 'URL адрес к папке с иконками';
-    $txt['elga_max_width_img'] = 'Максимальная ширина изображения';
-    $txt['elga_max_height_img'] = 'Максимальная высота изображения';
     
-	$context[$context['admin_menu_name']]['tab_data']['tabs']['elga']['description'] = $txt['elga_desc'];
+	$context[$context['admin_menu_name']]['tab_data']['tabs']['elga']['description'] = $txt['elga_settings_desc'];
 
 	// Lets build a settings form
 	require_once(SUBSDIR . '/SettingsForm.class.php');
@@ -184,8 +170,10 @@ function elga_addon_settings()
         [ 'text', 'elga_files_url', 'invalid' => !$context['valid_elga_files_url'], 'label' => $txt['elga_files_url'], 'subtext' => 'Например: ' . $boardurl.'/elga_files/upload'],
         [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/icons'],
         [ 'text', 'elga_icons_url', 'invalid' => !$context['valid_elga_icons_url'], 'label' => $txt['elga_icons_url'], 'subtext' => 'Например: '.$boardurl.'/elga_files/icons'],
-        [ 'int', 'elga_max_width_img', ],
-        [ 'int', 'elga_max_height_img', ],
+        [ 'int', 'elga_img_max_width', ],
+        [ 'int', 'elga_img_max_height', ],
+        [ 'int', 'elga_icon_max_width', ],
+        [ 'int', 'elga_icon_max_height', ],
 	];
 
 	// Load the settings to the form class
@@ -197,10 +185,14 @@ function elga_addon_settings()
 		checkSession();
 
 		// Some defaults are good to have
-		if (empty($_POST['elga_max_width_img']))
-			$_POST['elga_max_width_img'] = 350;
-		if (empty($_POST['elga_max_height_img']))
-			$_POST['elga_max_height_img'] = 350;
+		if (empty($_POST['elga_img_max_width']))
+			$_POST['elga_img_max_width'] = 350;
+		if (empty($_POST['elga_img_max_height']))
+			$_POST['elga_img_max_height'] = 350;
+		if (empty($_POST['elga_icon_max_width']))
+			$_POST['elga_icon_max_width'] = 60;
+		if (empty($_POST['elga_icon_max_height']))
+			$_POST['elga_icon_max_height'] = 60;
 
         $_POST['elga_files_path'] = rtrim($_POST['elga_files_path'], '/');
         $_POST['elga_files_url'] = rtrim($_POST['elga_files_url'], '/');
@@ -248,25 +240,15 @@ function elga_load_permissions(&$permissionGroups, &$permissionList, &$leftPermi
 {
     global $txt;
 
-    $txt['permissiongroup_elga'] = 'Галерея';
-
-    $txt['permissionname_elga_manage_albums'] = 'Управлять альбомами';
-    $txt['permissionname_elga_manage_albums_own'] = 'Управлять своими альбомами';
-    $txt['permissionname_elga_manage_albums_any'] = 'Управлять любыми альбомами';
-    $txt['cannot_elga_manage_albums'] = 'Вы не можете управлять альбомами';
-    $txt['cannot_elga_manage_albums_own'] = 'Вы не можете управлять своими альбомами';
-    $txt['cannot_elga_manage_albums_any'] = 'Вы не можете управлять чужими альбомами';
-
-    $txt['permissionname_elga_manage_files'] = 'Управлять файлами';
-    $txt['permissionname_elga_manage_files_own'] = 'Управлять своими файлами';
-    $txt['permissionname_elga_manage_files_any'] = 'Управлять любыми файлами';
-    $txt['cannot_elga_manage_files'] = 'Доступ запрещён!';
-    $txt['cannot_elga_manage_files_own'] = 'Доступ запрещён!';
-    $txt['cannot_elga_manage_files_any'] = 'Доступ запрещён!';
-
     $permissionList['membergroup'] = array_merge($permissionList['membergroup'], [
-        'elga_manage_albums' => [true, 'elga'],
-        'elga_manage_files' => [true, 'elga'],
+        // 'elga_manage_albums' => [true, 'elga'],
+        // 'elga_manage_files' => [true, 'elga'],
+        'elga_create_albums' => [false, 'elga'],
+        'elga_edit_albums' => [true, 'elga'],
+        'elga_delete_albums' => [true, 'elga'],
+        'elga_create_files' => [false, 'elga'],
+        'elga_edit_files' => [true, 'elga'],
+        'elga_delete_files' => [true, 'elga'],
     ]);
 
     // $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
