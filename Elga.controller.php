@@ -84,7 +84,7 @@ $(document).ready(function(){
             case 'loadcats':
                 return ElgaSubs::json_response(['status' => 'ok', 'result' => ElgaSubs::getAlbumsSimple()]);
             default:
-                return ElgaSubs::response($res);
+                return ElgaSubs::json_response($res);
         }
     }
 
@@ -270,7 +270,7 @@ $(document).ready(function(){
             require_once SUBSDIR.'/Post.subs.php';
             $descr = $validator->descr;
             preparsecode($descr);
-            
+
             if (empty($context['errors'])) {
                 $db = database();
 
@@ -294,7 +294,6 @@ $(document).ready(function(){
 
         // GET
         ElgaSubs::createChecks('add_album');
-
     }
 
     public function action_edit_album()
