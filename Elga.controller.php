@@ -563,11 +563,12 @@ class ElgaController extends Action_Controller
                 // die();
 
                 $db->insert('', '{db_prefix}elga_files',
-                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 'id_album' => 'int',
+                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 
+                      'preview' => 'string', 'id_album' => 'int',
                       'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string',
                       'time_added' => 'int', 'exif' => 'string', ],
-                    [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $validator->album, $title,
-                      $descr, $user_info['id'], $user_info['name'], time(), '', ],
+                    [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $img['preview'], $validator->album,
+                      $title, $descr, $user_info['id'], $user_info['name'], time(), '', ],
                     [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
@@ -902,15 +903,11 @@ class ElgaController extends Action_Controller
             redirectexit('action=gallery');
         }
 
-        die; // uncomment this code if you know what you're doing
+        die; // delete this line if you know what you're doing
+        $fp = $modSettings['elga_files_path'];
 
-        // $url = $modSettings['elga_files_url'];
         foreach (ElgaSubs::getFilesIterator(0, 0, 1000) as $row) {
-            // echo $row['id'], '<br>';
-            // continue;
-
             $dir = pathinfo($row['fname'])['dirname'];
-            $fp = $modSettings['elga_files_path'];
 
             // create thumb image
             $thumb_name = pathinfo($row['fname'], PATHINFO_FILENAME).'_thumb.'.pathinfo($row['fname'], PATHINFO_EXTENSION);
@@ -949,8 +946,6 @@ class ElgaController extends Action_Controller
                     ]
                 );
             }
-            
-            unset($dir);
         }
 
         redirectexit('action=gallery');

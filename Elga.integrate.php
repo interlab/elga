@@ -166,7 +166,7 @@ function elga_addon_settings()
 	// All the options, well at least some of them!
 	$config_vars = [
       ['title', 'elga_basic_settings'],
-		['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
+        ['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
         [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/upload'],
         [ 'text', 'elga_files_url', 'invalid' => !$context['valid_elga_files_url'], 'label' => $txt['elga_files_url'], 'subtext' => 'Например: ' . $boardurl.'/elga_files/upload'],
         [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/icons'],
