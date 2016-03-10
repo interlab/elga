@@ -76,6 +76,7 @@ class ElgaController extends Action_Controller
     {
         global $modSettings;
 
+        die();
         if (empty($_GET['id'])) {
             header("HTTP/1.0 404 Not Found");
             die('<h1>Not Found</h1>');

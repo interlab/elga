@@ -13,6 +13,7 @@ $txt['elga_date'] = 'Дата загрузки:';
 $txt['elga_descr'] = 'Описание:';
 $txt['elga_fname'] = 'Имя файла:';
 $txt['elga_bbcode_link'] = 'BBC-код:';
+$txt['elga_views'] = 'Просмотров:';
 
 $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';
 $txt['who_gallery_search'] = 'Выполняет поиск в <a href="%s">галерее</a>';

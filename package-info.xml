@@ -18,6 +18,7 @@
     <type>modification</type>
     <install for="1.0.1 - 1.0.99">
         <readme type="inline">This will install Elga</readme>
+        <require-file name="ElgaItem.php" destination="BOARDDIR" />
         <require-file name="Elga.integrate.php" destination="SUBSDIR" />
         <require-file name="Elga.subs.php" destination="SUBSDIR" />
         <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
@@ -35,6 +36,7 @@
 
     <uninstall for="1.0.1 - 1.0.99">
         <readme type="inline">This will uninstall Elga</readme>
+        <remove-file name="BOARDDIR/ElgaItem.php" />
         <remove-file name="SUBSDIR/Elga.integrate.php" />
         <remove-file name="SUBSDIR/Elga.subs.php" />
         <remove-file name="CONTROLLERDIR/Elga.controller.php" />

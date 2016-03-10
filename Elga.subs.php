@@ -17,7 +17,7 @@ class ElgaSubs
 
     public static function getFile($id)
     {
-        global $txt, $modSettings, $scripturl;
+        global $txt, $modSettings, $boardurl;
 
         if (!is_numeric($id)) {
             fatal_error('Bad id value. Required int type.', false);
@@ -49,7 +49,7 @@ class ElgaSubs
         $row['icon'] = $url.'/'.$row['fname'];
         $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
         $row['description'] = parse_bbc($row['description']);
-        $row['copy-img-bbc'] = $scripturl . '?action=gallery;sa=show;id=' . $row['id'];
+        $row['copy-img-bbc'] = $boardurl . '/ElgaItem.php?id=' . $row['id'];
         $db->free_result($req);
 
         return $row;
@@ -600,5 +600,16 @@ class ElgaSubs
     public static function uint($val)
     {
         return abs(intval($val));
+    }
+
+    public static function updateFile($id, $fields, array $vals = [])
+    {
+        $db = database();
+        $req = $db->query('', '
+            UPDATE {db_prefix}elga_files
+                SET ' . $fields . '
+            WHERE id = {int:id}',
+            array_merge([ 'id' => $id, ], $vals)
+        );
     }
 }

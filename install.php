@@ -30,6 +30,7 @@ $tables = array(
             array('name' => 'orig_name', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'fname', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'thumb', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
+            array('name' => 'preview', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'fsize', 'type' => 'bigint', 'size' => 20, 'unsigned' => true, 'null' => false),
             array('name' => 'id_album', 'type' => 'int', 'size' => 10, 'unsigned' => true, 'null' => false),
             array('name' => 'title', 'type' => 'varchar', 'size' => 100, 'null' => false, 'default' => ''),

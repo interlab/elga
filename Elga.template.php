@@ -426,6 +426,7 @@ function template_file()
     <div class="elga-file-descr">
     <strong>', $txt['elga_fname'], '</strong> <a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a><br>
     <strong>', $txt['elga_size'], '</strong> ', $row['hsize'], '<br>
+    <strong>', $txt['elga_views'], '</strong> ', $row['views'],'<br>
     <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
     <strong>', $txt['elga_date'], '</strong> ', standardTime($row['time_added']), '<br>
     <strong>', $txt['elga_bbcode_link'], '</strong>
@@ -437,6 +438,6 @@ function template_file()
     </div>';
 
     echo elga_show_select_cats();
-
+    
     // comments block
 }
