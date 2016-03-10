@@ -17,6 +17,8 @@ class ElgaSubs
 
     public static function getFile($id)
     {
+        global $txt, $modSettings, $scripturl;
+
         if (!is_numeric($id)) {
             fatal_error('Bad id value. Required int type.', false);
         }
@@ -24,7 +26,8 @@ class ElgaSubs
         $db = database();
         $req = $db->query('', '
         SELECT
-            f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views,
+            f.id, f.orig_name, f.fname, f.thumb, f.preview, f.fsize,
+            f.id_album, f.title, f.description, f.views,
             f.id_member, f.member_name, f.time_added,
             a.name AS album_name
         FROM {db_prefix}elga_files as f
@@ -39,10 +42,117 @@ class ElgaSubs
             return false;
         }
 
-        $file = $db->fetch_assoc($req);
+        $url = $modSettings['elga_files_url'];
+        $row = $db->fetch_assoc($req);
+        $row['thumb-url'] = $url.'/'.$row['thumb'];
+        $row['preview-url'] = $url.'/'.$row['preview'];
+        $row['icon'] = $url.'/'.$row['fname'];
+        $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
+        $row['description'] = parse_bbc($row['description']);
+        $row['copy-img-bbc'] = $scripturl . '?action=gallery;sa=show;id=' . $row['id'];
         $db->free_result($req);
 
-        return $file;
+        return $row;
+    }
+
+    public static function countFiles($album_id)
+    {
+        $db = database();
+        $req = $db->query('', '
+            SELECT COUNT(*)
+            FROM {db_prefix}elga_files
+            WHERE id_album = {int:id}
+            LIMIT 1',
+            ['id' => $album_id]
+        );
+        if (!$db->num_rows($req)) {
+            $total = 0;
+        } else {
+            $total = $db->fetch_row($req)[0];
+        }
+        $db->free_result($req);
+
+        return $total;
+    }
+
+    public static function getLastFiles($limit=20)
+    {
+        $limit = self::uint($limit);
+
+        return self::getFiles(0, 0, $limit);
+    }
+
+    public static function getFilesIterator($album_id, $offset, $limit)
+    {
+        global $modSettings, $txt;
+
+        $db = database();
+        $req = $db->query('', '
+            SELECT
+                f.id, f.orig_name, f.fname, f.thumb, f.preview, f.fsize, f.title,
+                f.description, f.views, f.id_member, f.member_name
+            FROM {db_prefix}elga_files as f' . ($album_id ? '
+            WHERE f.id_album = {int:album}' : '') . '
+            ORDER BY f.id DESC
+            LIMIT {int:start}, {int:per_page}',
+            [
+                'album' => $album_id,
+                'start' => $offset, // $context['start'],
+                'per_page' => $limit, // $per_page,
+            ]
+        );
+
+        $url = $modSettings['elga_files_url'];
+        $files = [];
+        if ($db->num_rows($req) > 0) {
+            while ($row = $db->fetch_assoc($req)) {
+                $row['thumb-url'] = $url.'/'.$row['thumb'];
+                $row['preview-url'] = $url.'/'.$row['preview'];
+                $row['icon'] = $url.'/'.$row['fname'];
+                $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
+                // $files[$row['id']] = $row;
+                yield $row;
+            }
+        }
+        $db->free_result($req);
+
+        // return $files;
+    }
+
+    public static function getFiles($album_id, $offset, $limit)
+    {
+        global $modSettings, $txt;
+
+        $db = database();
+        $req = $db->query('', '
+            SELECT
+                f.id, f.orig_name, f.fname, f.thumb, f.preview, f.fsize, f.title,
+                f.description, f.views, f.id_member, f.member_name
+            FROM {db_prefix}elga_files as f' . ($album_id ? '
+            WHERE f.id_album = {int:album}' : '') . '
+            ORDER BY f.id DESC
+            LIMIT {int:start}, {int:per_page}',
+            [
+                'album' => $album_id,
+                'start' => $offset, // $context['start'],
+                'per_page' => $limit, // $per_page,
+            ]
+        );
+
+        $url = $modSettings['elga_files_url'];
+        $files = [];
+        if ($db->num_rows($req) > 0) {
+            while ($row = $db->fetch_assoc($req)) {
+                $row['thumb-url'] = $url.'/'.$row['thumb'];
+                $row['preview-url'] = $url.'/'.$row['preview'];
+                $row['icon'] = $url.'/'.$row['fname'];
+                $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
+                $files[$row['id']] = $row;
+            }
+        }
+        $db->free_result($req);
+
+        return $files;
     }
 
 // @TODO
@@ -360,15 +470,22 @@ class ElgaSubs
 
                 // create thumb image
                 $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-                $width = 350;
-                $height = 350;
+                $width = empty($modSettings['elga_imgthumb_max_width']) ? 350 : $modSettings['elga_imgthumb_max_width'];
+                $height = empty($modSettings['elga_imgthumb_max_height']) ? 350 : $modSettings['elga_imgthumb_max_height'];
                 self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $width, $height);
+
+                // create preview image
+                $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
+                $width = empty($modSettings['elga_imgpreview_max_width']) ? 350 : $modSettings['elga_imgpreview_max_width'];
+                $height = empty($modSettings['elga_imgpreview_max_height']) ? 350 : $modSettings['elga_imgpreview_max_height'];
+                self::thumb($dest_name, $dest_dir.'/'.$preview_name, $width, $height);
 
                 return [
         'name' => $date.'/'.$nfname,
         'orig_name' => $_FILES['image']['name'], // ? need sanitize?
         'size' => $fsize,
         'thumb' => $date.'/'.$thumb_name,
+        'preview' => $date . '/' . $preview_name, 
                 ];
             }
         /*
@@ -435,14 +552,18 @@ class ElgaSubs
     public static function thumb($img, $thumb,  $width = 300, $height = 300)
     {
         # Check if GD extension is loaded
-        if (!extension_loaded('gd') && !extension_loaded('gd2')) {
-            trigger_error("GD is not loaded", E_USER_WARNING);
+        // if (!extension_loaded('gd') && !extension_loaded('gd2')) {
+            // trigger_error("GD is not loaded", E_USER_WARNING);
 
-            return false;
+            // return false;
+        // }
+
+        // $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
+        try {
+            $imagine = new Imagine\Imagick\Imagine();
+        } catch (\Imagine\Exception\RuntimeException $e) {
+            $imagine = new \Imagine\Gd\Imagine();
         }
-
-        $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
-
         $imagine = new \Imagine\Gd\Imagine();
         $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET; # THUMBNAIL_OUTBOUND
         $image = $imagine->open($img);

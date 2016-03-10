@@ -29,6 +29,28 @@ function elga_html_buttons()
     }
 }
 
+function elga_thumbs($files)
+{
+    global $scripturl, $txt;
+
+    $r = '<div class="elga-thumbs">';
+    foreach ($files as $row) {
+        $r .= '
+        <div class="elga-thumb-file">
+            <a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
+                <img src="' . $row['thumb-url'] . '" alt="..." height="100px" width="100px" class="fancybox" />
+            </a>
+            <h4><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></h4>
+            <strong>' . $txt['elga_size'] . '</strong> ' . $row['hsize'] . '<br>
+            <strong>' . $txt['elga_author'] . '</strong> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a>
+        </div>';
+    }
+    $r .= '
+    </div>';
+
+    return $r;
+}
+
 function template_empty()
 {
     
@@ -67,6 +89,7 @@ function template_home()
     elga_html_buttons();
 
     echo '
+    <h2 class="category_header elga-h2">Albums</h2>
     <div class="elga-thumbs">';
 
     foreach ($context['elga_albums'] as $album) {
@@ -91,6 +114,14 @@ function template_home()
         </div>';
     }
     echo '</div>';
+
+    echo '
+    <h2 class="category_header elga-h2">
+    Last files
+    <span class="nextlinks">Сортировка по: Дата | Название</span>
+	</h2>';
+
+    echo elga_thumbs($context['elga_last_files']);
 }
 
 function template_add_file()
@@ -311,20 +342,7 @@ function template_album()
     // Show the page index... "Pages: [1]".
     template_pagesection('normal_buttons', 'right');
 
-    echo '<div class="elga-thumbs">';
-    foreach ($context['elga_files'] as $row) {
-        echo '
-        <div class="elga-thumb-file">
-            <a href="', $row['icon'], '" class="fancybox" rel="group">
-                <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
-            </a>
-            <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
-            <strong>', $txt['elga_size'], '</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
-            <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a>
-        </div>';
-    }
-    echo '
-    </div>';
+    echo elga_thumbs($context['elga_files']);
 
     if ($context['elga_is_next_start']) {
         echo '
@@ -352,11 +370,11 @@ function template_album_js()
     foreach ($context['elga_files'] as $row) {
         echo '
         <div class="elga-thumb-file">
-            <a href="', $row['icon'], '" class="fancybox" rel="group">
-                <img src="', $row['thumb'], '" alt="..." height="100px" width="100px" class="fancybox" />
+            <a href="', $row['icon'], '" class="fancybox" rel="group" title="' . $row['title'] . '">
+                <img src="', $row['thumb-url'], '" alt="..." height="100px" width="100px" class="fancybox" />
             </a>
             <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
-            <strong>', $txt['elga_size'], '</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
+            <strong>', $txt['elga_size'], '</strong> ', $row['hsize'], '<br>
             <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a>
         </div>';
     }
@@ -398,7 +416,7 @@ function template_file()
         <div class="elga-arrow' . ($row['prev_id'] ? '' : ' elga-disabled') . '">' . ($row['prev_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['prev_id']. '">' : '') . '&#8592; Пред.</a></div>
         <div class="elga-display">
     <a href="', $row['icon'], '" class="fancybox" rel="group">
-        <img src="', $row['icon'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
+        <img src="', $row['preview-url'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
     </a>
         </div>
         <div class="elga-arrow' . ($row['next_id'] ? '' : ' elga-disabled') . '">' . ($row['next_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['next_id']. '">' : '') . 'След. &#8594;</a></div>
@@ -407,12 +425,18 @@ function template_file()
     echo '
     <div class="elga-file-descr">
     <strong>', $txt['elga_fname'], '</strong> <a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a><br>
-    <strong>', $txt['elga_size'], '</strong> ', (round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte']), '<br>
+    <strong>', $txt['elga_size'], '</strong> ', $row['hsize'], '<br>
     <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
     <strong>', $txt['elga_date'], '</strong> ', standardTime($row['time_added']), '<br>
+    <strong>', $txt['elga_bbcode_link'], '</strong>
+        &nbsp;<input id="elga-bbcode-copy" value="[img]', $row['copy-img-bbc'], '[/img]" size="60" readonly>
+        &nbsp;<button id="elga-copy-btn">Скопировать</button>
+        &nbsp;<span id="elga-copy-answer"></span><br>
     <strong>', $txt['elga_ftitle'], '</strong> ', $row['title'], '<br>
     <strong>', $txt['elga_descr'], '</strong> ', $row['description'], '<br>
     </div>';
 
     echo elga_show_select_cats();
+
+    // comments block
 }

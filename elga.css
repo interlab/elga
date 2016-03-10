@@ -1,4 +1,8 @@
 
+.elga-h2 {
+    margin-top: 1rem;
+}
+
 .elga-thumbs {
     margin: 0;
     text-align: center;
@@ -21,6 +25,7 @@
     background-color: #FFF;
     border: 1px solid #CECECE; /*#DDD; #C4C4C4; */
     display: inline-block;
+    padding: 4px;
 }
 
 .elga-thumb-album a,

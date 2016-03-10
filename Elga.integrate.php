@@ -154,7 +154,7 @@ function elga_addon_settings()
     $context['valid_elga_files_url'] = filter_var($modSettings['elga_files_url'], FILTER_VALIDATE_URL);
     $context['valid_elga_icons_path'] = is_dir($modSettings['elga_icons_path']);
     $context['valid_elga_icons_url'] = filter_var($modSettings['elga_icons_url'], FILTER_VALIDATE_URL);
-    
+
 	$context[$context['admin_menu_name']]['tab_data']['tabs']['elga']['description'] = $txt['elga_settings_desc'];
 
 	// Lets build a settings form
@@ -165,15 +165,23 @@ function elga_addon_settings()
 
 	// All the options, well at least some of them!
 	$config_vars = [
+      ['title', 'elga_basic_settings'],
 		['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
         [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/upload'],
         [ 'text', 'elga_files_url', 'invalid' => !$context['valid_elga_files_url'], 'label' => $txt['elga_files_url'], 'subtext' => 'Например: ' . $boardurl.'/elga_files/upload'],
         [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/icons'],
         [ 'text', 'elga_icons_url', 'invalid' => !$context['valid_elga_icons_url'], 'label' => $txt['elga_icons_url'], 'subtext' => 'Например: '.$boardurl.'/elga_files/icons'],
+        '',
         [ 'int', 'elga_img_max_width', ],
         [ 'int', 'elga_img_max_height', ],
         [ 'int', 'elga_icon_max_width', ],
         [ 'int', 'elga_icon_max_height', ],
+      ['title', 'elga_preview_settings'],
+        [ 'int', 'elga_imgthumb_max_width', ],
+        [ 'int', 'elga_imgthumb_max_height', ],
+        '',
+        [ 'int', 'elga_imgpreview_max_width', ],
+        [ 'int', 'elga_imgpreview_max_height', ],
 	];
 
 	// Load the settings to the form class
@@ -185,10 +193,16 @@ function elga_addon_settings()
 		checkSession();
 
 		// Some defaults are good to have
-		if (empty($_POST['elga_img_max_width']))
-			$_POST['elga_img_max_width'] = 350;
-		if (empty($_POST['elga_img_max_height']))
-			$_POST['elga_img_max_height'] = 350;
+		if (empty($_POST['elga_imgthumb_max_width']))
+			$_POST['elga_imgthumb_max_width'] = 200;
+		if (empty($_POST['elga_imgthumb_max_height']))
+			$_POST['elga_imgthumb_max_height'] = 200;
+
+		if (empty($_POST['elga_imgpreview_max_width']))
+			$_POST['elga_imgpreview_max_width'] = 500;
+		if (empty($_POST['elga_imgpreview_max_height']))
+			$_POST['elga_imgpreview_max_height'] = 500;
+
 		if (empty($_POST['elga_icon_max_width']))
 			$_POST['elga_icon_max_width'] = 60;
 		if (empty($_POST['elga_icon_max_height']))
@@ -213,7 +227,8 @@ function elga_addon_settings()
 	}
 
 	// Continue on to the settings template
-	$context['page_title'] = $context['settings_title'] = $txt['elga_title'];
+	$context['page_title'] = $txt['elga_title'];
+    // $context['settings_title'] = $txt['elga_title'];
 	$context['post_url'] = $scripturl . '?action=admin;area=addonsettings;sa=elga;save';
 
 	// if (!empty($modSettings['ююю']))

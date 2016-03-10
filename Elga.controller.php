@@ -10,6 +10,7 @@ class ElgaController extends Action_Controller
 {
     public function __construct()
     {
+        $loader = require_once EXTDIR . '/elga_lib/vendor/autoload.php';
     }
 
     public function action_index()
@@ -28,24 +29,6 @@ class ElgaController extends Action_Controller
 
         loadJavascriptFile('elga/elga.js');
         loadJavascriptFile('elga/jscroll-2.3.4/jquery.jscroll.js');
-        // JavaScriptEscape(...)
-        addInlineJavascript('
-$(document).ready(function(){
-    // var i = 0;
-    // console.log(elgaimgload.src);
-    $(\'.elga-scroll\').jscroll({
-        loadingHtml: \'<i class="fa fa-spinner fa-pulse"></i> Loading...\',
-        padding: 20,
-        nextSelector: \'a.jscroll-next:last\',
-        contentSelector: \'\',
-        callback: function(){
-            jQuery("div.jscroll-added").children().not("div.jscroll-next-parent").appendTo("div.elga-thumbs");
-            // i++;
-            // console.log(i + \'test jscroll\');
-        },
-    });
-});
-        ');
 
         if ( ! $modSettings['elga_enabled'] ) {
             $context['sub_template'] = 'gallery_off';
@@ -65,6 +48,7 @@ $(document).ready(function(){
         }
 
         $context['elga_albums'] = ElgaSubs::getAlbums();
+        $context['elga_last_files'] = ElgaSubs::getLastFiles(20);
     }
 
     public function action_ajax()
@@ -86,6 +70,37 @@ $(document).ready(function(){
             default:
                 return ElgaSubs::json_response($res);
         }
+    }
+
+    public function action_show()
+    {
+        global $modSettings;
+
+        if (empty($_GET['id'])) {
+            header("HTTP/1.0 404 Not Found");
+            die('<h1>Not Found</h1>');
+        }
+
+        $id = (int) $_GET['id'];
+        $file = ElgaSubs::getFile($id);
+        if (!$file) {
+            header("HTTP/1.0 404 Not Found");
+            die('<h1>Not Found</h1>');
+        }
+
+        $path = $modSettings['elga_files_path'];
+        $fpath = isset($_GET['preview']) ? $path . '/' . $file['preview'] :
+            ( isset($_GET['thumb']) ? $path . '/' . $file['thumb'] : $path . '/' . $file['fname'] );
+        $fext = pathinfo($fpath, PATHINFO_EXTENSION);
+
+        try {
+            $imagine = new Imagine\Imagick\Imagine();
+        } catch (\Imagine\Exception\RuntimeException $e) {
+            $imagine = new \Imagine\Gd\Imagine();
+        }
+        $imagine->open($fpath)
+           ->show($fext);
+        die();
     }
 
     public function action_album()
@@ -121,24 +136,10 @@ $(document).ready(function(){
             // $context['sub_template'] = 'send_json';
         }
 
-        $db = database();
-
         // $limit = 20;
         $per_page = 20;
 
-        $req = $db->query('', '
-            SELECT COUNT(*)
-            FROM {db_prefix}elga_files
-            WHERE id_album = {int:id}
-            LIMIT 1',
-            ['id' => $album['id']]);
-        if (!$db->num_rows($req)) {
-            $totalfiles = 0;
-        } else {
-            $totalfiles = $db->fetch_row($req)[0];
-        }
-        $db->free_result($req);
-
+        $totalfiles = ElgaSubs::countFiles($album['id']);
         if (!$totalfiles) {
             return;
         }
@@ -160,29 +161,7 @@ $(document).ready(function(){
             'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
         ];
 
-        $req = $db->query('', '
-            SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
-            FROM {db_prefix}elga_files as f
-            WHERE f.id_album = {int:album}
-            ORDER BY f.id DESC
-            LIMIT {int:start}, {int:per_page}',
-            [
-                'album' => $album['id'],
-                'start' => $context['start'],
-                'per_page' => $per_page,
-            ]
-        );
-
-        $url = $modSettings['elga_files_url'];
-        $context['elga_files'] = [];
-        if ($db->num_rows($req) > 0) {
-            while ($row = $db->fetch_assoc($req)) {
-                $row['thumb'] = $url.'/'.$row['thumb'];
-                $row['icon'] = $url.'/'.$row['fname'];
-                $context['elga_files'][$row['id']] = $row;
-            }
-        }
-        $db->free_result($req);
+        $context['elga_files'] = ElgaSubs::getFiles($album['id'], $context['start'], $per_page);
     }
 
     public function action_add_album()
@@ -725,7 +704,8 @@ $(document).ready(function(){
                         orig_name = {string:oname},
                         fname = {string:fname},
                         fsize = {raw:fsize},
-                        thumb = {string:thumb},' : '').'
+                        thumb = {string:thumb},
+                        preview = {string:preview},' : '').'
                         id_album = {int:album},
                         title = {string:title},
                         description = {string:descr},
@@ -737,6 +717,7 @@ $(document).ready(function(){
                         'fname' => $img ? $img['name'] : '',
                         'fsize' => $img ? $img['size'] : '',
                         'thumb' => $img ? $img['thumb'] : '',
+                        'preview' => $img ? $img['preview'] : '',
                         'album' => $validator->album,
                         'title' => $title,
                         'descr' => $descr,
@@ -890,10 +871,9 @@ $(document).ready(function(){
         }
         $url = $modSettings['elga_files_url'];
         $context['elga_file'] = & $file;
-        $context['elga_file']['icon'] = $url.'/'.$context['elga_file']['fname'];
+
         require_once SUBSDIR.'/Post.subs.php';
         censorText($file['description']);
-        $file['description'] = parse_bbc($file['description']);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=album;id='.$file['id_album'],
@@ -910,5 +890,69 @@ $(document).ready(function(){
         $context['sub_template'] = 'file';
 
         $context['elga_is_author'] = $user_info['id'] == $file['id_member'] || allowedTo('moderate_forum') || allowedTo('admin_forum');
+    }
+
+    // delete this function in production
+    public function action_reloadthumbs()
+    {
+        global $user_info, $modSettings;
+        // global $context, $scripturl, $boardurl;
+
+        if ( ! $user_info['is_admin'] ) {
+            redirectexit('action=gallery');
+        }
+
+        die; // uncomment this code if you know what you're doing
+
+        // $url = $modSettings['elga_files_url'];
+        foreach (ElgaSubs::getFilesIterator(0, 0, 1000) as $row) {
+            // echo $row['id'], '<br>';
+            // continue;
+
+            $dir = pathinfo($row['fname'])['dirname'];
+            $fp = $modSettings['elga_files_path'];
+
+            // create thumb image
+            $thumb_name = pathinfo($row['fname'], PATHINFO_FILENAME).'_thumb.'.pathinfo($row['fname'], PATHINFO_EXTENSION);
+            $width = empty($modSettings['elga_imgthumb_max_width']) ? 350 : $modSettings['elga_imgthumb_max_width'];
+            $height = empty($modSettings['elga_imgthumb_max_height']) ? 350 : $modSettings['elga_imgthumb_max_height'];
+            $o = ElgaSubs::thumb(
+                $fp . '/' . $row['fname'],
+                $fp . '/' . $dir . '/' . $thumb_name,
+                $width,
+                $height
+            );
+
+            // create preview image
+            $preview_name = pathinfo($row['fname'], PATHINFO_FILENAME).'_preview.'.pathinfo($row['fname'], PATHINFO_EXTENSION);
+            $width = empty($modSettings['elga_imgpreview_max_width']) ? 350 : $modSettings['elga_imgpreview_max_width'];
+            $height = empty($modSettings['elga_imgpreview_max_height']) ? 350 : $modSettings['elga_imgpreview_max_height'];
+            $o2 = ElgaSubs::thumb(
+                $fp . '/' . $row['fname'],
+                $fp . '/' . $dir . '/' . $preview_name,
+                $width,
+                $height
+            );
+
+            if ( !empty($o) && !empty($o2) ) {
+                $db = database();
+                $db->query('', '
+                    UPDATE {db_prefix}elga_files
+                    SET
+                        thumb = {string:thumb},
+                        preview = {string:preview}
+                    WHERE id = {int:id}',
+                    [
+                        'thumb' => $dir . '/' . $thumb_name,
+                        'preview' => $dir . '/' . $preview_name,
+                        'id' => $row['id'],
+                    ]
+                );
+            }
+            
+            unset($dir);
+        }
+
+        redirectexit('action=gallery');
     }
 }

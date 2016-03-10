@@ -12,6 +12,7 @@ $txt['elga_ftitle'] = 'Название:';
 $txt['elga_date'] = 'Дата загрузки:';
 $txt['elga_descr'] = 'Описание:';
 $txt['elga_fname'] = 'Имя файла:';
+$txt['elga_bbcode_link'] = 'BBC-код:';
 
 $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';
 $txt['who_gallery_search'] = 'Выполняет поиск в <a href="%s">галерее</a>';
@@ -29,6 +30,13 @@ $txt['elga_img_max_width'] = 'Максимальная ширина изобра
 $txt['elga_img_max_height'] = 'Максимальная высота изображения';
 $txt['elga_icon_max_width'] = 'Максимальная ширина иконки альбома';
 $txt['elga_icon_max_height'] = 'Максимальная высота иконки альбома';
+
+$txt['elga_basic_settings'] = 'Основные настройки';
+$txt['elga_preview_settings'] = 'Настройки предпросмотра';
+$txt['elga_imgthumb_max_width'] = 'Макс. ширина миниатюры';
+$txt['elga_imgthumb_max_height'] = 'Макс. ширина миниатюры';
+$txt['elga_imgpreview_max_width'] = 'Макс. ширина предпросмотра';
+$txt['elga_imgpreview_max_height'] = 'Макс. ширина предпросмотра';
 
 $txt['permissiongroup_elga'] = 'Галерея';
 
