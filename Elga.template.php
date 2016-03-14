@@ -427,13 +427,13 @@ function template_file()
 
     echo '
     <div class="elga-file-descr">
-    <strong>', $txt['elga_fname'], '</strong> <a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['orig_name'] . '</a><br>
+    <strong>', $txt['elga_fname'], '</strong> <a href="', $row['img-url'], '">' . $row['orig_name'] . '</a><br>
     <strong>', $txt['elga_size'], '</strong> ', $row['hsize'], '<br>
     <strong>', $txt['elga_views'], '</strong> ', $row['views'],'<br>
     <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
     <strong>', $txt['elga_date'], '</strong> ', standardTime($row['time_added']), '<br>
     <strong>', $txt['elga_bbcode_link'], '</strong>
-        &nbsp;<input id="elga-bbcode-copy" value="[img]', $row['copy-img-bbc'], '[/img]" size="60" readonly>
+        &nbsp;<input id="elga-bbcode-copy" value="', $row['img-bbc'], '" size="60" readonly>
         &nbsp;<button id="elga-copy-btn">Скопировать</button>
         &nbsp;<span id="elga-copy-answer"></span><br>
     <strong>', $txt['elga_ftitle'], '</strong> ', $row['title'], '<br>

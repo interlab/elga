@@ -49,7 +49,8 @@ class ElgaSubs
         $row['icon'] = $url.'/'.$row['fname'];
         $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
         $row['description'] = parse_bbc($row['description']);
-        $row['copy-img-bbc'] = $boardurl . '/gallery.php?id=' . $row['id'];
+        $row['img-bbc'] = '[img]' . $boardurl . '/gallery.php?id=' . $row['id'] . '[/img]';
+        $row['img-url'] = $boardurl . '/gallery.php?id=' . $row['id'];
         $db->free_result($req);
 
         return $row;
