@@ -49,7 +49,7 @@ class ElgaSubs
         $row['icon'] = $url.'/'.$row['fname'];
         $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
         $row['description'] = parse_bbc($row['description']);
-        $row['copy-img-bbc'] = $boardurl . '/ElgaItem.php?id=' . $row['id'];
+        $row['copy-img-bbc'] = $boardurl . '/gallery.php?id=' . $row['id'];
         $db->free_result($req);
 
         return $row;
@@ -127,8 +127,10 @@ class ElgaSubs
         $req = $db->query('', '
             SELECT
                 f.id, f.orig_name, f.fname, f.thumb, f.preview, f.fsize, f.title,
-                f.description, f.views, f.id_member, f.member_name
-            FROM {db_prefix}elga_files as f' . ($album_id ? '
+                f.description, f.views, f.id_member, f.member_name,
+                a.id AS alb_id, a.name AS alb_name
+            FROM {db_prefix}elga_files as f
+                INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)' . ($album_id ? '
             WHERE f.id_album = {int:album}' : '') . '
             ORDER BY f.id DESC
             LIMIT {int:start}, {int:per_page}',
