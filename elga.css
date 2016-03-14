@@ -49,8 +49,8 @@
     text-decoration: none;
     margin: 1.3em 0px 0px 0.5em;
     padding: 4px;
-    background-color: #FFF;
-    border: 1px solid #C4C4C4;
+    background-color: #F6F7FB;
+    /*border: 1px solid #C4C4C4;*/
     border-radius: 6px;
     box-shadow: 0px 0px 1px 0px rgba(99, 99, 99, 0.77);
 }
@@ -145,4 +145,8 @@
 
 .elga-buttons {
 
+}
+
+.elga-fname {
+    margin-bottom: 4px;
 }

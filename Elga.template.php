@@ -33,17 +33,19 @@ function elga_thumbs($files, $usealbum=false)
 {
     global $scripturl, $txt;
 
-    $r = '<div class="elga-thumbs">';
+    $r = '
+    <div class="elga-thumbs">';
     foreach ($files as $row) {
         $r .= '
         <div class="elga-thumb-file">
-            <a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
+            <p class="elga-fname"><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></p>
+            <p><a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
                 <img src="' . $row['thumb-url'] . '" alt="..." height="100px" width="100px" class="fancybox" />
-            </a>
-            <h4><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></h4>' . ($usealbum ? 
-            '<strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a><br>' : '') . '
-            <strong>' . $txt['elga_size'] . '</strong> ' . $row['hsize'] . '<br>
-            <strong>' . $txt['elga_author'] . '</strong> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a>
+            </a></p>
+            ' . ($usealbum ? 
+            '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
+            <p><strong>' . $txt['elga_size'] . '</strong> ' . $row['hsize'] . '</p>
+            <p><strong>' . $txt['elga_author'] . '</strong> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
         </div>';
     }
     $r .= '
