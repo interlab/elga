@@ -167,10 +167,10 @@ function elga_addon_settings()
 	$config_vars = [
       ['title', 'elga_basic_settings'],
         ['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
-        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/upload'],
-        [ 'text', 'elga_files_url', 'invalid' => !$context['valid_elga_files_url'], 'label' => $txt['elga_files_url'], 'subtext' => 'Например: ' . $boardurl.'/elga_files/upload'],
-        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => 'Например: ' . BOARDDIR.'/elga_files/icons'],
-        [ 'text', 'elga_icons_url', 'invalid' => !$context['valid_elga_icons_url'], 'label' => $txt['elga_icons_url'], 'subtext' => 'Например: '.$boardurl.'/elga_files/icons'],
+        [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => $txt['elga_example'].' '.BOARDDIR.'/elga_files/upload'],
+        [ 'text', 'elga_files_url', 'invalid' => !$context['valid_elga_files_url'], 'label' => $txt['elga_files_url'], 'subtext' => $txt['elga_example'].' '.$boardurl.'/elga_files/upload'],
+        [ 'text', 'elga_icons_path', 'invalid' => !$context['valid_elga_icons_path'], 'label' => $txt['elga_icons_path'], 'subtext' => $txt['elga_example'].' ' . BOARDDIR.'/elga_files/icons'],
+        [ 'text', 'elga_icons_url', 'invalid' => !$context['valid_elga_icons_url'], 'label' => $txt['elga_icons_url'], 'subtext' => $txt['elga_example'].' '.$boardurl.'/elga_files/icons'],
         '',
         [ 'int', 'elga_img_max_width', ],
         [ 'int', 'elga_img_max_height', ],
@@ -244,8 +244,13 @@ function elga_load_illegal_guest_permissions()
 
 	// Guests shouldn't be able to have any portal specific permissions.
 	$context['non_guest_permissions'] = array_merge($context['non_guest_permissions'], [
-        'elga_manage_albums',
-        'elga_manage_files',
+        // 'elga_manage_albums',
+        // 'elga_manage_files',
+        'elga_create_albums',
+        'elga_edit_albums',
+        'elga_delete_albums',
+        'elga_edit_files',
+        'elga_delete_files',
     ]);
 }
 
@@ -256,14 +261,15 @@ function elga_load_permissions(&$permissionGroups, &$permissionList, &$leftPermi
     global $txt;
 
     $permissionList['membergroup'] = array_merge($permissionList['membergroup'], [
-        // 'elga_manage_albums' => [true, 'elga'],
-        // 'elga_manage_files' => [true, 'elga'],
-        'elga_create_albums' => [false, 'elga'],
-        'elga_edit_albums' => [true, 'elga'],
-        'elga_delete_albums' => [true, 'elga'],
+        // files
+        'elga_view_files' => [false, 'elga'],
         'elga_create_files' => [false, 'elga'],
         'elga_edit_files' => [true, 'elga'],
         'elga_delete_files' => [true, 'elga'],
+        // albums
+        'elga_create_albums' => [false, 'elga'],
+        'elga_edit_albums' => [true, 'elga'],
+        'elga_delete_albums' => [true, 'elga'],
     ]);
 
     // $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';

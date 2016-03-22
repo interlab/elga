@@ -2,14 +2,14 @@
 
 function elga_html_buttons()
 {
-    global $context, $scripturl, $user_info;
+    global $context, $scripturl, $user_info, $txt;
 
     $links = [];
     if (allowedTo('elga_create_files')) {
-        $links[] = [$scripturl . '?action=gallery;sa=add_file', 'Add new file'];
+        $links[] = [$scripturl . '?action=gallery;sa=add_file', $txt['elga_create_file']];
     }
     if (allowedTo('elga_create_albums')) {
-        $links[] = [$scripturl . '?action=gallery;sa=add_album', 'Add new album'];
+        $links[] = [$scripturl . '?action=gallery;sa=add_album', $txt['elga_create_album']];
     }
 
     if (!empty($links)) {
@@ -247,18 +247,20 @@ function template_add_album()
             <select name="location" id="location" tabindex="', $context['tabindex']++, '">
             <option value="0">before</option>
             <option value="1">after</option>
+            <option value="2">child</option>
             </select>
 
             <select name="album" id="album" tabindex="', $context['tabindex']++, '">
             <option value="0"></option>';
 
-        foreach ($context['elga_albums'] as $row) {
-            $selected = $context['elga_id'] == $row['id'];
-            echo '
-            <option value="', $row['id'], '"', ($selected ? ' selected="selected"' : ''), '>
-                ', $row['name'], '
-            </option>';
+         foreach ($context['elga_albums'] as $row) {
+                if ($row['id'] == $context['elga_id']) {
+                    continue;
+                }
+                echo '
+            <option value="', $row['id'], '">', $row['name'], '</option>';
         }
+
         echo '
         </select>&nbsp;&nbsp';
 
@@ -360,6 +362,7 @@ function template_album_js()
 {
     global $context, $scripturl, $txt, $boardurl, $modSettings;
 
+    $usealbum = false;
     // @ob_end_clean();
     // if (!empty($modSettings['enableCompressedOutput']))
         // ob_start('ob_gzhandler');
@@ -373,12 +376,14 @@ function template_album_js()
     foreach ($context['elga_files'] as $row) {
         echo '
         <div class="elga-thumb-file">
-            <a href="', $row['icon'], '" class="fancybox" rel="group" title="' . $row['title'] . '">
-                <img src="', $row['thumb-url'], '" alt="..." height="100px" width="100px" class="fancybox" />
-            </a>
-            <h4><a href="', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '">' . $row['title'] . '</a></h4>
-            <strong>', $txt['elga_size'], '</strong> ', $row['hsize'], '<br>
-            <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a>
+            <p class="elga-fname"><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></p>
+            <p><a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
+                <img src="' . $row['thumb-url'] . '" alt="..." height="100px" width="100px" class="fancybox" />
+            </a></p>
+            ' . ($usealbum ? 
+            '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
+            <p><strong>' . $txt['elga_size'] . '</strong> ' . $row['hsize'] . '</p>
+            <p><strong>' . $txt['elga_author'] . '</strong> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
         </div>';
     }
     //echo '</div>';

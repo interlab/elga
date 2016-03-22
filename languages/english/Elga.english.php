@@ -2,7 +2,8 @@
 
 $txt['elga_title'] = 'Галерея';
 $txt['elga_off'] = 'Галерея отключена.';
-$txt['elga_add_file'] = 'Добавить файл';
+$txt['elga_create_file'] = 'Добавить файл';
+$txt['elga_create_album'] = 'Создать альбом';
 $txt['elga_admin'] = 'Админ';
 $txt['elga_edit'] = 'Редактировать';
 $txt['elga_remove'] = 'Удалить';
@@ -13,7 +14,9 @@ $txt['elga_date'] = 'Дата загрузки:';
 $txt['elga_descr'] = 'Описание:';
 $txt['elga_fname'] = 'Имя файла:';
 $txt['elga_bbcode_link'] = 'BBC-код:';
-$txt['elga_views'] = 'Просмотры:';
+$txt['elga_views'] = 'Просмотров:';
+$txt['elga_album'] = 'Альбом:';
+$txt['elga_example'] = 'Например:';
 
 $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';
 $txt['who_gallery_search'] = 'Выполняет поиск в <a href="%s">галерее</a>';
@@ -38,6 +41,8 @@ $txt['elga_imgthumb_max_width'] = 'Макс. ширина миниатюры';
 $txt['elga_imgthumb_max_height'] = 'Макс. ширина миниатюры';
 $txt['elga_imgpreview_max_width'] = 'Макс. ширина предпросмотра';
 $txt['elga_imgpreview_max_height'] = 'Макс. ширина предпросмотра';
+
+// permissions
 
 $txt['permissiongroup_elga'] = 'Галерея';
 
@@ -74,6 +79,9 @@ $txt['cannot_elga_delete_albums_own'] = 'Вы не можете удалять �
 $txt['cannot_elga_delete_albums_any'] = 'Вы не можете удалять чужие альбомы';
 
 // Files
+$txt['permissionname_elga_view_files'] = 'Просматривать файлы';
+$txt['cannot_elga_view_files'] = 'Вы не можете просматривать файлы! Не хватает прав!';
+
 $txt['permissionname_elga_create_files'] = 'Создавать файлы';
 $txt['cannot_elga_create_files'] = 'Вы не можете создавать файлы! Не хватает прав!';
 

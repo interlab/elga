@@ -36,6 +36,8 @@ class ElgaController extends Action_Controller
             return;
         }
 
+        isAllowedTo('elga_view_files');
+
         $context['sub_template'] = 'home';
 
         if (isset($_REQUEST['sa'])) {
@@ -457,6 +459,7 @@ class ElgaController extends Action_Controller
         $context['elga_id'] = $id;
     }
 
+    // @TODO
     public function action_remove_album()
     {
         isAllowedTo('elga_delete_albums');
