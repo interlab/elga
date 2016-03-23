@@ -106,6 +106,21 @@ class ElgaController extends Action_Controller
         die();
     }
 
+    public function action_managealbums()
+    {
+        global $context, $scripturl, $boardurl, $modSettings;
+
+        $context['elga_albums'] = ElgaSubs::getAlbums();
+
+        $context['page_title'] = 'Manage albums';
+        $context['sub_template'] = 'managealbums';
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=managealbums',
+            'name' => 'Manage albums',
+        ];
+    }
+    
     public function action_album()
     {
         global $context, $scripturl, $boardurl, $modSettings;

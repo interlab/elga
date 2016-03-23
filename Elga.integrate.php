@@ -27,7 +27,7 @@ function elga_menu_buttons(&$buttons, &$menu_count)
             'show' => $modSettings['elga_enabled'], // true, // allowedTo('admin_forum'),
             'sub_buttons' => [
                 'add_file' => [
-                    'title' => $txt['elga_add_file'],
+                    'title' => $txt['elga_create_file'],
                     'href' => $scripturl . '?action=gallery;sa=add_file',
                     'show' => true,
                 ],

@@ -1,29 +1,66 @@
 
-.elga-h2 {
-    margin-top: 1rem;
-}
-
 .elga-thumbs {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-align-content: stretch;
+    -ms-flex-line-pack: stretch;
+    align-content: stretch;
+    -webkit-align-items: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+
     margin: 0;
     text-align: center;
 }
 
 .elga-thumb-album {
+    -webkit-order: 0;
+    -ms-flex-order: 0;
+    order: 0;
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -webkit-align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+
     text-decoration: none;
-    display: inline-block;
-    vertical-align: top;
+    /*display: inline-block;
+    vertical-align: top;*/
     margin: 1.3em 0 0 1.5em;
     padding: 4px;
     background-color: #FFF;
     border: 1px solid #CECECE;
     border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    /*background: -moz-linear-gradient(top, #fafbfd, #fafbfc);*/
+    background: #fafbfd;
+    background: -moz-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, #fafbfd), color-stop(100%, #fafbfc));
+    background: -webkit-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: -o-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: -ms-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: linear-gradient(to bottom, #fafbfd 0%, #fafbfc 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fafbfd', endColorstr='#fafbfc', GradientType=0 );
+}
+
+.elga-h2 {
+    margin-top: 1rem;
 }
 
 .elga-r {
     width: 14em;
     min-height: 10em;
-    background-color: #FFF;
-    border: 1px solid #CECECE; /*#DDD; #C4C4C4; */
     display: inline-block;
     padding: 4px;
 }
@@ -47,7 +84,7 @@
 	min-width: 8em;
     width: 14em;
     text-decoration: none;
-    margin: 1.3em 0px 0px 0.5em;
+    margin: 0.5em 0px 0px 0.5em;
     padding: 4px;
     background-color: #F6F7FB;
     /*border: 1px solid #C4C4C4;*/
@@ -149,4 +186,98 @@
 
 .elga-fname {
     margin-bottom: 4px;
+}
+
+table.elga-managealbum {
+    border-collapse:collapse;
+    border-spacing: 0;
+    width: 100%;    
+}
+
+.elga-managealbum {
+    font-family: 'trebuchet MS', 'Lucida sans', Arial;
+    font-size: 14px;
+    color: #444;
+
+    border: solid #ccc 1px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 1px 1px #ccc; 
+    -moz-box-shadow: 0 1px 1px #ccc; 
+    box-shadow: 0 1px 1px #ccc;         
+}
+
+.elga-managealbum tr:hover {
+    background: #fbf8e9;
+    -o-transition: all 0.1s ease-in-out;
+    -webkit-transition: all 0.1s ease-in-out;
+    -moz-transition: all 0.1s ease-in-out;
+    -ms-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;     
+}    
+
+.elga-managealbum td, .elga-managealbum th {
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;    
+}
+
+.elga-managealbum th {
+    text-align: center;    
+}
+
+.elga-managealbum th {
+    background-color: #dce9f9;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9));
+    background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -moz-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -ms-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -o-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: linear-gradient(top, #ebf3fc, #dce9f9);
+    -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.8) inset; 
+    -moz-box-shadow:0 1px 0 rgba(255,255,255,.8) inset;  
+    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;        
+    border-top: none;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5); 
+}
+
+.elga-managealbum td:first-child, .elga-managealbum th:first-child {
+    border-left: none;
+}
+
+.elga-managealbum th:first-child {
+    -moz-border-radius: 6px 0 0 0;
+    -webkit-border-radius: 6px 0 0 0;
+    border-radius: 6px 0 0 0;
+}
+
+.elga-managealbum th:last-child {
+    -moz-border-radius: 0 6px 0 0;
+    -webkit-border-radius: 0 6px 0 0;
+    border-radius: 0 6px 0 0;
+}
+
+.elga-managealbum th:only-child{
+    -moz-border-radius: 6px 6px 0 0;
+    -webkit-border-radius: 6px 6px 0 0;
+    border-radius: 6px 6px 0 0;
+}
+
+.elga-managealbum tr:last-child td:first-child {
+    -moz-border-radius: 0 0 0 6px;
+    -webkit-border-radius: 0 0 0 6px;
+    border-radius: 0 0 0 6px;
+}
+
+.elga-managealbum tr:last-child td:last-child {
+    -moz-border-radius: 0 0 6px 0;
+    -webkit-border-radius: 0 0 6px 0;
+    border-radius: 0 0 6px 0;
+}
+
+.elga-managealbum td.elga-manage {
+    text-align: center;
+    width: 18rem;
 }

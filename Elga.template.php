@@ -11,6 +11,9 @@ function elga_html_buttons()
     if (allowedTo('elga_create_albums')) {
         $links[] = [$scripturl . '?action=gallery;sa=add_album', $txt['elga_create_album']];
     }
+    if (allowedTo('elga_edit_albums')) {
+        $links[] = [$scripturl . '?action=gallery;sa=managealbums', 'Manage albums'];
+    }
 
     if (!empty($links)) {
         echo '
@@ -78,6 +81,64 @@ function template_gallery_off()
     global $txt;
 
     echo $txt['elga_off'];
+}
+
+function template_managealbums()
+{
+    global $txt, $context, $scripturl;
+
+    echo '
+    <div class="elga-buttons">
+    <ul>
+        <li class="listlevel1">
+        <a href="'.$scripturl . '?action=gallery;sa=add_album"class="linklevel1">', $txt['elga_create_album'], '</a>
+        </li>
+    </ul>
+    </div>
+    <div class="clear"></div>
+    <br>';
+
+    echo '
+    <table class="elga-managealbum">
+    <thead>
+    <th colspan="4">Название</th>
+    <th>Управление</th>
+    </thead>
+    <tbody>';
+    foreach ($context['elga_albums'] as $album) {
+        echo '
+    <tr>
+    <td>
+    <ul>
+        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-long-arrow-right"></i></a></li>
+        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-forward"></i></a></li>
+    </ul>
+    </td>
+    <td style="height:35px; width: 35px;"><img src="', $album['icon'], '" height="34px" width="34px" /></td>
+    <td><a href="', $album['url'], '">', $album['name'], '</a></td>
+    <td>
+    <ul>
+        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-backward"></i></a></li>
+        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-long-arrow-left"></i></a></li>
+    </ul>
+    </td>
+    <td class="elga-manage">
+    <!--
+    <ul>
+        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-arrows"></i> Перемещение</a></li>
+        <li class="listlevel1"><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="linklevel1"><i class="fa fa-pencil-square-o"></i> Редактировать</a></li>
+    </ul>
+    -->
+
+    <a><i class="fa fa-arrows"></i>&nbsp;Перемещение</a>
+    &nbsp;&nbsp;
+    <a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '"><i class="fa fa-pencil-square-o"></i>&nbsp;Редактировать</a>
+    </td>
+    </tr>';
+    }
+    echo '
+    </tbody>
+    </table>';
 }
 
 function template_home()

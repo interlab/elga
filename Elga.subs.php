@@ -234,7 +234,7 @@ class ElgaSubs
 
     public static function getAlbums()
     {
-        global $boardurl, $modSettings;
+        global $scripturl, $modSettings;
 
         $db = database();
 
@@ -251,6 +251,7 @@ class ElgaSubs
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
                 $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+                $row['url'] = $scripturl.'?action=gallery;sa=album;id='.$row['id'];
                 $data[$row['id']] = $row;
             }
         }
