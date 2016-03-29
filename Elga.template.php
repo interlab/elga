@@ -143,17 +143,12 @@ function template_managealbums()
 
 function template_home()
 {
-    global $context, $scripturl, $user_info;
-
-    // http://www.artlebedev.ru/tools/technogrette/html/thumbnails-center/
-    // echo '
-    // <style>
-    // </style>';
+    global $context, $scripturl, $user_info, $txt;
 
     elga_html_buttons();
 
     echo '
-    <h2 class="category_header elga-h2">Albums</h2>
+    <h2 class="category_header elga-h2">', $txt['elga_albums'], '</h2>
     <div class="elga-thumbs">';
 
     foreach ($context['elga_albums'] as $album) {
@@ -170,7 +165,7 @@ function template_home()
             if ($user_info['is_admin']) {
                 echo '
                 <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="elga-edit">
-                <i class="fa fa-edit fa-lg"></i> [Edit Album]</a></p>';
+                <i class="fa fa-edit fa-lg"></i> [', $txt['edit_album'], ']</a></p>';
             }
 
         echo '
@@ -181,7 +176,7 @@ function template_home()
 
     echo '
     <h2 class="category_header elga-h2">
-    Last files
+    ', $txt['elga_last_files'], '
     <span class="nextlinks">Сортировка по: Дата | Название</span>
 	</h2>';
 
@@ -391,7 +386,7 @@ function template_album()
     <div class="elga-buttons">
     <ul>
         <li class="listlevel1">
-    <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '" class="linklevel1">Add new file</a>
+    <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '" class="linklevel1">', $txt['elga_create_file'], '</a>
         </li>
     </ul>
     </div>';
@@ -493,17 +488,32 @@ function template_file()
 
     echo '
     <div class="elga-file-descr">
-    <strong>', $txt['elga_fname'], '</strong> <a href="', $row['img-url'], '">' . $row['orig_name'] . '</a><br>
-    <strong>', $txt['elga_size'], '</strong> ', $row['hsize'], '<br>
-    <strong>', $txt['elga_views'], '</strong> ', $row['views'],'<br>
-    <strong>', $txt['elga_author'], '</strong> <a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a><br>
-    <strong>', $txt['elga_date'], '</strong> ', standardTime($row['time_added']), '<br>
-    <strong>', $txt['elga_bbcode_link'], '</strong>
+    <table>
+    <tbody>
+    <tr>
+        <td>', $txt['elga_fname'], '</td><td><a href="', $row['img-url'], '">' . $row['orig_name'] . '</a></td>
+    </tr><tr>
+        <td>', $txt['elga_size'], '</td><td>', $row['hsize'], '</td>
+    </tr><tr>
+        <td>', $txt['elga_views'], '</td><td>', $row['views'],'</td>
+    </tr><tr>
+        <td>', $txt['elga_author'], '</td>
+        <td><a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a></td>
+    </tr><tr>
+        <td>', $txt['elga_date'], '</td>
+        <td>', standardTime($row['time_added']), '</td>
+    </tr><tr>
+        <td>', $txt['elga_bbcode_link'], '</td><td>
         &nbsp;<input id="elga-bbcode-copy" value="', $row['img-bbc'], '" size="60" readonly>
         &nbsp;<button id="elga-copy-btn">Скопировать</button>
-        &nbsp;<span id="elga-copy-answer"></span><br>
-    <strong>', $txt['elga_ftitle'], '</strong> ', $row['title'], '<br>
-    <strong>', $txt['elga_descr'], '</strong> ', $row['description'], '<br>
+        &nbsp;<span id="elga-copy-answer"></span></td>
+    </tr><tr>
+        <td>', $txt['elga_ftitle'], '</td><td>', $row['title'], '</td>
+    </tr><tr>
+        <td>', $txt['elga_descr'], '</td><td>', $row['description'], '</td>
+    </tr>
+    </tbody>
+    </table>
     </div>';
 
     echo elga_show_select_cats();

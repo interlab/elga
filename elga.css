@@ -170,6 +170,13 @@
     padding: 0.5rem 0.75rem;
 }
 
+.elga-file-descr td:first-child {
+    font-weight: bold;
+    color: #666;
+    min-width: 12rem;
+    vertical-align: top;
+}
+
 .elga-disabled:hover, a.elga-disabled:hover {
     color:#777 !important;
     cursor:not-allowed;
@@ -248,32 +255,22 @@ table.elga-managealbum {
 }
 
 .elga-managealbum th:first-child {
-    -moz-border-radius: 6px 0 0 0;
-    -webkit-border-radius: 6px 0 0 0;
     border-radius: 6px 0 0 0;
 }
 
 .elga-managealbum th:last-child {
-    -moz-border-radius: 0 6px 0 0;
-    -webkit-border-radius: 0 6px 0 0;
     border-radius: 0 6px 0 0;
 }
 
-.elga-managealbum th:only-child{
-    -moz-border-radius: 6px 6px 0 0;
-    -webkit-border-radius: 6px 6px 0 0;
+.elga-managealbum th:only-child {
     border-radius: 6px 6px 0 0;
 }
 
 .elga-managealbum tr:last-child td:first-child {
-    -moz-border-radius: 0 0 0 6px;
-    -webkit-border-radius: 0 0 0 6px;
     border-radius: 0 0 0 6px;
 }
 
 .elga-managealbum tr:last-child td:last-child {
-    -moz-border-radius: 0 0 6px 0;
-    -webkit-border-radius: 0 0 6px 0;
     border-radius: 0 0 6px 0;
 }
 

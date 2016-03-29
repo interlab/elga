@@ -422,13 +422,14 @@ class ElgaController extends Action_Controller
                 $context['elga_id'] = $id;
 
                 $context['sub_template'] = 'add_album';
+                $atitle = sprintf($txt['edit_album'], $title);
 
                 $context['linktree'][] = [
                     'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
-                    'name' => 'Edit album '.$title,
+                    'name' => $atitle,
                 ];
 
-                $context['page_title'] = 'Edit album '.$title;
+                $context['page_title'] = $atitle;
 
                 ElgaSubs::createChecks('edit_album');
             }
@@ -461,13 +462,14 @@ class ElgaController extends Action_Controller
         $context['elga_descr'] = $a['description'];
 
         $context['sub_template'] = 'add_album';
+        $atitle = sprintf($txt['edit_album'], $a['name']);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
-            'name' => 'Edit album '.$a['name'],
+            'name' => $atitle,
         ];
 
-        $context['page_title'] = 'Edit album '.$a['name'];
+        $context['page_title'] = $atitle;
 
         ElgaSubs::createChecks('edit_album');
 
