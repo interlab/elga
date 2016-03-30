@@ -305,9 +305,19 @@ class ElgaController extends Action_Controller
             if (empty($context['errors'])) {
                 $db = database();
 
+                $lastalbum = ElgaSubs::getNestedSetsManager()->getLastParent();
+                if (null === $lastalbum) {
+                    $leftkey = 1;
+                    $rightkey = 2;
+                }
+                else {
+                    $leftkey = $lastalbum->left;
+                    $rightkey = $lastalbum->right;
+                }
+
                 $db->insert('', '{db_prefix}elga_albums',
-                    [ 'name' => 'string', 'icon' => 'string', 'description' => 'string', ],
-                    [ $title, ($icon ? $icon : ''), $descr, ],
+                    [ 'name' => 'string', 'icon' => 'string', 'description' => 'string', 'leftkey' => 'int', 'rightkey' => 'int'],
+                    [ $title, ($icon ? $icon : ''), $descr, $leftkey, $rightkey ],
                     [ ]
                 );
                 $id = $db->insert_id('{db_prefix}elga_albums', 'id');
@@ -445,7 +455,7 @@ class ElgaController extends Action_Controller
 
                 // del old image
                 if ($db->affected_rows() && '' !== $a['icon'] && $a['icon'] !== $icon) {
-                    delOldIcon($a);
+                    ElgaSubs::delOldIcon($a);
                 }
 
                 redirectexit('action=gallery;sa=album;id='.$id);
