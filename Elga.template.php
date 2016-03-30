@@ -319,22 +319,25 @@ function template_add_album()
     <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
 
-    if (!empty($context['errors']))
+    if (!empty($context['errors'])) {
         echo '
-    <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
+    <div class="errorbox">', $txt['elga_fix_errors'], ' <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
+    }
 
     echo '
 <div class="content">
     <dl class="settings">
 
         <dt>
-            <label for="album">Расположение</label>
+            <label for="album">', $txt['elga_location'], '</label>
         </dt>
         <dd>
-            <select name="location" id="location" tabindex="', $context['tabindex']++, '">
-            <option value="0">before</option>
-            <option value="1">after</option>
-            <option value="2">child</option>
+            <select name="location" id="location" tabindex="', $context['tabindex']++, '">';
+            foreach ($txt['elga_location_variants'] as $k => $v) {
+                echo '
+            <option value="', $k, '">', $v, '</option>';
+            }
+    echo '
             </select>
 
             <select name="album" id="album" tabindex="', $context['tabindex']++, '">
@@ -348,24 +351,24 @@ function template_add_album()
             <option value="', $row['id'], '">', $row['name'], '</option>';
         }
 
-        echo '
-        </select>&nbsp;&nbsp';
-
     echo '
+            </select>&nbsp;&nbsp
         </dd>
 
         <dt>
-            <label for="title">Title</label>
+            <label for="title">', $txt['elga_album_name'], '</label>
         </dt>
         <dd>
             <input type="text" name="title" id="title" value="', !empty($context['elga_title']) ? $context['elga_title'] : '', '" tabindex="', $context['tabindex']++, '">
         </dd>
+
         <dt>
             <label for="descr">Ваше сообщение</label>
         </dt>
         <dd>
             <textarea id="descr" name="descr" cols="50" rows="10" tabindex="', $context['tabindex']++, '">', !empty($context['elga_descr']) ? $context['elga_descr'] : '', '</textarea>
         </dd>
+
         <dt>
             <label>Добавить файл</label>
         </dt>
@@ -426,7 +429,7 @@ function template_album()
     echo elga_show_select_cats();
 
     if (empty($context['elga_files'])) {
-        echo '<h1>В этом альбоме нет загруженных файлов.</h1>';
+        echo '<h1>', $txt['elga_album_empty'], '</h1>';
 
         return;
     }
@@ -550,5 +553,4 @@ function template_file()
     echo elga_show_select_cats();
 
     // comments block
-
 }

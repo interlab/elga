@@ -552,7 +552,7 @@ class ElgaSubs
             array_merge([ 'id' => $id, ], $vals)
         );
     }
-    
+
     public static function getNestedSetsManager()
     {
         global $db_type, $db_host,  $db_prefix, $db_passwd, $db_name, $db_user, $db_port;

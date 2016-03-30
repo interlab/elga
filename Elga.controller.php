@@ -223,8 +223,6 @@ class ElgaController extends Action_Controller
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
         is_not_guest();
-
-        $txt['cannot_elga_create_albums'] = 'Вы не можете создавать альбомы! Не хватает прав!';
         isAllowedTo('elga_create_albums');
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
@@ -233,13 +231,13 @@ class ElgaController extends Action_Controller
 
         $context['sub_template'] = 'add_album';
         $context['elga_sa'] = 'add_album';
-        $context['page_title'] = 'New album';
+        $context['page_title'] = $txt['elga_new_album'];
         $context['elga_id'] = 0;
         $context['elga_albums'] = ElgaSubs::getAlbums();
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=add_album',
-            'name' => 'New album',
+            'name' => $txt['elga_new_album'],
         ];
 
         if (isset($_REQUEST['send'])) {
@@ -270,8 +268,8 @@ class ElgaController extends Action_Controller
             ]);
             $validator->text_replacements([
                 'location' => 'Location not selected!',
-                'album' => 'Album not selected!',
-                'title' => 'Title is empty!',
+                'album' => $txt['elga_album_not_selected'],
+                'title' => $txt['elga_empty_title'],
                 'descr' => $txt['error_message'],
             ]);
 
