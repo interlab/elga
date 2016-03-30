@@ -110,6 +110,9 @@ class ElgaController extends Action_Controller
     {
         global $context, $scripturl, $boardurl, $modSettings;
 
+        is_not_guest();
+        isAllowedTo('elga_edit_albums');
+
         $context['elga_albums'] = ElgaSubs::getAlbums();
 
         $context['page_title'] = 'Manage albums';
