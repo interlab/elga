@@ -26,7 +26,7 @@ $tables = array(
             array('type' => 'primary', 'columns' => array('id')),
             array('type' => 'index', 'columns' => array('leftkey'), 'name' => 'leftkey'),
             array('type' => 'index', 'columns' => array('rightkey'), 'name' => 'rightkey'),
-            array('type' => 'index', 'columns' => array('leftright'), 'name' => 'leftright'),
+            array('type' => 'index', 'columns' => array('leftkey', 'rightkey'), 'name' => 'leftright'),
         ),
     ),
     'elga_files' => array(
