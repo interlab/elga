@@ -98,26 +98,24 @@ class ElgaSubs
             LIMIT {int:start}, {int:per_page}',
             [
                 'album' => $album_id,
-                'start' => $offset, // $context['start'],
-                'per_page' => $limit, // $per_page,
+                'start' => $offset,
+                'per_page' => $limit,
             ]
         );
 
         $url = $modSettings['elga_files_url'];
-        $files = [];
+
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
                 $row['thumb-url'] = $url.'/'.$row['thumb'];
                 $row['preview-url'] = $url.'/'.$row['preview'];
                 $row['icon'] = $url.'/'.$row['fname'];
                 $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
-                // $files[$row['id']] = $row;
+
                 yield $row;
             }
         }
         $db->free_result($req);
-
-        // return $files;
     }
 
     public static function getFiles($album_id, $offset, $limit)
@@ -164,10 +162,10 @@ class ElgaSubs
 // 2 next
 // SELECT f.id FROM elkarte_elga_files as f INNER JOIN elkarte_elga_albums AS a ON (a.id = f.id_album) WHERE f.id > 112 AND f.id_album = 1 order by id asc LIMIT 2 
 
-/*
- * @return int
- *
- */
+    /*
+     * @return int
+     *
+     */
     public static function getNextId($id, $idalbum)
     {
         if (!is_numeric($id)) {
@@ -268,8 +266,9 @@ class ElgaSubs
 
         // @todo: limit
         $req = $db->query('', '
-        SELECT id, name
-        FROM {db_prefix}elga_albums
+        SELECT a.id, a.name
+        FROM {db_prefix}elga_albums AS a
+        ORDER BY a.leftkey
         LIMIT 250', []);
 
         $data = [];
@@ -385,113 +384,50 @@ class ElgaSubs
     {
         global $context, $modSettings;
 
-        /*
-        # http://www.php.net/manual/ru/features.file-upload.errors.php
-        if (UPLOAD_ERR_OK !== $_FILES['image']['error']) {
-            switch ($_FILES['image']['error']) {
-                case UPLOAD_ERR_INI_SIZE:
-                    $context['errors'][] = 'Слишком большой размер файла';
-                    break;
-                case UPLOAD_ERR_FORM_SIZE:
-                    $context['errors'][] = 'Слишком большой размер файла';
-                    break;
-                case UPLOAD_ERR_PARTIAL:
-                    $context['errors'][] = 'Файл был получен только частично';
-                    break;
-                case UPLOAD_ERR_NO_FILE:
-                    $context['errors'][] = 'Файл не был загружен';
-                    break;
-                case UPLOAD_ERR_NO_TMP_DIR:
-                    $context['errors'][] = 'Отсутствует временная папка';
-                    break;
-                case UPLOAD_ERR_CANT_WRITE:
-                    $context['errors'][] = 'Не удалось записать файл на диск';
-                    break;
-                case UPLOAD_ERR_EXTENSION:
-                    $context['errors'][] = 'PHP-расширение остановило загрузку файла';
-                    break;
-                default:
-                    $context['errors'][] = 'Unknown Error';
-                    break;
-            }
-        }
+        $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $directory = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
+        $max_size = 1024 * 1024 * 3;
+        $fsize = filesize($_FILES['image']['tmp_name']);
 
-        if (!empty($context['errors'])) {
+        if ( ! self::findFileUploadErrors('image', $directory, $max_size) ) {
             return false;
         }
 
-        if (!empty($_FILES['image']) && $_FILES['image']['error'] === 0) {
-            $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
-            $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $directory = BOARDDIR.'/files/gallery';
-            $max_size = 1024 * 1024 * 3;
-
-            if (!is_dir($directory)) {
-                fatal_error('Директория постеров указана неверно!', false);
+        $nfname = sha1_file($_FILES['image']['tmp_name']).'.'.$ext;
+        $date = date('Y/m/d', time());
+        $dest_dir = $directory.'/'.$date;
+        if (!is_dir($dest_dir)) {
+            if (!mkdir($dest_dir, 0777, true)) {
+                fatal_error('Не получается создать директорию '.$dest_dir);
             }
+        }
+        $dest_name = $dest_dir.'/'.$nfname;
 
-            if (!is_uploaded_file($_FILES['image']['tmp_name'])) {
-                fatal_error('Ошибка загрузки файла на сервер. Попробуйте заново закачать файл.', false);
-            }
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
+            fatal_error('Ошибка копирования временного файла!', false);
+        } else {
 
-            $fsize = filesize($_FILES['image']['tmp_name']);
-            if ($fsize > $max_size) {
-                fatal_error('Файл превышает максимально допустимый размер!', false);
-            }
+            // create thumb image
+            $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
+            $width = empty($modSettings['elga_imgthumb_max_width']) ? 350 : $modSettings['elga_imgthumb_max_width'];
+            $height = empty($modSettings['elga_imgthumb_max_height']) ? 350 : $modSettings['elga_imgthumb_max_height'];
+            self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $width, $height);
 
-            if (preg_match('~\\/:\*\?"<>|\\0~', $_FILES['image']['name'])) {
-                fatal_error(Util::htmlspecialchars($_FILES['image']['name']).'Недопустимые символы в имени постер-файла!', false);
-            }
+            // create preview image
+            $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
+            $width = empty($modSettings['elga_imgpreview_max_width']) ? 350 : $modSettings['elga_imgpreview_max_width'];
+            $height = empty($modSettings['elga_imgpreview_max_height']) ? 350 : $modSettings['elga_imgpreview_max_height'];
+            self::thumb($dest_name, $dest_dir.'/'.$preview_name, $width, $height);
 
-            if (!preg_match('~png|gif|jpg|jpeg~i', $ext)) {
-                fatal_error('Расширение постера должно быть <strong>png, gif, jpg, jpeg</strong>.', false);
-            }
-            */
-
-            $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
-            $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $directory = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
-            $max_size = 1024 * 1024 * 3;
-            $fsize = filesize($_FILES['image']['tmp_name']);
-
-            if ( ! self::findFileUploadErrors('image', $directory, $max_size) ) {
-                return false;
-            }
-
-            $nfname = sha1_file($_FILES['image']['tmp_name']).'.'.$ext;
-            $date = date('Y/m/d', time());
-            $dest_dir = $directory.'/'.$date;
-            if (!is_dir($dest_dir)) {
-                if (!mkdir($dest_dir, 0777, true)) {
-                    fatal_error('Не получается создать директорию '.$dest_dir);
-                }
-            }
-            $dest_name = $dest_dir.'/'.$nfname;
-
-            if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
-                fatal_error('Ошибка копирования временного файла!', false);
-            } else {
-
-                // create thumb image
-                $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-                $width = empty($modSettings['elga_imgthumb_max_width']) ? 350 : $modSettings['elga_imgthumb_max_width'];
-                $height = empty($modSettings['elga_imgthumb_max_height']) ? 350 : $modSettings['elga_imgthumb_max_height'];
-                self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $width, $height);
-
-                // create preview image
-                $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-                $width = empty($modSettings['elga_imgpreview_max_width']) ? 350 : $modSettings['elga_imgpreview_max_width'];
-                $height = empty($modSettings['elga_imgpreview_max_height']) ? 350 : $modSettings['elga_imgpreview_max_height'];
-                self::thumb($dest_name, $dest_dir.'/'.$preview_name, $width, $height);
-
-                return [
-        'name' => $date.'/'.$nfname,
-        'orig_name' => $_FILES['image']['name'], // ? need sanitize?
-        'size' => $fsize,
-        'thumb' => $date.'/'.$thumb_name,
-        'preview' => $date . '/' . $preview_name, 
-                ];
-            }
+            return [
+                'name' => $date.'/'.$nfname,
+                'orig_name' => $_FILES['image']['name'], // ? need sanitize?
+                'size' => $fsize,
+                'thumb' => $date.'/'.$thumb_name,
+                'preview' => $date . '/' . $preview_name, 
+            ];
+        }
         /*
         }
         */
