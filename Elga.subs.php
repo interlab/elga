@@ -243,7 +243,7 @@ class ElgaSubs
         FROM {db_prefix}elga_albums AS a
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
         GROUP BY a.id
-        ORDER BY a.id ASC
+        ORDER BY a.leftkey
         LIMIT 100', []);
 
         // $data = new Foo();
@@ -615,5 +615,19 @@ class ElgaSubs
             WHERE id = {int:id}',
             array_merge([ 'id' => $id, ], $vals)
         );
+    }
+    
+    public static function getNestedSetsManager()
+    {
+        global $db_type, $db_host,  $db_prefix, $db_passwd, $db_name, $db_user, $db_port;
+
+        $ns = new \Interlab\NestedSets\Manager();
+        $ns->db_table = $db_prefix . 'elga_albums';
+        $ns->id_column = 'id';
+        $ns->left_column = 'leftkey';
+        $ns->right_column = 'rightkey';
+        $ns->setDb( $db_type, $db_host, $db_port, $db_name, $db_user, $db_passwd );
+
+        return $ns;
     }
 }

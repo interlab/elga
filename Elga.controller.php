@@ -119,8 +119,41 @@ class ElgaController extends Action_Controller
             'url' => $scripturl.'?action=gallery;sa=managealbums',
             'name' => 'Manage albums',
         ];
+
+        if (isset($_REQUEST['m'])) {
+            switch ($_REQUEST['m']) {
+                case 'move':
+                    if (ElgaSubs::getAlbum($_REQUEST['id'])) {
+                        $context['elga_move_id'] = $_REQUEST['id'];
+                    }
+                    break;
+                case 'moveToPrevSiblingOf':
+                case 'moveToNextSiblingOf':
+                case 'moveToFirstChildOf':
+                case 'moveToLastChildOf':
+                    checkSession('get');
+                    $ns = ElgaSubs::getNestedSetsManager();
+                    if (isset($_REQUEST['id'], $_REQUEST['current']) &&
+                        $ns->issetNode($_REQUEST['id']) &&
+                        $ns->issetNode($_REQUEST['current'])) {
+                            if (call_user_func_array([$ns, $_REQUEST['m']], [$_REQUEST['current'], $_REQUEST['id']])) {
+                                $context['elga_flashdata'] = [$_REQUEST['m'], 'success', 'Узел успешно перемещён!'];
+                                $context['elga_albums'] = ElgaSubs::getAlbums();
+                            } else {
+                                $context['elga_flashdata'] = [$_REQUEST['m'], 'error', 'Ошибка! Unknown Error Type. #' . __LINE__];
+                            }
+                    }
+                    break;
+                default:
+                    die('unknown m');
+            }
+        }
+
+        // if (isset($_REQUEST['m']) && ElgaSubs::getAlbum($_REQUEST['move'])) {
+            // $context['elga_move_id'] = $_REQUEST['move'];
+        // }
     }
-    
+
     public function action_album()
     {
         global $context, $scripturl, $boardurl, $modSettings;

@@ -87,6 +87,9 @@ function template_managealbums()
 {
     global $txt, $context, $scripturl;
 
+    $ismove = !empty($context['elga_move_id']);
+    $current = $ismove ? $context['elga_move_id'] : 0;
+    
     echo '
     <div class="elga-buttons">
     <ul>
@@ -98,30 +101,58 @@ function template_managealbums()
     <div class="clear"></div>
     <br>';
 
+    if ( ! empty($context['elga_flashdata']) ) {
+        echo $context['elga_flashdata'][2];
+    }
+
     echo '
     <table class="elga-managealbum">
     <thead>
-    <th colspan="4">Название</th>
+    <th colspan="', ($ismove ? '4' : '2'), '">Название</th>
     <th>Управление</th>
     </thead>
     <tbody>';
     foreach ($context['elga_albums'] as $album) {
         echo '
-    <tr>
-    <td>
+    <tr>';
+
+        if ($ismove) {
+            echo '
+    <td>';
+
+            if ($album['id'] != $context['elga_move_id']) {
+                echo '
     <ul>
-        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-long-arrow-right"></i></a></li>
-        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-forward"></i></a></li>
-    </ul>
-    </td>
+        <li class="listlevel1"><a href="', $scripturl, '?action=gallery;sa=managealbums;m=moveToPrevSiblingOf;id=', $album['id'], ';current=', $current, ';', $context['session_var'], '=', $context['session_id'], '" class="linklevel1"><i class="fa fa-long-arrow-right"></i></a></li>
+        <li class="listlevel1"><a href="', $scripturl, '?action=gallery;sa=managealbums;m=moveToFirstChildOf;id=', $album['id'], ';current=', $current, ';', $context['session_var'], '=', $context['session_id'], '" class="linklevel1"><i class="fa fa-forward"></i></a></li>
+    </ul>';
+            }
+
+        echo '
+    </td>';
+        }
+
+        echo '
     <td style="height:35px; width: 35px;"><img src="', $album['icon'], '" height="34px" width="34px" /></td>
-    <td><a href="', $album['url'], '">', $album['name'], '</a></td>
-    <td>
+    <td><a href="', $album['url'], '">', $album['name'], '</a></td>';
+
+        if ($ismove) {
+            echo '
+    <td>';
+
+            if ($album['id'] != $context['elga_move_id']) {
+                echo '
     <ul>
-        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-backward"></i></a></li>
-        <li class="listlevel1"><a class="linklevel1"><i class="fa fa-long-arrow-left"></i></a></li>
-    </ul>
-    </td>
+        <li class="listlevel1"><a href="', $scripturl, '?action=gallery;sa=managealbums;m=moveToLastChildOf;id=', $album['id'], ';current=', $current, ';', $context['session_var'], '=', $context['session_id'], '" class="linklevel1"><i class="fa fa-backward"></i></a></li>
+        <li class="listlevel1"><a href="', $scripturl, '?action=gallery;sa=managealbums;m=moveToNextSiblingOf;id=', $album['id'], ';current=', $current, ';', $context['session_var'], '=', $context['session_id'], '" class="linklevel1"><i class="fa fa-long-arrow-left"></i></a></li>
+    </ul>';
+            }
+
+        echo '
+    </td>';
+        }
+
+        echo '
     <td class="elga-manage">
     <!--
     <ul>
@@ -130,7 +161,7 @@ function template_managealbums()
     </ul>
     -->
 
-    <a><i class="fa fa-arrows"></i>&nbsp;Перемещение</a>
+    <a href="', $scripturl, '?action=gallery;sa=managealbums;m=move;id=', $album['id'], '"><i class="fa fa-arrows"></i>&nbsp;Перемещение</a>
     &nbsp;&nbsp;
     <a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '"><i class="fa fa-pencil-square-o"></i>&nbsp;Редактировать</a>
     </td>
@@ -519,30 +550,5 @@ function template_file()
     echo elga_show_select_cats();
 
     // comments block
-    echo '
-<div id="disqus_thread"></div>
-<script>
-    /**
-     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-     */
 
-    var disqus_config = function () {
-        this.page.url = "', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '"; // PAGE_URL;  // Replace PAGE_URL with your page\'s canonical URL variable
-        this.page.identifier = ', $row['id'], '; // PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page\'s unique identifier variable
-    };
-
-    (function() {  // DON\'T EDIT BELOW THIS LINE
-        var d = document, s = d.createElement(\'script\');
-
-        s.src = \'//simaru.disqus.com/embed.js\';
-
-        s.setAttribute(\'data-timestamp\', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-
-    
-    <script id="dsq-count-scr" src="//simaru.disqus.com/count.js" async></script>';
 }

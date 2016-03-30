@@ -19,9 +19,14 @@ $tables = array(
             array('name' => 'name', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'description', 'null' => false, 'type' => 'text'),
             array('name' => 'icon', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
+            array('name' => 'leftkey', 'type' => 'int', 'size' => 10, 'unsigned' => true, 'default' => 0),
+            array('name' => 'rightkey', 'type' => 'int', 'size' => 10, 'unsigned' => true, 'default' => 0),
         ),
         'indexes' => array(
             array('type' => 'primary', 'columns' => array('id')),
+            array('type' => 'index', 'columns' => array('leftkey'), 'name' => 'leftkey'),
+            array('type' => 'index', 'columns' => array('rightkey'), 'name' => 'rightkey'),
+            array('type' => 'index', 'columns' => array('leftright'), 'name' => 'leftright'),
         ),
     ),
     'elga_files' => array(
