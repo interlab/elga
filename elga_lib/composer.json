@@ -2,9 +2,16 @@
     "require": {
         "php": ">=5.4.0",
         "gargron/fileupload": "1.0.*",
-        "imagine/Imagine": "*"
+        "imagine/Imagine": "*",
+        "interlab/nested-sets": "dev-master"
     },
     "require-dev": {
         "symfony/var-dumper" : "2.*"
-    }
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://bitbucket.org/interlab/ns"
+        }
+    ]
 }

@@ -6,6 +6,8 @@ $txt['elga_create_file'] = 'Добавить файл';
 $txt['elga_create_album'] = 'Создать альбом';
 $txt['elga_admin'] = 'Админ';
 $txt['elga_edit'] = 'Редактировать';
+$txt['edit_album'] = 'Изменить альбом';
+$txt['edit_album_name'] = 'Изменить альбом %s';
 $txt['elga_remove'] = 'Удалить';
 $txt['elga_size'] = 'Размер:';
 $txt['elga_author'] = 'Автор:';
@@ -16,6 +18,8 @@ $txt['elga_fname'] = 'Имя файла:';
 $txt['elga_bbcode_link'] = 'BBC-код:';
 $txt['elga_views'] = 'Просмотров:';
 $txt['elga_album'] = 'Альбом:';
+$txt['elga_albums'] = 'Альбомы';
+$txt['elga_last_files'] = 'Последние файлы';
 $txt['elga_example'] = 'Например:';
 
 $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';

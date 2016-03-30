@@ -1,0 +1,18 @@
+{
+    "name": "interlab/nested-sets",
+    "description": "The nested sets behavior for php PDO",
+    "keywords": [
+        "nested sets"
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Interlab\\NestedSets\\": "src"
+        }
+    }
+}
