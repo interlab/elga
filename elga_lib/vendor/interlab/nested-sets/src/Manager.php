@@ -404,13 +404,13 @@ class Manager
     }
 
     /**
-     * @return array
+     * @return Node|null
      * @throws Exception
      */
     public function getLastParent()
     {
         $sql = '
-            SELECT node.' . $this->id_column . ', (COUNT(parent.' . $this->id_column . ') - 1) AS ' . $this->level_column . '
+            SELECT node.*, (COUNT(parent.' . $this->id_column . ') - 1) AS ' . $this->level_column . '
             FROM ' . $this->db_table . ' AS node, ' . $this->db_table . ' AS parent
             WHERE node.' . $this->left_column . ' BETWEEN parent.' . $this->left_column . ' AND parent.' . $this->right_column . '
             GROUP BY node.' . $this->id_column . '
@@ -421,12 +421,24 @@ class Manager
         try {
             $q = $this->db->query($sql);
             $row = $q->fetch(PDO::FETCH_ASSOC);
+            $node = null;
+            if ($row) {
+                $node = new Node([
+                    'id' => $row[$this->id_column],
+                    'left' => $row[$this->left_column],
+                    'right' => $row[$this->right_column],
+                    'level' => $row[$this->level_column],
+                    '_data' => array_diff_key($row, [
+                        $this->id_column => 1, $this->left_column => 1, $this->right_column => 1, $this->level_column => 1,
+                    ]),
+                ]);
+            }
             $q->closeCursor();
         } catch (Exception $e) {
             throw $e;
         }
 
-        return $row[$this->id_column];
+        return $node;
     }
 
     /**
