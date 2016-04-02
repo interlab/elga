@@ -78,16 +78,16 @@ $db->free_result($result);
 if (empty($has_album))
 {
     $albums = [
-        ['name' => 'Юмор', 'description' => 'LOL', 'icon' => 'clown.png',],
-        ['name' => 'Демотиваторы', 'description' => 'хо-хо', 'icon' => 'bomb.png',],
-        ['name' => 'Природа', 'description' => 'zoo', 'icon' => 'butterfly.png',],
-        ['name' => 'Города', 'description' => 'city', 'icon' => 'paris-eiffel.png',],
-        ['name' => 'Girls', 'description' => 'sexy', 'icon' => 'girl.png',],
+        ['name' => 'Юмор', 'description' => 'LOL', 'icon' => 'clown.png', 'leftkey' => '1', 'rightkey' => '2',],
+        ['name' => 'Демотиваторы', 'description' => 'хо-хо', 'icon' => 'bomb.png', 'leftkey' => '3', 'rightkey' => '4',],
+        ['name' => 'Природа', 'description' => 'zoo', 'icon' => 'butterfly.png', 'leftkey' => '5', 'rightkey' => '6',],
+        ['name' => 'Города', 'description' => 'city', 'icon' => 'paris-eiffel.png',  'leftkey' => '7', 'rightkey' => '8',],
+        ['name' => 'Girls', 'description' => 'sexy', 'icon' => 'girl.png',  'leftkey' => '9', 'rightkey' => '10',],
     ];
 
     $db->insert('ignore',
         '{db_prefix}elga_albums',
-        ['name' => 'text', 'description' => 'text', 'icon' => 'text'],
+        ['name' => 'text', 'description' => 'text', 'icon' => 'text', 'leftkey' => 'int', 'rightkey' => 'int'],
         $albums,
         ['id',]
     );
