@@ -30,6 +30,11 @@ $txt['elga_albums'] = 'Альбомы';
 $txt['elga_last_files'] = 'Последние файлы';
 $txt['elga_example'] = 'Например:';
 
+// sort
+$txt['elga_sviews'] = 'Просмотры';
+$txt['elga_sdate'] = 'Дата';
+$txt['elga_stitle'] = 'Название';
+
 $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';
 $txt['who_gallery_search'] = 'Выполняет поиск в <a href="%s">галерее</a>';
 $txt['who_gallery_file'] = 'Просматривает файл <a href="%s">%s</a>';

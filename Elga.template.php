@@ -64,19 +64,19 @@ function template_empty()
 
 function elga_show_sort_fields($album_id)
 {
-    // global $context, $scripturl, $user_info;
+    global $txt; //$context, $scripturl, $user_info;
 
     echo '
     <div class="elga-sort-fields">
     <form>
     <select>
     <option value="0">Сортировать по</option>
-    <option value="time_added-desc">Дата &#9660;</option>
-    <option value="time_added-asc">Дата &#9650;</option>
-    <option value="title-desc">Название &#9660;</option>
-    <option value="title-asc">Название &#9650;</option>
-    <option value="views-desc">Просмотры &#9660;</option>
-    <option value="views-asc">Просмотры &#9650;</option>
+    <option value="views-desc">', $txt['elga_sviews'], ' &#9660;</option>
+    <option value="views-asc">', $txt['elga_sviews'], ' &#9650;</option>
+    <option value="time_added-desc">', $txt['elga_sdate'], ' &#9660;</option>
+    <option value="time_added-asc">', $txt['elga_sdate'], ' &#9650;</option>
+    <option value="title-desc">', $txt['elga_stitle'], ' &#9660;</option>
+    <option value="title-asc">', $txt['elga_stitle'], ' &#9650;</option>
     </select>
     <input type="hidden" name="album_id" value="', $album_id, '" />
     </form>
