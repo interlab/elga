@@ -170,6 +170,7 @@ class ElgaController extends Action_Controller
         $order = '';
         if (!empty($_GET['sort']) && preg_match('~^(time_added|title|views)-(desc|asc)$~i', $_GET['sort'], $matches)) {
             $order = 'f.' . $matches[1] . ' ' . strtoupper($matches[2]);
+            $context['elga_sort'] = $_GET['sort'];
         }
 
         $albums = ElgaSubs::getAlbums();
