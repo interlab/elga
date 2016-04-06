@@ -507,7 +507,9 @@ function template_album_js()
     }
     else {
         echo '
-    <a href="'. $scripturl. '?action=gallery;sa=album;type=js;id='. $context['elga_album']['id']. ';start='. $context['elga_next_start'].
+    <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=',
+    $context['elga_album']['id'], ';start=', $context['elga_next_start'],
+    (empty($context['elga_sort']) ? '' : ';sort=' . $context['elga_sort']),
         '" class="jscroll-next">next page</a>';
         // die('');
     }
