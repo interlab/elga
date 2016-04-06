@@ -182,6 +182,11 @@
     cursor:not-allowed;
 }
 
+.elga-sort-fields {
+    float: right;
+    white-space: nowrap;
+}
+
 .elga-select-cats {
     float: right;
     white-space: nowrap;

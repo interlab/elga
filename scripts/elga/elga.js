@@ -40,6 +40,15 @@
             }
         });
 
+        var $sortselect = $('div.elga-sort-fields select');
+        $sortselect.on("change", function(){
+            var selval = $sortselect.val();
+            var album_id = $sortselect.parent().find('input[name=album_id]').val();
+            if (selval !== 0) {
+                window.location = elk_scripturl + '?action=gallery;sa=album;id=' + album_id + ';sort=' + selval;
+            }
+        });
+
         function copyTxt(){
             var res = '';
             // Use try & catch for unsupported browser

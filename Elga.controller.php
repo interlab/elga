@@ -123,6 +123,7 @@ class ElgaController extends Action_Controller
             'name' => 'Manage albums',
         ];
 
+        // move album
         if (isset($_REQUEST['m'])) {
             switch ($_REQUEST['m']) {
                 case 'move':
@@ -163,6 +164,12 @@ class ElgaController extends Action_Controller
 
         if (empty($_GET['id'])) {
             redirectexit('action=gallery');
+        }
+
+        // sort
+        $order = '';
+        if (!empty($_GET['sort']) && preg_match('~^(time_added|title|views)-(desc|asc)$~i', $_GET['sort'], $matches)) {
+            $order = 'f.' . $matches[1] . ' ' . strtoupper($matches[2]);
         }
 
         $albums = ElgaSubs::getAlbums();
@@ -215,7 +222,7 @@ class ElgaController extends Action_Controller
             'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
         ];
 
-        $context['elga_files'] = ElgaSubs::getFiles($album['id'], $context['start'], $per_page);
+        $context['elga_files'] = ElgaSubs::getFiles($album['id'], $context['start'], $per_page, ['order' => $order]);
     }
 
     public function action_add_album()
@@ -956,6 +963,11 @@ class ElgaController extends Action_Controller
         $context['sub_template'] = 'file';
 
         $context['elga_is_author'] = $user_info['id'] == $file['id_member'] || allowedTo('moderate_forum') || allowedTo('admin_forum');
+
+        if (empty($_SESSION['elga_lastreadfile']) || $_SESSION['elga_lastreadfile'] != $file['id']) {
+            ElgaSubs::updateFile($id, 'views = views + 1');
+            $_SESSION['elga_lastreadfile'] = $file['id'];
+        }
     }
 
     // delete this function in production

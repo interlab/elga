@@ -118,7 +118,7 @@ class ElgaSubs
         $db->free_result($req);
     }
 
-    public static function getFiles($album_id, $offset, $limit)
+    public static function getFiles($album_id, $offset, $limit, array $params = [])
     {
         global $modSettings, $txt;
 
@@ -131,7 +131,7 @@ class ElgaSubs
             FROM {db_prefix}elga_files as f
                 INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)' . ($album_id ? '
             WHERE f.id_album = {int:album}' : '') . '
-            ORDER BY f.id DESC
+            ORDER BY ' . (empty($params['order']) ? 'f.id DESC' : $params['order']) . '
             LIMIT {int:start}, {int:per_page}',
             [
                 'album' => $album_id,
