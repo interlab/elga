@@ -17,7 +17,7 @@ class ElgaSubs
 
     public static function getFile($id)
     {
-        global $txt, $modSettings, $boardurl;
+        global $txt, $modSettings, $boardurl, $scripturl;
 
         if (!is_numeric($id)) {
             fatal_error('Bad id value. Required int type.', false);
@@ -44,12 +44,16 @@ class ElgaSubs
 
         $url = $modSettings['elga_files_url'];
         $row = $db->fetch_assoc($req);
-        $row['thumb-url'] = $url.'/'.$row['thumb'];
-        $row['preview-url'] = $url.'/'.$row['preview'];
-        $row['icon'] = $url.'/'.$row['fname'];
+        // $row['thumb-url'] = $url.'/'.$row['thumb'];
+        // $row['preview-url'] = $url.'/'.$row['preview'];
+        // $row['icon'] = $url.'/'.$row['fname'];
+        $row['thumb-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=thumb';
+        $row['preview-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=preview';
+        $row['icon'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
         $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
         $row['description'] = parse_bbc($row['description']);
-        $row['img-bbc'] = '[img]' . $boardurl . '/gallery.php?id=' . $row['id'] . '[/img]';
+        // $row['img-bbc'] = '[img]' . $boardurl . '/gallery.php?id=' . $row['id'] . '[/img]';
+        $row['img-bbc'] = '[img]' . $scripturl . '?action=gallery;sa=show;id='.$row['id'] . '[/img]';
         $row['img-url'] = $boardurl . '/gallery.php?id=' . $row['id'];
         $db->free_result($req);
 
@@ -85,7 +89,7 @@ class ElgaSubs
 
     public static function getFilesIterator($album_id, $offset, $limit)
     {
-        global $modSettings, $txt;
+        global $modSettings, $txt, $scripturl;
 
         $db = database();
         $req = $db->query('', '
@@ -107,9 +111,12 @@ class ElgaSubs
 
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
-                $row['thumb-url'] = $url.'/'.$row['thumb'];
-                $row['preview-url'] = $url.'/'.$row['preview'];
-                $row['icon'] = $url.'/'.$row['fname'];
+                // $row['thumb-url'] = $url.'/'.$row['thumb'];
+                // $row['preview-url'] = $url.'/'.$row['preview'];
+                // $row['icon'] = $url.'/'.$row['fname'];
+                $row['thumb-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=thumb';
+                $row['preview-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=preview';
+                $row['icon'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
                 $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
 
                 yield $row;
@@ -120,7 +127,7 @@ class ElgaSubs
 
     public static function getFiles($album_id, $offset, $limit, array $params = [])
     {
-        global $modSettings, $txt;
+        global $modSettings, $txt, $boardurl, $scripturl;
 
         $db = database();
         $req = $db->query('', '
@@ -144,9 +151,12 @@ class ElgaSubs
         $files = [];
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
-                $row['thumb-url'] = $url.'/'.$row['thumb'];
-                $row['preview-url'] = $url.'/'.$row['preview'];
-                $row['icon'] = $url.'/'.$row['fname'];
+                // $row['thumb-url'] = $url.'/'.$row['thumb'];
+                // $row['preview-url'] = $url.'/'.$row['preview'];
+                // $row['icon'] = $url.'/'.$row['fname'];
+                $row['thumb-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=thumb';
+                $row['preview-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=preview';
+                $row['icon'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
                 $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
                 $files[$row['id']] = $row;
             }
@@ -394,7 +404,8 @@ class ElgaSubs
             return false;
         }
 
-        $nfname = sha1_file($_FILES['image']['tmp_name']).'.'.$ext;
+        $sha1 = sha1_file($_FILES['image']['tmp_name']);
+        $nfname = $sha1 . '.' . $ext;
         $date = date('Y/m/d', time());
         $dest_dir = $directory.'/'.$date;
         if (!is_dir($dest_dir)) {
@@ -404,20 +415,38 @@ class ElgaSubs
         }
         $dest_name = $dest_dir.'/'.$nfname;
 
+        // уже существует файл с таким же названием,
+        // добавим к концу имени цифру
+        if ( file_exists($dest_name) ) {
+            // http://www.cowburn.info/2010/04/30/glob-patterns/
+            $samefiles = glob($dest_dir.'/'.$sha1.'-[!_].*');
+            natcasesort($samefiles);
+            $last_same = array_pop($samefiles);
+            if (preg_match('~-([0-9]+)\.[\w]+$~', $last_same, $ms)) {
+                $nfname = $sha1 . '-' . ($ms[1] + 1) . '.' . $ext;
+            } else {
+                $nfname = $sha1 . '-1.' . $ext;
+            }
+        }
+
+        $dest_name = $dest_dir.'/'.$nfname;
+        if (file_exists($dest_name)) {
+            fatal_error('уже существует файл с таким же названием');
+        }
+
         if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
             fatal_error('Ошибка копирования временного файла!', false);
         } else {
-
             // create thumb image
             $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-            $width = empty($modSettings['elga_imgthumb_max_width']) ? 350 : $modSettings['elga_imgthumb_max_width'];
-            $height = empty($modSettings['elga_imgthumb_max_height']) ? 350 : $modSettings['elga_imgthumb_max_height'];
+            $width = empty($modSettings['elga_imgthumb_max_width']) ? 200 : $modSettings['elga_imgthumb_max_width'];
+            $height = empty($modSettings['elga_imgthumb_max_height']) ? 200 : $modSettings['elga_imgthumb_max_height'];
             self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $width, $height);
 
             // create preview image
             $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-            $width = empty($modSettings['elga_imgpreview_max_width']) ? 350 : $modSettings['elga_imgpreview_max_width'];
-            $height = empty($modSettings['elga_imgpreview_max_height']) ? 350 : $modSettings['elga_imgpreview_max_height'];
+            $width = empty($modSettings['elga_imgpreview_max_width']) ? 450 : $modSettings['elga_imgpreview_max_width'];
+            $height = empty($modSettings['elga_imgpreview_max_height']) ? 450 : $modSettings['elga_imgpreview_max_height'];
             self::thumb($dest_name, $dest_dir.'/'.$preview_name, $width, $height);
 
             return [
@@ -433,14 +462,34 @@ class ElgaSubs
         */
     }
 
+    public static function removeFile($id)
+    {
+        $id = self::uint($_GET['id']);
+
+        $file = self::getFile($id);
+        if (!$file) {
+            fatal_error('File not found.', false);
+        }
+
+        $db = database();
+        $req = $db->query('', '
+            DELETE FROM {db_prefix}elga_files
+            WHERE id = {int:id}',
+            [
+                'id' => $id,
+            ]
+        );
+
+        self::delOldImage($file);
+    }
+
     public static function delOldImage($img)
     {
         global $modSettings;
 
         $path = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
-        $orig = $path.'/'.$img['fname'];
-        $thumb = $path.'/'.$img['thumb'];
-        foreach ([$orig, $thumb] as $file) {
+        $imgs = [ $path.'/'.$img['fname'], $path.'/'.$img['thumb'], $path.'/'.$img['preview'] ];
+        foreach ( $imgs as $file ) {
             if (file_exists($file)) {
                 @unlink($file);
             }
@@ -478,16 +527,22 @@ class ElgaSubs
         return $name;
     }
 
-    # Создаем мини-постер
     # http://imagine.readthedocs.org/en/latest/index.html
     # https://speakerdeck.com/avalanche123/introduction-to-imagine
     /*
-    thumb(
-        $dir . '/' . $fname,
-        $dir . '/' . $thumb_fname,
-        $maxWidth,
-        $maxHeight
-        );
+     * Создаем мини-постер
+     * http://imagine.readthedocs.org/en/latest/index.html
+     * https://speakerdeck.com/avalanche123/introduction-to-imagine
+     * @return bool ?
+     *
+        example:
+        thumb(
+            $dir . '/' . $fname,
+            $dir . '/' . $thumb_fname,
+            $maxWidth,
+            $maxHeight
+            );
+     *
     */
     public static function thumb($img, $thumb,  $width = 300, $height = 300)
     {
@@ -500,11 +555,10 @@ class ElgaSubs
 
         // $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
         try {
-            $imagine = new Imagine\Imagick\Imagine();
+            $imagine = new \Imagine\Imagick\Imagine();
         } catch (\Imagine\Exception\RuntimeException $e) {
             $imagine = new \Imagine\Gd\Imagine();
         }
-        $imagine = new \Imagine\Gd\Imagine();
         $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET; # THUMBNAIL_OUTBOUND
         $image = $imagine->open($img);
         $size = $image->getSize();

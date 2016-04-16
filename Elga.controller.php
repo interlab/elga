@@ -78,7 +78,6 @@ class ElgaController extends Action_Controller
     {
         global $modSettings;
 
-        die();
         if (empty($_GET['id'])) {
             header("HTTP/1.0 404 Not Found");
             die('<h1>Not Found</h1>');
@@ -92,12 +91,31 @@ class ElgaController extends Action_Controller
         }
 
         $path = $modSettings['elga_files_path'];
-        $fpath = isset($_GET['preview']) ? $path . '/' . $file['preview'] :
-            ( isset($_GET['thumb']) ? $path . '/' . $file['thumb'] : $path . '/' . $file['fname'] );
+
+        if (isset($_GET['mode'])) {
+            switch ($_GET['mode']) {
+                case 'preview':
+                $fpath = $path . '/' . $file['preview'];
+                break;
+
+                case 'thumb':
+                $fpath = $path . '/' . $file['thumb'];
+                break;
+
+                default:
+                $fpath = $path . '/' . $file['fname'];
+                ElgaSubs::updateFile($id, 'views = views + 1');
+            }
+        } else {
+            $fpath = $path . '/' . $file['fname'];
+        }
+
+        // $fpath = isset($_GET['preview']) ? $path . '/' . $file['preview'] :
+            // ( isset($_GET['thumb']) ? $path . '/' . $file['thumb'] : $path . '/' . $file['fname'] );
         $fext = pathinfo($fpath, PATHINFO_EXTENSION);
 
         try {
-            $imagine = new Imagine\Imagick\Imagine();
+            $imagine = new \Imagine\Imagick\Imagine();
         } catch (\Imagine\Exception\RuntimeException $e) {
             $imagine = new \Imagine\Gd\Imagine();
         }
@@ -890,30 +908,7 @@ class ElgaController extends Action_Controller
             fatal_error('Bad id value. Required int type.', false);
         }
 
-        $id = $_REQUEST['id'] = ElgaSubs::uint($_GET['id']);
-
-        $file = ElgaSubs::getFile($id);
-        if (!$file) {
-            fatal_error('File not found.', false);
-        }
-
-        $db = database();
-        $req = $db->query('', '
-            DELETE FROM {db_prefix}elga_files
-            WHERE id = {int:id}',
-            [
-                'id' => $id,
-            ]
-        );
-
-        $dir = $modSettings['elga_files_path'];
-        $img = $dir.'/'.$file['fname'];
-        $thumb = $dir.'/'.$file['thumb'];
-        foreach ([$img, $thumb] as $f) {
-            if (is_file($f)) {
-                @unlink($f);
-            }
-        }
+        ElgaSubs::removeFile($_GET['id']);
 
         redirectexit('action=gallery');
     }
