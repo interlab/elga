@@ -102,6 +102,15 @@ class ElgaController extends Action_Controller
                 $fpath = $path . '/' . $file['thumb'];
                 break;
 
+                case 'download':
+
+                header('Content-disposition: attachment; filename=' . $file['orig_name']);
+                header('Content-type: application/octet-stream');
+                readfile($path . '/' . $file['fname']);
+                exit(0);
+
+                break;
+
                 default:
                 $fpath = $path . '/' . $file['fname'];
                 ElgaSubs::updateFile($id, 'views = views + 1');
@@ -184,10 +193,9 @@ class ElgaController extends Action_Controller
             redirectexit('action=gallery');
         }
 
-        // sort
-        $order = '';
-        if (!empty($_GET['sort']) && preg_match('~^(time_added|title|views)-(desc|asc)$~i', $_GET['sort'], $matches)) {
-            $order = 'f.' . $matches[1] . ' ' . strtoupper($matches[2]);
+        $context['elga_sort'] = $sort = '';
+        if ( ! empty($_GET['sort']) ) {
+            $sort = ElgaSubs::parseSortQuery($_GET['sort']);
             $context['elga_sort'] = $_GET['sort'];
         }
 
@@ -241,7 +249,7 @@ class ElgaController extends Action_Controller
             'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
         ];
 
-        $context['elga_files'] = ElgaSubs::getFiles($album['id'], $context['start'], $per_page, ['order' => $order]);
+        $context['elga_files'] = ElgaSubs::getFiles($album['id'], $context['start'], $per_page, ['sort' => $sort]);
     }
 
     public function action_add_album()
@@ -964,6 +972,11 @@ class ElgaController extends Action_Controller
             ElgaSubs::updateFile($id, 'views = views + 1');
             $_SESSION['elga_lastreadfile'] = $file['id'];
         }
+
+        // jQuery UI
+        $modSettings['jquery_include_ui'] = true;
+		//loadCSSFile('jquery.ui.slider.css');
+		//loadCSSFile('jquery.ui.theme.css');
     }
 
     // delete this function in production

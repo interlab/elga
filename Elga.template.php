@@ -521,6 +521,14 @@ function template_file()
 
     $row = $context['elga_file'];
     
+    echo '
+  <script>
+  $(function() {
+    $( "#elga-tabs-file" ).tabs();
+  });
+  </script>
+    ';
+    
     if ($context['elga_is_author']) {
         echo '
     <ul>
@@ -546,12 +554,22 @@ function template_file()
         <div class="elga-arrow' . ($row['next_id'] ? '' : ' elga-disabled') . '">' . ($row['next_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['next_id']. '">' : '') . 'След. &#8594;</a></div>
     </div>';
 
+    // tabs
     echo '
+<div id="elga-tabs-file">
+    <ul>
+        <li><a href="#elga-tabs-descr">Описание</a></li>
+        <li><a href="#elga-tabs-exif">EXIF</a></li>
+    </ul>
+    <div id="elga-tabs-descr">
+
+
     <div class="elga-file-descr">
     <table>
     <tbody>
     <tr>
-        <td>', $txt['elga_fname'], '</td><td><a href="', $row['img-url'], '">' . $row['orig_name'] . '</a></td>
+        <td>', $txt['elga_fname'], '</td><td>' . $row['orig_name'] . '&nbsp;&nbsp;<a href="', $row['img-url'], '">[Открыть]</a>
+        &nbsp;&nbsp;<a href="', $row['img-download-url'], '">[Скачать]</a></td>
     </tr><tr>
         <td>', $txt['elga_size'], '</td><td>', $row['hsize'], '</td>
     </tr><tr>
@@ -574,9 +592,16 @@ function template_file()
     </tr>
     </tbody>
     </table>
-    </div>';
+    </div>
+
+
+    </div>
+    <div id="elga-tabs-exif">', $row['exif'], '</div>
+</div>';
 
     echo elga_show_select_cats();
 
+
     // comments block
+
 }

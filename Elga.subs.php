@@ -28,7 +28,7 @@ class ElgaSubs
         SELECT
             f.id, f.orig_name, f.fname, f.thumb, f.preview, f.fsize,
             f.id_album, f.title, f.description, f.views,
-            f.id_member, f.member_name, f.time_added,
+            f.id_member, f.member_name, f.time_added, f.exif,
             a.name AS album_name
         FROM {db_prefix}elga_files as f
             INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
@@ -54,7 +54,9 @@ class ElgaSubs
         $row['description'] = parse_bbc($row['description']);
         // $row['img-bbc'] = '[img]' . $boardurl . '/gallery.php?id=' . $row['id'] . '[/img]';
         $row['img-bbc'] = '[img]' . $scripturl . '?action=gallery;sa=show;id='.$row['id'] . '[/img]';
-        $row['img-url'] = $boardurl . '/gallery.php?id=' . $row['id'];
+        // $row['img-url'] = $boardurl . '/gallery.php?id=' . $row['id'];
+        $row['img-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
+        $row['img-download-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'] . ';mode=download';
         $db->free_result($req);
 
         return $row;
@@ -125,6 +127,29 @@ class ElgaSubs
         $db->free_result($req);
     }
 
+    public static function parseSortQuery($val)
+    {
+        $order = '';
+        if ( !empty($val) ) {
+            // && preg_match('~^(time_added|title|views)-(desc|asc)$~i', $val, $s)) {
+            $s = explode('-', $val);
+            if ( (count($s) === 2)
+                && in_array($s[0], ['time_added', 'title', 'views'])
+                && in_array($s[1], ['asc', 'desc'])
+            ) {
+                $s1 = strtoupper($s[1]);
+                if ('time_added' === $s[0]) {
+                    $order = 'f.id ' . $s[1] . ', f.' . $s[0] . ' ' . $s[1];
+                }
+                else {
+                    $order = 'f.' . $s[0] . ' ' . $s[1];
+                }
+            }
+        }
+
+        return $order;
+    }
+
     public static function getFiles($album_id, $offset, $limit, array $params = [])
     {
         global $modSettings, $txt, $boardurl, $scripturl;
@@ -138,7 +163,7 @@ class ElgaSubs
             FROM {db_prefix}elga_files as f
                 INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)' . ($album_id ? '
             WHERE f.id_album = {int:album}' : '') . '
-            ORDER BY ' . (empty($params['order']) ? 'f.id DESC' : $params['order']) . '
+            ORDER BY ' . (empty($params['sort']) ? 'f.id DESC' : $params['sort']) . '
             LIMIT {int:start}, {int:per_page}',
             [
                 'album' => $album_id,
