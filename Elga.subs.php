@@ -154,6 +154,8 @@ class ElgaSubs
     {
         global $modSettings, $txt, $boardurl, $scripturl;
 
+        $sort = self::parseSortQuery( ( isset($params['sort']) ? $params['sort'] : '' ) );
+
         $db = database();
         $req = $db->query('', '
             SELECT
@@ -163,7 +165,7 @@ class ElgaSubs
             FROM {db_prefix}elga_files as f
                 INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)' . ($album_id ? '
             WHERE f.id_album = {int:album}' : '') . '
-            ORDER BY ' . (empty($params['sort']) ? 'f.id DESC' : $params['sort']) . '
+            ORDER BY ' . (empty($sort) ? 'f.id DESC' : $sort) . '
             LIMIT {int:start}, {int:per_page}',
             [
                 'album' => $album_id,

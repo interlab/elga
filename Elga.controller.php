@@ -193,11 +193,7 @@ class ElgaController extends Action_Controller
             redirectexit('action=gallery');
         }
 
-        $context['elga_sort'] = $sort = '';
-        if ( ! empty($_GET['sort']) ) {
-            $sort = ElgaSubs::parseSortQuery($_GET['sort']);
-            $context['elga_sort'] = $_GET['sort'];
-        }
+        $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
 
         $albums = ElgaSubs::getAlbums();
         if (empty($albums[$_GET['id']])) {
