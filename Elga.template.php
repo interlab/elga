@@ -224,9 +224,10 @@ function template_home()
             </div>
         </div>';
     }
-    echo '</div>';
 
     echo '
+    </div>
+
     <h2 class="category_header elga-h2">
     ', $txt['elga_last_files'], '
     <span class="nextlinks">Сортировка по: Дата | Название</span>
@@ -245,9 +246,10 @@ function template_add_file()
     <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
     
-    if (!empty($context['errors']))
+    if (!empty($context['errors'])) {
         echo '
                 <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
+    }
 
     echo '
 <div class="content">
@@ -261,17 +263,17 @@ function template_add_file()
             <select name="album" id="album" tabindex="', $context['tabindex']++, '">
             <option value="0"></option>';
 
-        foreach ($context['elga_albums'] as $row) {
-            $selected = $context['elga_album'] == $row['id'];
-            echo '
+    foreach ($context['elga_albums'] as $row) {
+        $selected = $context['elga_album'] == $row['id'];
+        echo '
             <option value="', $row['id'], '"', ($selected ? ' selected="selected"' : ''), '>
                 ', $row['name'], '
             </option>';
-        }
-        echo '
-        </select>&nbsp;&nbsp';
+    }
 
     echo '
+        </select>&nbsp;&nbsp
+
         </dd>
     
         <dt>
@@ -354,23 +356,25 @@ function template_add_album()
         </dt>
         <dd>
             <select name="location" id="location" tabindex="', $context['tabindex']++, '">';
-            foreach ($txt['elga_location_variants'] as $k => $v) {
-                echo '
+
+    foreach ($txt['elga_location_variants'] as $k => $v) {
+        echo '
             <option value="', $k, '">', $v, '</option>';
-            }
+    }
+
     echo '
             </select>
 
             <select name="album" id="album" tabindex="', $context['tabindex']++, '">
             <option value="0"></option>';
 
-         foreach ($context['elga_albums'] as $row) {
-                if ($row['id'] == $context['elga_id']) {
-                    continue;
-                }
-                echo '
-            <option value="', $row['id'], '">', $row['name'], '</option>';
+     foreach ($context['elga_albums'] as $row) {
+        if ($row['id'] == $context['elga_id']) {
+            continue;
         }
+        echo '
+            <option value="', $row['id'], '">', $row['name'], '</option>';
+    }
 
     echo '
             </select>&nbsp;&nbsp
@@ -413,10 +417,8 @@ function template_add_album()
     <hr>
     <div class="submitbutton">
     <input type="submit" value="', $txt['sendtopic_send'], '" name="send" tabindex="', $context['tabindex']++, '" class="button_submit" />
-    <input type="hidden" name="sa" value="', $context['elga_sa'], '">';
-    echo '
-    <input type="hidden" name="id" value="', $context['elga_id'], '" />';
-    echo '
+    <input type="hidden" name="sa" value="', $context['elga_sa'], '">
+    <input type="hidden" name="id" value="', $context['elga_id'], '" />
     <input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />';
     if ($context['elga_sa'] === 'add_album') {
         echo '

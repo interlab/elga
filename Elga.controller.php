@@ -341,8 +341,8 @@ class ElgaController extends Action_Controller
                     $rightkey = 2;
                 }
                 else {
-                    $leftkey = $lastalbum->left;
-                    $rightkey = $lastalbum->right;
+                    $leftkey = $lastalbum->left + 1;
+                    $rightkey = $lastalbum->right + 1;
                 }
 
                 $db->insert('', '{db_prefix}elga_albums',
@@ -565,7 +565,6 @@ class ElgaController extends Action_Controller
 
         $txt['cannot_elga_create_files'] = 'Вы не можете создавать файлы';
         isAllowedTo('elga_create_files');
-        //echo allowedTo('elga_create_files');
 
         // if (!allowedTo('moderate_forum') && !allowedTo('admin_forum'))
             // fatal_error('Не хватает прав!', false);

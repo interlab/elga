@@ -52,8 +52,8 @@ class ElgaSubs
         $row['icon'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
         $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
         $row['description'] = parse_bbc($row['description']);
-        // $row['img-bbc'] = '[img]' . $boardurl . '/gallery.php?id=' . $row['id'] . '[/img]';
-        $row['img-bbc'] = '[img]' . $scripturl . '?action=gallery;sa=show;id='.$row['id'] . '[/img]';
+        $row['img-bbc'] = '[img]' . $boardurl . '/gallery.php?id=' . $row['id'] . '[/img]';
+        // $row['img-bbc'] = '[img]' . $scripturl . '?action=gallery;sa=show;id='.$row['id'] . '[/img]'; // [img]...[/img] not work!
         // $row['img-url'] = $boardurl . '/gallery.php?id=' . $row['id'];
         $row['img-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
         $row['img-download-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'] . ';mode=download';
