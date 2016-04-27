@@ -347,21 +347,37 @@ class ElgaSubs
         $row = $db->fetch_assoc($req);
         $db->free_result($req);
         $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
-        
-        $ns = self::getNestedSetsManager();
-        $row['descendants'] = [];
-        // fix node keys
-        $ds = $ns->getChildren($id);
-        $ds = $ds === null ? [] : $ds;
-        foreach ($ds as $n) {
-            $row['descendants'][$n['id']] = $n;
-            $row['descendants'][$n['id']]['icon'] = filter_var($n['icon'], FILTER_VALIDATE_URL) ? $n['icon'] :
-                $modSettings['elga_icons_url'].'/'.$n['icon'];
-            $row['descendants'][$n['id']]['leftkey'] = $n['left'];
-            $row['descendants'][$n['id']]['rightkey'] = $n['right'];
-        }
+        $row['descendants'] = self::getDescendants($row);
 
         return $row;
+    }
+
+    public function getDescendants($r)
+    {
+        global $modSettings;
+
+        $db = database();
+        $req = $db->query('', '
+        SELECT a.*, (COUNT(p.id - 1)) AS depth, COUNT(f.id) as total
+        FROM {db_prefix}elga_albums AS a, {db_prefix}elga_albums AS p, {db_prefix}elga_files AS f
+        WHERE a.leftkey BETWEEN p.leftkey AND p.rightkey
+            AND a.leftkey > ' . $r['leftkey'] . '
+            AND a.rightkey < ' . $r['rightkey'] . '
+            AND a.id = f.id_album
+        GROUP BY a.id
+        ORDER BY a.leftkey
+        LIMIT 250', []);
+
+        $data = [];
+        if ($db->num_rows($req) > 0) {
+            while ($row = $db->fetch_assoc($req)) {
+                $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+                $data[] = $row;
+            }
+        }
+        $db->free_result($req);
+
+        return $data;
     }
 
     public static function findFileUploadErrors($key, $path, $max_size)
