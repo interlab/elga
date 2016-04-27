@@ -195,11 +195,11 @@ class ElgaController extends Action_Controller
 
         $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
 
-        $albums = ElgaSubs::getAlbums();
-        if (empty($albums[$_GET['id']])) {
+        $album = ElgaSubs::getAlbum($_GET['id']);
+        if (empty($album)) {
             fatal_error('Album not found!', false);
         }
-        $context['elga_album'] = $album = $albums[$_GET['id']];
+        $context['elga_album'] = $album;
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=album;id='.$album['id'],

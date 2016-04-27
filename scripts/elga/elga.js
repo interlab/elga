@@ -1,8 +1,10 @@
 ;(function($){
+
     $(document).ready(function(){
         // var i = 0;
         // console.log(elgaimgload.src);
         $('.elga-scroll').jscroll({
+            autoTriggerUntil: 100,
             loadingHtml: '<i class="fa fa-spinner fa-pulse"></i> Loading...',
             padding: 20,
             nextSelector: 'a.jscroll-next:last',
@@ -23,7 +25,7 @@
                 loadCats.isLoaded = 1;
                 $.getJSON(elk_scripturl + "?action=gallery;sa=ajax;m=loadcats", function(data) {
                     data.result.forEach(function(val){
-                        $select.append( $('<option value="' + val.id + '">' + val.name + '</option>') );
+                        $select.append( $('<option value="' + val.id + '">' + ' ' + php_str_repeat('-', val.depth-1) + ' ' + val.name + '</option>') );
                     });
                 })
                 // .done( () => { console.log( "second success" ); } );
@@ -72,5 +74,6 @@
             $answer.html('').show();
             $answer.html(copyTxt()).fadeOut(4000);
         });
+
     });
 })(jQuery);

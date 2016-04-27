@@ -1,6 +1,6 @@
 <?php
 
-function elga_html_buttons()
+function elga_show_buttons()
 {
     global $context, $scripturl, $user_info, $txt;
 
@@ -193,18 +193,20 @@ function template_managealbums()
     </table>';
 }
 
-function template_home()
+function elga_show_albums(array $albums = [])
 {
     global $context, $scripturl, $user_info, $txt;
 
-    elga_html_buttons();
-
+    if (empty($albums)) {
+        return;
+    } 
+    
     echo '
     <h2 class="category_header elga-h2">', $txt['elga_albums'], '</h2>
-    <div class="elga-thumbs">';
+    <div class="elga-thumbs-albums">';
 
     $nsubalbs = 0;
-    foreach ($context['elga_albums'] as $album) {
+    foreach ($albums as $album) {
         if ( ! $nsubalbs ) {
             echo '
         <div class="elga-thumb-album">
@@ -248,8 +250,18 @@ function template_home()
     }
 
     echo '
-    </div>
+    </div>';
+}
 
+function template_home()
+{
+    global $context, $scripturl, $user_info, $txt;
+
+    elga_show_buttons();
+
+    elga_show_albums($context['elga_albums']);
+
+    echo '
     <h2 class="category_header elga-h2">
     ', $txt['elga_last_files'], '
     <span class="nextlinks">Сортировка по: Дата | Название</span>
@@ -460,6 +472,13 @@ function template_album()
 {
     global $context, $scripturl, $txt, $boardurl;
 
+    elga_show_albums($context['elga_album']['descendants']);
+
+    echo '
+    <h2 class="category_header elga-h2">
+    ', $txt['elga_last_files'], '
+	</h2>';
+
     if (allowedTo('elga_create_files')) {
         echo '
     <div class="elga-buttons">
@@ -627,5 +646,6 @@ function template_file()
 
 
     // comments block
+    echo '
 
 }

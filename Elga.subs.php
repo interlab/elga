@@ -303,8 +303,10 @@ class ElgaSubs
 
         // @todo: limit
         $req = $db->query('', '
-        SELECT a.id, a.name
-        FROM {db_prefix}elga_albums AS a
+        SELECT a.id, a.name, (COUNT(p.id - 1)) AS depth
+        FROM {db_prefix}elga_albums AS a, {db_prefix}elga_albums AS p
+        WHERE a.leftkey BETWEEN p.leftkey AND p.rightkey
+        GROUP BY a.id
         ORDER BY a.leftkey
         LIMIT 250', []);
 
@@ -329,9 +331,9 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT id, name, description, icon
-        FROM {db_prefix}elga_albums
-        WHERE id = {int:id}
+        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey
+        FROM {db_prefix}elga_albums AS a
+        WHERE a.id = {int:id}
         LIMIT 1', [
             'id' => self::uint($id),
         ]);
@@ -345,6 +347,17 @@ class ElgaSubs
         $row = $db->fetch_assoc($req);
         $db->free_result($req);
         $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+        
+        $ns = self::getNestedSetsManager();
+        $row['descendants'] = [];
+        // fix node keys
+        foreach ($ns->getChildren($id) as $n) {
+            $row['descendants'][$n['id']] = $n;
+            $row['descendants'][$n['id']]['icon'] = filter_var($n['icon'], FILTER_VALIDATE_URL) ? $n['icon'] :
+                $modSettings['elga_icons_url'].'/'.$n['icon'];
+            $row['descendants'][$n['id']]['leftkey'] = $n['left'];
+            $row['descendants'][$n['id']]['rightkey'] = $n['right'];
+        }
 
         return $row;
     }

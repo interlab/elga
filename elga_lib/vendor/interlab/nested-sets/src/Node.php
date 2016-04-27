@@ -4,7 +4,7 @@ namespace Interlab\NestedSets;
 
 // use Interlab\NestedSets\Manager;
 
-class Node
+class Node implements \ArrayAccess
 {
     public $id;
     public $left;
@@ -12,7 +12,7 @@ class Node
     public $level;
 
     private $_data;
-    private $manager;
+    // private $manager;
 
     // ??? Manager $manager
     public function __construct(array $row)
@@ -40,6 +40,31 @@ class Node
     public function __get($name)
     {
         return isset($this->_data[$name]) ?  $this->_data[$name] : '';
+    }
+    
+    public function offsetSet($offset, $value)
+    {
+        if (is_null($offset)) {
+            $this->_data[] = $value;
+        } else {
+            $this->_data[$offset] = $value;
+        }
+    }
+
+    public function offsetExists($offset)
+    {
+        return isset($this->_data[$offset]) || isset($this->$offset);
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->_data[$offset]);
+    }
+
+    public function offsetGet($offset)
+    {
+        return isset($this->_data[$offset]) ? $this->_data[$offset] :
+            (isset($this->$offset) ? $this->$offset : null);
     }
 
     /**
