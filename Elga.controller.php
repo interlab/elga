@@ -341,8 +341,8 @@ class ElgaController extends Action_Controller
                     $rightkey = 2;
                 }
                 else {
-                    $leftkey = $lastalbum->left + 1;
-                    $rightkey = $lastalbum->right + 1;
+                    $leftkey = $lastalbum->right + 1;
+                    $rightkey = $lastalbum->right + 2;
                 }
 
                 $db->insert('', '{db_prefix}elga_albums',

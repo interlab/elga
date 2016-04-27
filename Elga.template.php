@@ -203,8 +203,10 @@ function template_home()
     <h2 class="category_header elga-h2">', $txt['elga_albums'], '</h2>
     <div class="elga-thumbs">';
 
+    $nsubalbs = 0;
     foreach ($context['elga_albums'] as $album) {
-        echo '
+        if ( ! $nsubalbs ) {
+            echo '
         <div class="elga-thumb-album">
             <div class="elga-r">
                 <a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">
@@ -216,13 +218,33 @@ function template_home()
 
             if ($user_info['is_admin']) {
                 echo '
-                <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="elga-edit">
-                <i class="fa fa-edit fa-lg"></i> [', $txt['edit_album'], ']</a></p>';
+            <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="elga-edit">
+            <i class="fa fa-edit fa-lg"></i> [', $txt['edit_album'], ']</a></p>';
             }
 
-        echo '
+            if ( $album['rightkey'] - $album['leftkey'] > 1) {
+                $nsubalbs = ($album['rightkey'] - $album['leftkey'] - 1) / 2;
+                echo '<hr>';
+                continue;
+            } else {
+                echo '
             </div>
         </div>';
+            }
+        } else {
+            echo '
+        <h4 class="lefttext">
+            <img height="20" width="20" src="', $album['icon'], '" alt="">
+            <a href="', $scripturl, '?action=gallery;sa=album;id=', $album['id'], '">' . $album['name'] . '</a> (', $album['total'], ')
+        </h4>';
+
+            $nsubalbs -= 1;
+            if ( ! $nsubalbs ) {
+                echo '
+                </div>
+            </div>';
+            }
+        }
     }
 
     echo '

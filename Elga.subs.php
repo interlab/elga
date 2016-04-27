@@ -274,7 +274,7 @@ class ElgaSubs
         $db = database();
 
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon, COUNT(f.id) as total
+        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total
         FROM {db_prefix}elga_albums AS a
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
         GROUP BY a.id
