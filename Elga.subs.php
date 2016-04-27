@@ -351,7 +351,9 @@ class ElgaSubs
         $ns = self::getNestedSetsManager();
         $row['descendants'] = [];
         // fix node keys
-        foreach ($ns->getChildren($id) as $n) {
+        $ds = $ns->getChildren($id);
+        $ds = $ds === null ? [] : $ds;
+        foreach ($ds as $n) {
             $row['descendants'][$n['id']] = $n;
             $row['descendants'][$n['id']]['icon'] = filter_var($n['icon'], FILTER_VALIDATE_URL) ? $n['icon'] :
                 $modSettings['elga_icons_url'].'/'.$n['icon'];
