@@ -303,7 +303,7 @@ class ElgaSubs
 
         // @todo: limit
         $req = $db->query('', '
-        SELECT a.id, a.name, (COUNT(p.id - 1)) AS depth
+        SELECT a.id, a.name, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a, {db_prefix}elga_albums AS p
         WHERE a.leftkey BETWEEN p.leftkey AND p.rightkey
         GROUP BY a.id
@@ -347,18 +347,18 @@ class ElgaSubs
         $row = $db->fetch_assoc($req);
         $db->free_result($req);
         $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
-        $row['descendants'] = self::getDescendants($row);
+        $row['descendants'] = self::getSubAlbums($row);
 
         return $row;
     }
 
-    public function getDescendants($r)
+    public function getSubAlbums($r)
     {
         global $modSettings;
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.*, (COUNT(p.id - 1)) AS depth, COUNT(f.id) as total
+        SELECT a.*, (COUNT(p.id) - 1) AS depth, COUNT(f.id) as total
         FROM {db_prefix}elga_albums AS a, {db_prefix}elga_albums AS p, {db_prefix}elga_files AS f
         WHERE a.leftkey BETWEEN p.leftkey AND p.rightkey
             AND a.leftkey > ' . $r['leftkey'] . '
