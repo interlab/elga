@@ -1,12 +1,16 @@
 <?php
 
 $txt['elga_title'] = 'Галерея';
+$txt['elga_gallery'] = 'Галерея';
+$txt['elga_home'] = 'Галерея - Дом';
 $txt['elga_off'] = 'Галерея отключена.';
+$txt['elga_managealbums'] = 'Управлять альбомами';
 $txt['elga_album_empty'] = 'В этом альбоме нет загруженных файлов.';
 $txt['elga_create_file'] = 'Добавить файл';
 $txt['elga_create_album'] = 'Создать альбом';
 $txt['elga_new_album'] = 'Новый альбом';
 $txt['elga_album_not_selected'] = 'Альбом не выбран!';
+$txt['elga_galleryfmt'] = 'Галерея - %s';
 $txt['elga_empty_title'] = 'Пустое название!';
 $txt['elga_fix_errors'] = 'Исправьте ошибки:';
 $txt['elga_location'] = 'Расположение';

@@ -15,13 +15,13 @@ class ElgaController extends Action_Controller
 
     public function action_index()
     {
-        global $context, $scripturl, $modSettings;
+        global $txt, $context, $scripturl, $modSettings;
 
-        $context['page_title'] = 'Галерея - Дом';
+        $context['page_title'] = $txt['elga_home'];
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery',
-            'name' => 'Галерея',
+            'name' => $txt['elga_gallery'],
         ];
 
         loadCSSFile('elga.css');
@@ -135,19 +135,19 @@ class ElgaController extends Action_Controller
 
     public function action_managealbums()
     {
-        global $context, $scripturl, $boardurl, $modSettings;
+        global $txt, $context, $scripturl, $boardurl, $modSettings;
 
         is_not_guest();
         isAllowedTo('elga_edit_albums');
 
         $context['elga_albums'] = ElgaSubs::getAlbums();
 
-        $context['page_title'] = 'Manage albums';
+        $context['page_title'] = $txt['elga_managealbums'];
         $context['sub_template'] = 'managealbums';
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=managealbums',
-            'name' => 'Manage albums',
+            'name' => $txt['elga_managealbums'],
         ];
 
         // move album
@@ -166,13 +166,14 @@ class ElgaController extends Action_Controller
                     $ns = ElgaSubs::getNestedSetsManager();
                     if (isset($_REQUEST['id'], $_REQUEST['current']) &&
                         $ns->issetNode($_REQUEST['id']) &&
-                        $ns->issetNode($_REQUEST['current'])) {
-                            if (call_user_func_array([$ns, $_REQUEST['m']], [$_REQUEST['current'], $_REQUEST['id']])) {
-                                $context['elga_flashdata'] = [$_REQUEST['m'], 'success', 'Узел успешно перемещён!'];
-                                $context['elga_albums'] = ElgaSubs::getAlbums();
-                            } else {
-                                $context['elga_flashdata'] = [$_REQUEST['m'], 'error', 'Ошибка! Unknown Error Type. #' . __LINE__];
-                            }
+                        $ns->issetNode($_REQUEST['current'])
+                    ) {
+                        if (call_user_func_array([$ns, $_REQUEST['m']], [$_REQUEST['current'], $_REQUEST['id']])) {
+                            $context['elga_flashdata'] = [$_REQUEST['m'], 'success', 'Узел успешно перемещён!'];
+                            $context['elga_albums'] = ElgaSubs::getAlbums();
+                        } else {
+                            $context['elga_flashdata'] = [$_REQUEST['m'], 'error', 'Ошибка! Unknown Error Type. #' . __LINE__];
+                        }
                     }
                     break;
                 default:
@@ -187,7 +188,7 @@ class ElgaController extends Action_Controller
 
     public function action_album()
     {
-        global $context, $scripturl, $boardurl, $modSettings;
+        global $context, $scripturl, $boardurl, $modSettings, $txt;
 
         if (empty($_GET['id'])) {
             redirectexit('action=gallery');
@@ -206,7 +207,7 @@ class ElgaController extends Action_Controller
             'name' => $album['name'],
         ];
 
-        $context['page_title'] = 'Галерея - '.$album['name'];
+        $context['page_title'] = sprintf($txt['elga_galleryfmt'], $album['name']);
 
         $context['sub_template'] = 'album';
 
