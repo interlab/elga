@@ -34,6 +34,9 @@ $txt['elga_albums'] = 'Альбомы';
 $txt['elga_last_files'] = 'Последние файлы';
 $txt['elga_example'] = 'Например:';
 
+$txt['elga_comments_settings'] = 'Настройки комментариев';
+$txt['elga_disquz_enable'] = 'Включить комментарии Disquz?';
+
 // sort
 $txt['elga_sviews'] = 'Просмотры';
 $txt['elga_sdate'] = 'Дата';
