@@ -155,16 +155,16 @@ function elga_addon_settings()
     $context['valid_elga_icons_path'] = is_dir($modSettings['elga_icons_path']);
     $context['valid_elga_icons_url'] = filter_var($modSettings['elga_icons_url'], FILTER_VALIDATE_URL);
 
-	$context[$context['admin_menu_name']]['tab_data']['tabs']['elga']['description'] = $txt['elga_settings_desc'];
+    $context[$context['admin_menu_name']]['tab_data']['tabs']['elga']['description'] = $txt['elga_settings_desc'];
 
-	// Lets build a settings form
-	require_once(SUBSDIR . '/SettingsForm.class.php');
+    // Lets build a settings form
+    require_once(SUBSDIR . '/SettingsForm.class.php');
 
-	// Instantiate the form
-	$elgaSettings = new Settings_Form();
+    // Instantiate the form
+    $elgaSettings = new Settings_Form();
 
-	// All the options, well at least some of them!
-	$config_vars = [
+    // All the options, well at least some of them!
+    $config_vars = [
       ['title', 'elga_basic_settings'],
         ['check', 'elga_enabled', 'postinput' => $txt['elga_enabled_desc']],
         [ 'text', 'elga_files_path', 'invalid' => !$context['valid_elga_files_path'], 'label' => $txt['elga_files_path'], 'subtext' => $txt['elga_example'].' '.BOARDDIR.'/elga_files/upload'],
@@ -182,6 +182,15 @@ function elga_addon_settings()
         '',
         [ 'int', 'elga_imgpreview_max_width', ],
         [ 'int', 'elga_imgpreview_max_height', ],
+        '',
+      ['title', 'elga_comments_settings'],
+        // https://disqus.com/admin/universalcode/
+        [ 'check', 'elga_disquz_enable', ],
+        [
+            'text', 'elga_disquz_embed',
+            'label' => 'Embed js',
+            'subtext' => 'EXAMPLE.disqus.com/embed.js<br>IMPORTANT: Insert only EXAMPLE with your forum shortname!',
+        ],
 	];
 
 	// Load the settings to the form class

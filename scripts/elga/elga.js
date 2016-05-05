@@ -1,5 +1,4 @@
 ;(function($){
-
     $(document).ready(function(){
         // var i = 0;
         // console.log(elgaimgload.src);
@@ -25,7 +24,7 @@
                 loadCats.isLoaded = 1;
                 $.getJSON(elk_scripturl + "?action=gallery;sa=ajax;m=loadcats", function(data) {
                     data.result.forEach(function(val){
-                        $select.append( $('<option value="' + val.id + '">' + ' ' + php_str_repeat('-', val.depth-1) + ' ' + val.name + '</option>') );
+                        $select.append( $('<option value="' + val.id + '">' + ' ' + php_str_repeat('-', val.depth) + ' ' + val.name + '</option>') );
                     });
                 })
                 // .done( () => { console.log( "second success" ); } );

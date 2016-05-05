@@ -12,7 +12,7 @@ function elga_show_buttons()
         $links[] = [$scripturl . '?action=gallery;sa=add_album', $txt['elga_create_album']];
     }
     if (allowedTo('elga_edit_albums')) {
-        $links[] = [$scripturl . '?action=gallery;sa=managealbums', 'Manage albums'];
+        $links[] = [$scripturl . '?action=gallery;sa=managealbums', $txt['elga_managealbums']];
     }
 
     if (!empty($links)) {
@@ -477,7 +477,9 @@ function template_album()
     echo '
     <h2 class="category_header elga-h2">
     ', $txt['elga_last_files'], '
-	</h2>';
+
+    echo '
+    </h2>';
 
     if (allowedTo('elga_create_files')) {
         echo '
@@ -560,7 +562,7 @@ function template_album_js()
 
 function template_file()
 {
-    global $context, $scripturl, $txt, $boardurl;
+    global $context, $scripturl, $txt, $boardurl, $modSettings;
 
     $row = $context['elga_file'];
     
@@ -644,8 +646,30 @@ function template_file()
 
     echo elga_show_select_cats();
 
-
-    // comments block
+    //  Disqus comments block
+    if (!empty($modSettings['elga_disquz_enable']) && !empty($modSettings['elga_disquz_embed'])) {
     echo '
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
 
+    var disqus_config = function () {
+        this.page.url = "', $scripturl, '?action=gallery;sa=file;id=', $row['id'], '"; // Replace PAGE_URL with your page\'s canonical URL variable
+        this.page.identifier = ', $row['id'], '; // Replace PAGE_IDENTIFIER with your page\'s unique identifier variable
+    };
+
+    (function() {  // DON\'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement(\'script\');
+
+        s.src = \'//', $modSettings['elga_disquz_embed'], '.disqus.com/embed.js\';
+
+        s.setAttribute(\'data-timestamp\', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>';
+    }
 }
