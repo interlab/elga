@@ -7,7 +7,7 @@ if (!defined('ELK')) {
 // integrate_actions
 function elga_actions(&$actions, &$adminActions)
 {
-	$actions['gallery'] = ['Elga.controller.php', 'ElgaController', 'action_index'];
+    $actions['gallery'] = ['Elga.controller.php', 'ElgaController', 'action_index'];
     require_once SUBSDIR.'/Elga.subs.php';
     loadLanguage('Elga');
 }
@@ -63,9 +63,9 @@ function elga_menu_buttons(&$buttons, &$menu_count)
  */
 // function elga_pre_log_stats(&$no_stat_actions)
 // {
-	// // Don't track who actions for the gallery
-	// if (isset($_REQUEST['action']) && ($_REQUEST['action'] === 'gallery' && isset($_GET['xml'])))
-		// $no_stat_actions[] = 'gallery';
+    // // Don't track who actions for the gallery
+    // if (isset($_REQUEST['action']) && ($_REQUEST['action'] === 'gallery' && isset($_GET['xml'])))
+        // $no_stat_actions[] = 'gallery';
 // }
 
 // integrate_whos_online
@@ -132,23 +132,23 @@ function elga_admin_areas(&$admin_areas)
     // loadLanguage('HelpElga');
 
     // $admin_areas['config']['areas']['modsettings']['subsections']['elga'] = [$txt['elga_title']];
-	$admin_areas['config']['areas']['addonsettings']['subsections']['elga'] = [$txt['elga_title']];
+    $admin_areas['config']['areas']['addonsettings']['subsections']['elga'] = [$txt['elga_title']];
 }
 
 // integrate_sa_modify_modifications
 function elga_sa_modify_modifications(&$subActions)
 {
     $subActions['elga'] = [
-		'dir' => SUBSDIR,
-		// 'file' => 'Elga.subs.php',
-		'function' => 'elga_addon_settings',
-		'permission' => 'admin_forum',
-	];
+        'dir' => SUBSDIR,
+        // 'file' => 'Elga.subs.php',
+        'function' => 'elga_addon_settings',
+        'permission' => 'admin_forum',
+    ];
 }
 
 function elga_addon_settings()
 {
-	global $txt, $context, $scripturl, $modSettings, $boardurl;
+    global $txt, $context, $scripturl, $modSettings, $boardurl;
 
     $context['valid_elga_files_path'] = is_dir($modSettings['elga_files_path']);
     $context['valid_elga_files_url'] = filter_var($modSettings['elga_files_url'], FILTER_VALIDATE_URL);
@@ -182,47 +182,46 @@ function elga_addon_settings()
         '',
         [ 'int', 'elga_imgpreview_max_width', ],
         [ 'int', 'elga_imgpreview_max_height', ],
-        '',
       ['title', 'elga_comments_settings'],
         // https://disqus.com/admin/universalcode/
         [ 'check', 'elga_disquz_enable', ],
         [
             'text', 'elga_disquz_embed',
             'label' => 'Embed js',
-            'subtext' => 'EXAMPLE.disqus.com/embed.js<br>IMPORTANT: Insert only EXAMPLE with your forum shortname!',
+            'subtext' => $txt['elga_example'] . ' EXAMPLE.disqus.com/embed.js<br>IMPORTANT: Insert only EXAMPLE with your forum shortname!',
         ],
-	];
+    ];
 
-	// Load the settings to the form class
-	$elgaSettings->settings($config_vars);
+    // Load the settings to the form class
+    $elgaSettings->settings($config_vars);
 
-	// Saving?
-	if (isset($_GET['save']))
-	{
-		checkSession();
+    // Saving?
+    if (isset($_GET['save']))
+    {
+        checkSession();
 
-		// Some defaults are good to have
-		if (empty($_POST['elga_imgthumb_max_width']))
-			$_POST['elga_imgthumb_max_width'] = 200;
-		if (empty($_POST['elga_imgthumb_max_height']))
-			$_POST['elga_imgthumb_max_height'] = 200;
+        // Some defaults are good to have
+        if (empty($_POST['elga_imgthumb_max_width']))
+            $_POST['elga_imgthumb_max_width'] = 200;
+        if (empty($_POST['elga_imgthumb_max_height']))
+            $_POST['elga_imgthumb_max_height'] = 200;
 
-		if (empty($_POST['elga_imgpreview_max_width']))
-			$_POST['elga_imgpreview_max_width'] = 500;
-		if (empty($_POST['elga_imgpreview_max_height']))
-			$_POST['elga_imgpreview_max_height'] = 500;
+        if (empty($_POST['elga_imgpreview_max_width']))
+            $_POST['elga_imgpreview_max_width'] = 500;
+        if (empty($_POST['elga_imgpreview_max_height']))
+            $_POST['elga_imgpreview_max_height'] = 500;
 
-		if (empty($_POST['elga_icon_max_width']))
-			$_POST['elga_icon_max_width'] = 60;
-		if (empty($_POST['elga_icon_max_height']))
-			$_POST['elga_icon_max_height'] = 60;
+        if (empty($_POST['elga_icon_max_width']))
+            $_POST['elga_icon_max_width'] = 60;
+        if (empty($_POST['elga_icon_max_height']))
+            $_POST['elga_icon_max_height'] = 60;
 
         $_POST['elga_files_path'] = rtrim($_POST['elga_files_path'], '/');
         $_POST['elga_files_url'] = rtrim($_POST['elga_files_url'], '/');
         $_POST['elga_icons_path'] = rtrim($_POST['elga_icons_path'], '/');
         $_POST['elga_icons_url'] = rtrim($_POST['elga_icons_url'], '/');
 
-		Settings_Form::save_db($config_vars);
+        Settings_Form::save_db($config_vars);
 
         if (!is_dir($modSettings['elga_files_path'])) {
             mkdir($_POST['elga_files_path'], 0777, true);
@@ -232,27 +231,27 @@ function elga_addon_settings()
             mkdir($_POST['elga_icons_path'], 0777, true);
         }
 
-		redirectexit('action=admin;area=addonsettings;sa=elga');
-	}
+        redirectexit('action=admin;area=addonsettings;sa=elga');
+    }
 
-	// Continue on to the settings template
-	$context['page_title'] = $txt['elga_title'];
+    // Continue on to the settings template
+    $context['page_title'] = $txt['elga_title'];
     // $context['settings_title'] = $txt['elga_title'];
-	$context['post_url'] = $scripturl . '?action=admin;area=addonsettings;sa=elga;save';
+    $context['post_url'] = $scripturl . '?action=admin;area=addonsettings;sa=elga;save';
 
-	// if (!empty($modSettings['ююю']))
-		// updateSettings(array('ююю' => 'ююю'));
+    // if (!empty($modSettings['ююю']))
+        // updateSettings(array('ююю' => 'ююю'));
 
-	Settings_Form::prepare_db($config_vars);
+    Settings_Form::prepare_db($config_vars);
 }
 
 // integrate_load_illegal_guest_permissions
 function elga_load_illegal_guest_permissions()
 {
-	global $context;
+    global $context;
 
-	// Guests shouldn't be able to have any portal specific permissions.
-	$context['non_guest_permissions'] = array_merge($context['non_guest_permissions'], [
+    // Guests shouldn't be able to have any portal specific permissions.
+    $context['non_guest_permissions'] = array_merge($context['non_guest_permissions'], [
         // 'elga_manage_albums',
         // 'elga_manage_files',
         'elga_create_albums',

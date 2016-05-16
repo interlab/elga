@@ -47,8 +47,9 @@ function elga_thumbs($files, $usealbum=false)
             </a></p>
             ' . ($usealbum ? 
             '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
-            <p><strong>' . $txt['elga_size'] . '</strong> ' . $row['hsize'] . '</p>
-            <p><strong>' . $txt['elga_author'] . '</strong> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
+            <p><i class="fa fa-eye" aria-hidden="true"></i> ' . $row['views'] . '</p>
+            <p><i class="fa fa-hdd-o" aria-hidden="true"></i> ' . $row['hsize'] . '</p>
+            <p><i class="fa fa-user" aria-hidden="true"></i> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
         </div>';
     }
     $r .= '
@@ -110,7 +111,7 @@ function template_managealbums()
 
     $ismove = !empty($context['elga_move_id']);
     $current = $ismove ? $context['elga_move_id'] : 0;
-    
+
     echo '
     <div class="elga-buttons">
     <ul>
@@ -200,7 +201,7 @@ function elga_show_albums(array $albums = [])
     if (empty($albums)) {
         return;
     } 
-    
+
     echo '
     <h2 class="category_header elga-h2">', $txt['elga_albums'], '</h2>
     <div class="elga-thumbs-albums">';
@@ -265,7 +266,7 @@ function template_home()
     <h2 class="category_header elga-h2">
     ', $txt['elga_last_files'], '
     <span class="nextlinks">Сортировка по: Дата | Название</span>
-	</h2>';
+    </h2>';
 
     echo elga_thumbs($context['elga_last_files'], true);
 }
@@ -273,13 +274,13 @@ function template_home()
 function template_add_file()
 {
     global $context, $scripturl, $txt;
-    
+
     echo '
     <h2 class="category_header">', $context['page_title'], '</h2>
 
     <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
-    
+
     if (!empty($context['errors'])) {
         echo '
                 <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
@@ -309,7 +310,7 @@ function template_add_file()
         </select>&nbsp;&nbsp
 
         </dd>
-    
+
         <dt>
             <label for="title">Title</label>
         </dt>
@@ -328,7 +329,7 @@ function template_add_file()
         <dd>
             <input type="file" name="image" size="80" tabindex="', $context['tabindex']++, '" accept="image/*" />
         </dd>';
-        
+
     if ($context['require_verification'])
     {
         template_verification_controls($context['visual_verification_id'], '
@@ -339,7 +340,7 @@ function template_add_file()
                             ', '
                     </dd>');
     }
-        
+
     echo '
     </dl>
     <hr>
@@ -362,7 +363,7 @@ function template_add_file()
     echo '
     </div>
 </div>
-    
+
     </form>';
 }
 
@@ -477,8 +478,6 @@ function template_album()
     echo '
     <h2 class="category_header elga-h2">
     ', $txt['elga_last_files'], '
-
-    echo '
     </h2>';
 
     if (allowedTo('elga_create_files')) {
@@ -541,8 +540,9 @@ function template_album_js()
             </a></p>
             ' . ($usealbum ? 
             '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
-            <p><strong>' . $txt['elga_size'] . '</strong> ' . $row['hsize'] . '</p>
-            <p><strong>' . $txt['elga_author'] . '</strong> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
+            <p><i class="fa fa-eye" aria-hidden="true"></i> ' . $row['views'] . '</p>
+            <p><i class="fa fa-hdd-o" aria-hidden="true"></i> ' . $row['hsize'] . '</p>
+            <p><i class="fa fa-user" aria-hidden="true"></i> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
         </div>';
     }
     //echo '</div>';
@@ -565,7 +565,7 @@ function template_file()
     global $context, $scripturl, $txt, $boardurl, $modSettings;
 
     $row = $context['elga_file'];
-    
+
     echo '
   <script>
   $(function() {
@@ -573,7 +573,7 @@ function template_file()
   });
   </script>
     ';
-    
+
     if ($context['elga_is_author']) {
         echo '
     <ul>

@@ -202,6 +202,8 @@ class ElgaController extends Action_Controller
         }
         $context['elga_album'] = $album;
 
+        ElgaSubs::loadAlbumsLinkTree($album['id'], true);
+
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=album;id='.$album['id'],
             'name' => $album['name'],
@@ -948,17 +950,14 @@ class ElgaController extends Action_Controller
         require_once SUBSDIR.'/Post.subs.php';
         censorText($file['description']);
 
-        $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=album;id='.$file['id_album'],
-            'name' => $file['album_name'],
-        ];
+        ElgaSubs::loadAlbumsLinkTree($file['id_album'], false, true);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=file;id='.$file['id'],
             'name' => $file['title'],
         ];
 
-        $context['page_title'] = ''.$file['title'];
+        $context['page_title'] = $file['title'];
 
         $context['sub_template'] = 'file';
 

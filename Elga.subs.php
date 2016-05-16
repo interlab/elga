@@ -274,8 +274,9 @@ class ElgaSubs
         $db = database();
 
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total
+        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
+            JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
         GROUP BY a.id
         ORDER BY a.leftkey
@@ -331,8 +332,10 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey
+        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
+            JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
+            LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
         WHERE a.id = {int:id}
         LIMIT 1', [
             'id' => self::uint($id),
@@ -378,6 +381,59 @@ class ElgaSubs
         $db->free_result($req);
 
         return $data;
+    }
+
+    public function getParentsAlbums($id, $depth = null, $current = false)
+    {
+        global $modSettings, $scripturl;
+
+        $a = self::getAlbum($id);
+        if ( ! $a['depth'] ) {
+            return null;
+        }
+
+        $db = database();
+        $req = $db->query('', '
+        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total
+        FROM {db_prefix}elga_albums AS a
+            LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
+        WHERE a.leftkey ' . ($current ? '<=' : '<') . ' ' . $a['leftkey'] . '
+            AND a.rightkey ' . ($current ? '>=' : '>') . ' ' . $a['rightkey'] . '
+        GROUP BY a.id
+        ORDER BY a.leftkey
+        LIMIT 100', []);
+
+        $data = [];
+        if ($db->num_rows($req) > 0) {
+            while ($row = $db->fetch_assoc($req)) {
+                $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+                $row['url'] = $scripturl.'?action=gallery;sa=album;id='.$row['id'];
+                $data[$row['id']] = $row;
+            }
+        }
+        $db->free_result($req);
+
+        return $data;
+    }
+
+    public static function loadAlbumsLinkTree($id_album, $load_title = false, $load_current = false)
+    {
+        global $context, $scripturl;
+
+        $albms = self::getParentsAlbums($id_album, null, $load_current);
+
+        if ( ! empty($albms) ) {
+            foreach ($albms as $album) {
+                if ($load_title) {
+                    $context['page_title'] .= ' - ' . $album['name'];
+                }
+
+                $context['linktree'][] = [
+                    'url' => $scripturl.'?action=gallery;sa=album;id='.$album['id'],
+                    'name' => $album['name'],
+                ];
+            }
+        }
     }
 
     public static function findFileUploadErrors($key, $path, $max_size)
