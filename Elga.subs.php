@@ -322,9 +322,9 @@ class ElgaSubs
         return $data;
     }
 
-    public static function getAlbum($id)
+    public static function getAlbum($id, $load_descendants=false)
     {
-        global $modSettings;
+        global $modSettings, $scripturl;
 
         if (!is_numeric($id)) {
             fatal_error('Bad id value. Required int type.', false);
@@ -350,7 +350,10 @@ class ElgaSubs
         $row = $db->fetch_assoc($req);
         $db->free_result($req);
         $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
-        $row['descendants'] = self::getSubAlbums($row);
+        $row['url'] = $scripturl.'?action=gallery;sa=album;id='.$row['id'];
+        if ($load_descendants) {
+            $row['descendants'] = self::getSubAlbums($row);
+        }
 
         return $row;
     }
@@ -383,22 +386,23 @@ class ElgaSubs
         return $data;
     }
 
-    public function getParentsAlbums($id, $depth = null, $current = false)
+    public function getParentsAlbums($id, $depth = null, $get_current = false)
     {
         global $modSettings, $scripturl;
 
         $a = self::getAlbum($id);
-        if ( ! $a['depth'] ) {
+        if (empty($a['depth'])) {
             return null;
         }
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total
+        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
+            JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
-        WHERE a.leftkey ' . ($current ? '<=' : '<') . ' ' . $a['leftkey'] . '
-            AND a.rightkey ' . ($current ? '>=' : '>') . ' ' . $a['rightkey'] . '
+        WHERE a.leftkey < ' . $a['leftkey'] . '
+            AND a.rightkey > ' . $a['rightkey'] . '
         GROUP BY a.id
         ORDER BY a.leftkey
         LIMIT 100', []);
@@ -412,6 +416,10 @@ class ElgaSubs
             }
         }
         $db->free_result($req);
+
+        if ($get_current) {
+            $data[$id] = $a;
+        }
 
         return $data;
     }
@@ -494,7 +502,7 @@ class ElgaSubs
                 fatal_error(Util::htmlspecialchars($_FILES[$key]['name']).'Недопустимые символы в имени постер-файла!', false);
             }
 
-            if (!preg_match('~png|gif|jpg|jpeg~i', $ext)) {
+            if (!preg_match('~^(png|gif|jpg|jpeg)$~i', $ext)) {
                 fatal_error('Расширение постера должно быть <strong>png, gif, jpg, jpeg</strong>.', false);
             }
 

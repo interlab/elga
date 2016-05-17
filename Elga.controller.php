@@ -196,7 +196,7 @@ class ElgaController extends Action_Controller
 
         $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
 
-        $album = ElgaSubs::getAlbum($_GET['id']);
+        $album = ElgaSubs::getAlbum($_GET['id'], true);
         if (empty($album)) {
             fatal_error('Album not found!', false);
         }
