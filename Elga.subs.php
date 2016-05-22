@@ -556,7 +556,7 @@ class ElgaSubs
             fatal_error('уже существует файл с таким же названием');
         }
 
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name)) {
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name) && $sha1 === sha1_file($dest_name)) {
             fatal_error('Ошибка копирования временного файла!', false);
         } else {
             // create thumb image
@@ -576,7 +576,8 @@ class ElgaSubs
                 'orig_name' => $_FILES['image']['name'], // ? need sanitize?
                 'size' => $fsize,
                 'thumb' => $date.'/'.$thumb_name,
-                'preview' => $date . '/' . $preview_name, 
+                'preview' => $date . '/' . $preview_name,
+                'fhash' => $sha1,
             ];
         }
         /*
