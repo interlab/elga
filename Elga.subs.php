@@ -512,20 +512,16 @@ class ElgaSubs
         return false;    
     }
 
-    public static function uploadImage()
-    {
-        return self::createFileImage();
-    }
 
     /*
-            key
-            path
-            maxsize
-            max_thumb_width
-            max_thumb_height
-            max_preview_width
-            max_preview_height
-            is_preview
+        key
+        path
+        maxsize
+        max_thumb_width
+        max_thumb_height
+        max_preview_width
+        max_preview_height
+        is_preview
     */
     public static function createFileImage(array $img = [])
     {

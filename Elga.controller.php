@@ -669,7 +669,7 @@ class ElgaController extends Action_Controller
                 $context['errors'][] = 'Album not exists!';
             }
 
-            $img = ElgaSubs::uploadImage();
+            $img = ElgaSubs::createFileImage();
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
             require_once SUBSDIR.'/Post.subs.php';
@@ -812,7 +812,7 @@ class ElgaController extends Action_Controller
 
             $img = 0;
             if ('' !== $_FILES['image']['name']) {
-                $img = ElgaSubs::uploadImage();
+                $img = ElgaSubs::createFileImage();
             }
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
