@@ -660,12 +660,14 @@ class ElgaController extends Action_Controller
                 // die();
 
                 $db->insert('', '{db_prefix}elga_files',
-                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 
-                      'preview' => 'string', 'id_album' => 'int',
+                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'fhash' => 'string',
+                      'thumb' => 'string', 'preview' => 'string', 'id_album' => 'int',
                       'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string',
-                      'time_added' => 'int', 'exif' => 'string', ],
-                    [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $img['preview'], $validator->album,
-                      $title, $descr, $user_info['id'], $user_info['name'], time(), '', ],
+                      'time_added' => 'int', 'exif' => 'string',
+                    ],
+                    [ $img['orig_name'], $img['name'], $img['size'], $img['fhash'], $img['thumb'], $img['preview'],
+                      $validator->album, $title, $descr, $user_info['id'], $user_info['name'], time(), '',
+                    ],
                     [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
@@ -814,6 +816,7 @@ class ElgaController extends Action_Controller
                         'oname' => $img ? $img['orig_name'] : '',
                         'fname' => $img ? $img['name'] : '',
                         'fsize' => $img ? $img['size'] : '',
+                        'fhash' => $img ? $img['fhash'] : '',
                         'thumb' => $img ? $img['thumb'] : '',
                         'preview' => $img ? $img['preview'] : '',
                         'album' => $validator->album,
