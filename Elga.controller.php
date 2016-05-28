@@ -349,9 +349,27 @@ class ElgaController extends Action_Controller
                 }
 
                 $db->insert('', '{db_prefix}elga_albums',
-                    [ 'name' => 'string', 'icon' => 'string', 'description' => 'string', 'leftkey' => 'int', 'rightkey' => 'int'],
-                    [ $title, ($icon ? $icon : ''), $descr, $leftkey, $rightkey ],
-                    [ ]
+                    [
+                        'name' => 'string',
+                        'icon_orig_name' => 'string',
+                        'icon_name' => 'string',
+                        'icon_thumb' => 'string',
+                        'icon_fhash' => 'string',
+                        'description' => 'string',
+                        'leftkey' => 'int',
+                        'rightkey' => 'int',
+                    ],
+                    [
+                        $title,
+                        ($icon ? $icon['orig_name'] : ''),
+                        ($icon ? $icon['name'] : ''),
+                        ($icon ? $icon['thumb'] : ''),
+                        ($icon ? $icon['fhash'] : ''),
+                        $descr,
+                        $leftkey,
+                        $rightkey,
+                    ],
+                    []
                 );
                 $id = $db->insert_id('{db_prefix}elga_albums', 'id');
 
@@ -475,11 +493,17 @@ class ElgaController extends Action_Controller
                     UPDATE {db_prefix}elga_albums
                     SET 
                         name = {string:name},'.($icon ? '
-                        icon = {string:icon},' : '').'
+                        icon_orig_name = {string:orig_name},
+                        icon_name = {string:icon_name},
+                        icon_thumb = {string:icon_thumb},
+                        icon_fhash = {string:icon_fhash},' : '').'
                         description = {string:descr}
                     WHERE id = {int:id}',
                     [
-                        'icon' => $icon ? $icon : '',
+                        'orig_name' => ($icon ? $icon['orig_name'] : ''),
+                        'icon_name' => ($icon ? $icon['name'] : ''),
+                        'icon_thumb' => ($icon ? $icon['thumb'] : ''),
+                        'icon_fhash' => ($icon ? $icon['fhash'] : ''),
                         'name' => $title,
                         'descr' => $descr,
                         'id' => $id,

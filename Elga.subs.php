@@ -274,7 +274,7 @@ class ElgaSubs
         $db = database();
 
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
@@ -286,7 +286,7 @@ class ElgaSubs
         $data = [];
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
-                $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+                $row['icon'] = $modSettings['elga_icons_url'].'/'.$row['icon_thumb'];
                 $row['url'] = $scripturl.'?action=gallery;sa=album;id='.$row['id'];
                 $data[$row['id']] = $row;
             }
@@ -332,7 +332,7 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
@@ -349,7 +349,7 @@ class ElgaSubs
 
         $row = $db->fetch_assoc($req);
         $db->free_result($req);
-        $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+        $row['icon'] = $modSettings['elga_icons_url'].'/'.$row['icon_thumb'];
         $row['url'] = $scripturl.'?action=gallery;sa=album;id='.$row['id'];
         if ($load_descendants) {
             $row['descendants'] = self::getSubAlbums($row);
@@ -377,7 +377,7 @@ class ElgaSubs
         $data = [];
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
-                $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+                $row['icon'] = $modSettings['elga_icons_url'].'/'.$row['icon_thumb'];
                 $data[] = $row;
             }
         }
@@ -397,7 +397,7 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
@@ -410,7 +410,7 @@ class ElgaSubs
         $data = [];
         if ($db->num_rows($req) > 0) {
             while ($row = $db->fetch_assoc($req)) {
-                $row['icon'] = filter_var($row['icon'], FILTER_VALIDATE_URL) ? $row['icon'] : $modSettings['elga_icons_url'].'/'.$row['icon'];
+                $row['icon'] = $modSettings['elga_icons_url'].'/'.$row['icon_thumb'];
                 $row['url'] = $scripturl.'?action=gallery;sa=album;id='.$row['id'];
                 $data[$row['id']] = $row;
             }
@@ -514,22 +514,50 @@ class ElgaSubs
 
     public static function uploadImage()
     {
+        return self::createFileImage();
+    }
+
+    /*
+            key
+            path
+            maxsize
+            max_thumb_width
+            max_thumb_height
+            max_preview_width
+            max_preview_height
+            is_preview
+    */
+    public static function createFileImage(array $img = [])
+    {
         global $context, $modSettings;
 
-        $fname = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
-        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $directory = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
-        $max_size = 1024 * 1024 * 3;
-        $fsize = filesize($_FILES['image']['tmp_name']);
+        if (empty($img)) {
+            $img = [
+                'key' => 'image',
+                'path' => $modSettings['elga_files_path'],
+                'maxsize' => 1024 * 1024 * 3,
+                'max_thumb_width' => empty($modSettings['elga_imgthumb_max_width']) ? 200 : $modSettings['elga_imgthumb_max_width'],
+                'max_thumb_height' => empty($modSettings['elga_imgthumb_max_height']) ? 200 : $modSettings['elga_imgthumb_max_height'],
+                'max_preview_width' => empty($modSettings['elga_imgpreview_max_width']) ? 450 : $modSettings['elga_imgpreview_max_width'],
+                'max_preview_height' => empty($modSettings['elga_imgpreview_max_height']) ? 450 : $modSettings['elga_imgpreview_max_height'],
+                'is_preview' => true,
+            ];
+        }
 
-        if ( ! self::findFileUploadErrors('image', $directory, $max_size) ) {
+        $name = $_FILES[$img['key']]['name'];
+        $tmpname = $_FILES[$img['key']]['tmp_name'];
+        $fname = pathinfo($name, PATHINFO_FILENAME);
+        $ext = pathinfo($name, PATHINFO_EXTENSION);
+        $fsize = filesize($tmpname);
+
+        if ( ! self::findFileUploadErrors($img['key'], $img['path'], $img['maxsize']) ) {
             return false;
         }
 
-        $sha1 = sha1_file($_FILES['image']['tmp_name']);
+        $sha1 = sha1_file($tmpname);
         $nfname = $sha1 . '.' . $ext;
         $date = date('Y/m/d', time());
-        $dest_dir = $directory.'/'.$date;
+        $dest_dir = $img['path'].'/'.$date;
         if (!is_dir($dest_dir)) {
             if (!mkdir($dest_dir, 0777, true)) {
                 fatal_error('Не получается создать директорию '.$dest_dir);
@@ -556,33 +584,28 @@ class ElgaSubs
             fatal_error('уже существует файл с таким же названием');
         }
 
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest_name) && $sha1 === sha1_file($dest_name)) {
+        if (!move_uploaded_file($tmpname, $dest_name) && $sha1 === sha1_file($dest_name)) {
             fatal_error('Ошибка копирования временного файла!', false);
         } else {
             // create thumb image
             $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-            $width = empty($modSettings['elga_imgthumb_max_width']) ? 200 : $modSettings['elga_imgthumb_max_width'];
-            $height = empty($modSettings['elga_imgthumb_max_height']) ? 200 : $modSettings['elga_imgthumb_max_height'];
-            self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $width, $height);
+            self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $img['max_thumb_width'], $img['max_thumb_height']);
 
             // create preview image
-            $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-            $width = empty($modSettings['elga_imgpreview_max_width']) ? 450 : $modSettings['elga_imgpreview_max_width'];
-            $height = empty($modSettings['elga_imgpreview_max_height']) ? 450 : $modSettings['elga_imgpreview_max_height'];
-            self::thumb($dest_name, $dest_dir.'/'.$preview_name, $width, $height);
+            if ( $img['is_preview'] ) {
+                $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
+                self::thumb($dest_name, $dest_dir.'/'.$preview_name, $img['max_preview_width'], $img['max_preview_height']);
+            }
 
             return [
                 'name' => $date.'/'.$nfname,
-                'orig_name' => $_FILES['image']['name'], // ? need sanitize?
+                'orig_name' => $name, // ? need sanitize?
                 'size' => $fsize,
                 'thumb' => $date.'/'.$thumb_name,
-                'preview' => $date . '/' . $preview_name,
+                'preview' => $img['is_preview'] ? $date . '/' . $preview_name : '',
                 'fhash' => $sha1,
             ];
         }
-        /*
-        }
-        */
     }
 
     public static function removeFile($id)
@@ -634,20 +657,16 @@ class ElgaSubs
     {
         global $modSettings;
 
-        $path = $modSettings['elga_icons_path']; //BOARDDIR.'/files/gallery/icons';
-        $name = $_FILES['icon']['name'];
+        $file = self::createFileImage([
+            'key' => 'icon',
+            'path' => $modSettings['elga_icons_path'], //BOARDDIR.'/files/gallery/icons';
+            'maxsize' => 1024 * 1024 * 3,
+            'max_thumb_width' => $modSettings['elga_icon_max_width'] ? $modSettings['elga_icon_max_width'] : 60,
+            'max_thumb_height' => $modSettings['elga_icon_max_height'] ? $modSettings['elga_icon_max_height'] : 60,
+            'is_preview' => false,
+        ]);
 
-        if ( ! self::findFileUploadErrors('icon', $path, 1024 * 1024 * 3) )
-            return false;
-
-        self::thumb(
-            $_FILES['icon']['tmp_name'],
-            $path . '/' . $name,
-            $modSettings['elga_icon_max_width'] ? $modSettings['elga_icon_max_width'] : 60,
-            $modSettings['elga_icon_max_height'] ? $modSettings['elga_icon_max_height'] : 60
-        );
-
-        return $name;
+        return $file;
     }
 
     # http://imagine.readthedocs.org/en/latest/index.html
