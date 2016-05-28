@@ -18,10 +18,18 @@ $tables = array(
             array('name' => 'id', 'type' => 'int', 'size' => 10, 'unsigned' => true, 'auto' => true),
             array('name' => 'name', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'description', 'null' => false, 'type' => 'text'),
-            array('name' => 'icon', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
+            array('name' => 'icon_orig_name', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
+            array('name' => 'icon_name', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
+            array('name' => 'icon_thumb', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
+            array('name' => 'icon_fhash', 'type' => 'varchar', 'size' => 40, 'null' => false, 'default' => ''),
+            array('name' => 'leftkey', 'type' => 'int', 'size' => 10, 'unsigned' => true, 'default' => 0),
+            array('name' => 'rightkey', 'type' => 'int', 'size' => 10, 'unsigned' => true, 'default' => 0),
         ),
         'indexes' => array(
             array('type' => 'primary', 'columns' => array('id')),
+            array('type' => 'index', 'columns' => array('leftkey'), 'name' => 'leftkey'),
+            array('type' => 'index', 'columns' => array('rightkey'), 'name' => 'rightkey'),
+            array('type' => 'index', 'columns' => array('leftkey', 'rightkey'), 'name' => 'leftright'),
         ),
     ),
     'elga_files' => array(
@@ -30,7 +38,9 @@ $tables = array(
             array('name' => 'orig_name', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'fname', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'thumb', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
+            array('name' => 'preview', 'type' => 'varchar', 'size' => 255, 'null' => false, 'default' => ''),
             array('name' => 'fsize', 'type' => 'bigint', 'size' => 20, 'unsigned' => true, 'null' => false),
+            array('name' => 'fhash', 'type' => 'varchar', 'size' => 40, 'null' => false, 'default' => ''),
             array('name' => 'id_album', 'type' => 'int', 'size' => 10, 'unsigned' => true, 'null' => false),
             array('name' => 'title', 'type' => 'varchar', 'size' => 100, 'null' => false, 'default' => ''),
             array('name' => 'description', 'type' => 'text', 'null' => false),
@@ -72,16 +82,16 @@ $db->free_result($result);
 if (empty($has_album))
 {
     $albums = [
-        ['name' => 'Юмор', 'description' => 'LOL', 'icon' => 'clown.png',],
-        ['name' => 'Демотиваторы', 'description' => 'хо-хо', 'icon' => 'bomb.png',],
-        ['name' => 'Природа', 'description' => 'zoo', 'icon' => 'butterfly.png',],
-        ['name' => 'Города', 'description' => 'city', 'icon' => 'paris-eiffel.png',],
-        ['name' => 'Girls', 'description' => 'sexy', 'icon' => 'girl.png',],
+        ['name' => 'Юмор', 'description' => 'LOL', 'icon_thumb' => 'clown.png', 'leftkey' => '1', 'rightkey' => '2',],
+        ['name' => 'Демотиваторы', 'description' => 'хо-хо', 'icon_thumb' => 'bomb.png', 'leftkey' => '3', 'rightkey' => '4',],
+        ['name' => 'Природа', 'description' => 'zoo', 'icon_thumb' => 'butterfly.png', 'leftkey' => '5', 'rightkey' => '6',],
+        ['name' => 'Города', 'description' => 'city', 'icon_thumb' => 'paris-eiffel.png',  'leftkey' => '7', 'rightkey' => '8',],
+        ['name' => 'Girls', 'description' => 'sexy', 'icon_thumb' => 'girl.png',  'leftkey' => '9', 'rightkey' => '10',],
     ];
 
     $db->insert('ignore',
         '{db_prefix}elga_albums',
-        ['name' => 'text', 'description' => 'text', 'icon' => 'text'],
+        ['name' => 'text', 'description' => 'text', 'icon_thumb' => 'text', 'leftkey' => 'int', 'rightkey' => 'int'],
         $albums,
         ['id',]
     );

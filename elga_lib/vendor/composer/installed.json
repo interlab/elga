@@ -1,5 +1,33 @@
 [
     {
+        "name": "interlab/nested-sets",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://bitbucket.org/interlab/ns",
+            "reference": "59b924b41aac0eb89f51c16cf437660a56d4a1a7"
+        },
+        "require": {
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~5.0"
+        },
+        "time": "2016-03-27 13:50:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "Interlab\\NestedSets\\": "src"
+            }
+        },
+        "description": "The nested sets behavior for php PDO",
+        "keywords": [
+            "nested sets"
+        ]
+    },
+    {
         "name": "gargron/fileupload",
         "version": "v1.0.2",
         "version_normalized": "1.0.2.0",
@@ -33,17 +61,17 @@
     },
     {
         "name": "imagine/imagine",
-        "version": "0.6.2",
-        "version_normalized": "0.6.2.0",
+        "version": "v0.6.3",
+        "version_normalized": "0.6.3.0",
         "source": {
             "type": "git",
             "url": "https://github.com/avalanche123/Imagine.git",
-            "reference": "83ca8babede0e54f935ec09d55a726bf4b0a3f7c"
+            "reference": "149041d2a1b517107bfe270ca2b1a17aa341715d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/avalanche123/Imagine/zipball/83ca8babede0e54f935ec09d55a726bf4b0a3f7c",
-            "reference": "83ca8babede0e54f935ec09d55a726bf4b0a3f7c",
+            "url": "https://api.github.com/repos/avalanche123/Imagine/zipball/149041d2a1b517107bfe270ca2b1a17aa341715d",
+            "reference": "149041d2a1b517107bfe270ca2b1a17aa341715d",
             "shasum": ""
         },
         "require": {
@@ -57,7 +85,7 @@
             "ext-gmagick": "to use the Gmagick implementation",
             "ext-imagick": "to use the Imagick implementation"
         },
-        "time": "2014-11-11 11:36:02",
+        "time": "2015-09-19 16:54:05",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -91,34 +119,96 @@
         ]
     },
     {
-        "name": "symfony/var-dumper",
-        "version": "v2.7.3",
-        "version_normalized": "2.7.3.0",
+        "name": "symfony/polyfill-mbstring",
+        "version": "v1.1.1",
+        "version_normalized": "1.1.1.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/symfony/var-dumper.git",
-            "reference": "e8903ebba5eb019f5886ffce739ea9e3b7519579"
+            "url": "https://github.com/symfony/polyfill-mbstring.git",
+            "reference": "1289d16209491b584839022f29257ad859b8532d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/var-dumper/zipball/e8903ebba5eb019f5886ffce739ea9e3b7519579",
-            "reference": "e8903ebba5eb019f5886ffce739ea9e3b7519579",
+            "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/1289d16209491b584839022f29257ad859b8532d",
+            "reference": "1289d16209491b584839022f29257ad859b8532d",
             "shasum": ""
         },
         "require": {
-            "php": ">=5.3.9"
+            "php": ">=5.3.3"
+        },
+        "suggest": {
+            "ext-mbstring": "For best performance"
+        },
+        "time": "2016-01-20 09:13:37",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.1-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Symfony\\Polyfill\\Mbstring\\": ""
+            },
+            "files": [
+                "bootstrap.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Nicolas Grekas",
+                "email": "p@tchwork.com"
+            },
+            {
+                "name": "Symfony Community",
+                "homepage": "https://symfony.com/contributors"
+            }
+        ],
+        "description": "Symfony polyfill for the Mbstring extension",
+        "homepage": "https://symfony.com",
+        "keywords": [
+            "compatibility",
+            "mbstring",
+            "polyfill",
+            "portable",
+            "shim"
+        ]
+    },
+    {
+        "name": "symfony/var-dumper",
+        "version": "v2.8.4",
+        "version_normalized": "2.8.4.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/symfony/var-dumper.git",
+            "reference": "1f840df081f59cbe25140742bbe94a0dfac0222a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/symfony/var-dumper/zipball/1f840df081f59cbe25140742bbe94a0dfac0222a",
+            "reference": "1f840df081f59cbe25140742bbe94a0dfac0222a",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.9",
+            "symfony/polyfill-mbstring": "~1.0"
         },
         "require-dev": {
-            "symfony/phpunit-bridge": "~2.7"
+            "twig/twig": "~1.20|~2.0"
         },
         "suggest": {
             "ext-symfony_debug": ""
         },
-        "time": "2015-07-28 15:18:12",
+        "time": "2016-03-07 14:04:32",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "2.7-dev"
+                "dev-master": "2.8-dev"
             }
         },
         "installation-source": "dist",
@@ -128,7 +218,10 @@
             ],
             "psr-4": {
                 "Symfony\\Component\\VarDumper\\": ""
-            }
+            },
+            "exclude-from-classmap": [
+                "/Tests/"
+            ]
         },
         "notification-url": "https://packagist.org/downloads/",
         "license": [

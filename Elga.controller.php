@@ -10,17 +10,18 @@ class ElgaController extends Action_Controller
 {
     public function __construct()
     {
+        $loader = require_once EXTDIR . '/elga_lib/vendor/autoload.php';
     }
 
     public function action_index()
     {
-        global $context, $scripturl, $modSettings;
+        global $txt, $context, $scripturl, $modSettings;
 
-        $context['page_title'] = 'Галерея - Дом';
+        $context['page_title'] = $txt['elga_home'];
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery',
-            'name' => 'Галерея',
+            'name' => $txt['elga_gallery'],
         ];
 
         loadCSSFile('elga.css');
@@ -28,30 +29,14 @@ class ElgaController extends Action_Controller
 
         loadJavascriptFile('elga/elga.js');
         loadJavascriptFile('elga/jscroll-2.3.4/jquery.jscroll.js');
-        // JavaScriptEscape(...)
-        addInlineJavascript('
-$(document).ready(function(){
-    // var i = 0;
-    // console.log(elgaimgload.src);
-    $(\'.elga-scroll\').jscroll({
-        loadingHtml: \'<i class="fa fa-spinner fa-pulse"></i> Loading...\',
-        padding: 20,
-        nextSelector: \'a.jscroll-next:last\',
-        contentSelector: \'\',
-        callback: function(){
-            jQuery("div.jscroll-added").children().not("div.jscroll-next-parent").appendTo("div.elga-thumbs");
-            // i++;
-            // console.log(i + \'test jscroll\');
-        },
-    });
-});
-        ');
 
         if ( ! $modSettings['elga_enabled'] ) {
             $context['sub_template'] = 'gallery_off';
 
             return;
         }
+
+        isAllowedTo('elga_view_files');
 
         $context['sub_template'] = 'home';
 
@@ -65,6 +50,7 @@ $(document).ready(function(){
         }
 
         $context['elga_albums'] = ElgaSubs::getAlbums();
+        $context['elga_last_files'] = ElgaSubs::getLastFiles(20);
     }
 
     public function action_ajax()
@@ -88,26 +74,142 @@ $(document).ready(function(){
         }
     }
 
+    public function action_show()
+    {
+        global $modSettings;
+
+        if (empty($_GET['id'])) {
+            header("HTTP/1.0 404 Not Found");
+            die('<h1>Not Found</h1>');
+        }
+
+        $id = (int) $_GET['id'];
+        $file = ElgaSubs::getFile($id);
+        if (!$file) {
+            header("HTTP/1.0 404 Not Found");
+            die('<h1>Not Found</h1>');
+        }
+
+        $path = $modSettings['elga_files_path'];
+
+        if (isset($_GET['mode'])) {
+            switch ($_GET['mode']) {
+                case 'preview':
+                $fpath = $path . '/' . $file['preview'];
+                break;
+
+                case 'thumb':
+                $fpath = $path . '/' . $file['thumb'];
+                break;
+
+                case 'download':
+
+                header('Content-disposition: attachment; filename=' . $file['orig_name']);
+                header('Content-type: application/octet-stream');
+                readfile($path . '/' . $file['fname']);
+                exit(0);
+
+                break;
+
+                default:
+                $fpath = $path . '/' . $file['fname'];
+                ElgaSubs::updateFile($id, 'views = views + 1');
+            }
+        } else {
+            $fpath = $path . '/' . $file['fname'];
+        }
+
+        // $fpath = isset($_GET['preview']) ? $path . '/' . $file['preview'] :
+            // ( isset($_GET['thumb']) ? $path . '/' . $file['thumb'] : $path . '/' . $file['fname'] );
+        $fext = pathinfo($fpath, PATHINFO_EXTENSION);
+
+        try {
+            $imagine = new \Imagine\Imagick\Imagine();
+        } catch (\Imagine\Exception\RuntimeException $e) {
+            $imagine = new \Imagine\Gd\Imagine();
+        }
+        $imagine->open($fpath)
+           ->show($fext);
+        die();
+    }
+
+    public function action_managealbums()
+    {
+        global $txt, $context, $scripturl, $boardurl, $modSettings;
+
+        is_not_guest();
+        isAllowedTo('elga_edit_albums');
+
+        $context['elga_albums'] = ElgaSubs::getAlbums();
+
+        $context['page_title'] = $txt['elga_managealbums'];
+        $context['sub_template'] = 'managealbums';
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=managealbums',
+            'name' => $txt['elga_managealbums'],
+        ];
+
+        // move album
+        if (isset($_REQUEST['m'])) {
+            switch ($_REQUEST['m']) {
+                case 'move':
+                    if (ElgaSubs::getAlbum($_REQUEST['id'])) {
+                        $context['elga_move_id'] = $_REQUEST['id'];
+                    }
+                    break;
+                case 'moveToPrevSiblingOf':
+                case 'moveToNextSiblingOf':
+                case 'moveToFirstChildOf':
+                case 'moveToLastChildOf':
+                    checkSession('get');
+                    $ns = ElgaSubs::getNestedSetsManager();
+                    if (isset($_REQUEST['id'], $_REQUEST['current']) &&
+                        $ns->issetNode($_REQUEST['id']) &&
+                        $ns->issetNode($_REQUEST['current'])
+                    ) {
+                        if (call_user_func_array([$ns, $_REQUEST['m']], [$_REQUEST['current'], $_REQUEST['id']])) {
+                            $context['elga_flashdata'] = [$_REQUEST['m'], 'success', 'Узел успешно перемещён!'];
+                            $context['elga_albums'] = ElgaSubs::getAlbums();
+                        } else {
+                            $context['elga_flashdata'] = [$_REQUEST['m'], 'error', 'Ошибка! Unknown Error Type. #' . __LINE__];
+                        }
+                    }
+                    break;
+                default:
+                    die('unknown m');
+            }
+        }
+
+        // if (isset($_REQUEST['m']) && ElgaSubs::getAlbum($_REQUEST['move'])) {
+            // $context['elga_move_id'] = $_REQUEST['move'];
+        // }
+    }
+
     public function action_album()
     {
-        global $context, $scripturl, $boardurl, $modSettings;
+        global $context, $scripturl, $boardurl, $modSettings, $txt;
 
         if (empty($_GET['id'])) {
             redirectexit('action=gallery');
         }
 
-        $albums = ElgaSubs::getAlbums();
-        if (empty($albums[$_GET['id']])) {
+        $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
+
+        $album = ElgaSubs::getAlbum($_GET['id'], true);
+        if (empty($album)) {
             fatal_error('Album not found!', false);
         }
-        $context['elga_album'] = $album = $albums[$_GET['id']];
+        $context['elga_album'] = $album;
+
+        ElgaSubs::loadAlbumsLinkTree($album['id'], true);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=album;id='.$album['id'],
             'name' => $album['name'],
         ];
 
-        $context['page_title'] = 'Галерея - '.$album['name'];
+        $context['page_title'] = sprintf($txt['elga_galleryfmt'], $album['name']);
 
         $context['sub_template'] = 'album';
 
@@ -121,24 +223,10 @@ $(document).ready(function(){
             // $context['sub_template'] = 'send_json';
         }
 
-        $db = database();
-
         // $limit = 20;
         $per_page = 20;
 
-        $req = $db->query('', '
-            SELECT COUNT(*)
-            FROM {db_prefix}elga_files
-            WHERE id_album = {int:id}
-            LIMIT 1',
-            ['id' => $album['id']]);
-        if (!$db->num_rows($req)) {
-            $totalfiles = 0;
-        } else {
-            $totalfiles = $db->fetch_row($req)[0];
-        }
-        $db->free_result($req);
-
+        $totalfiles = ElgaSubs::countFiles($album['id']);
         if (!$totalfiles) {
             return;
         }
@@ -160,29 +248,7 @@ $(document).ready(function(){
             'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
         ];
 
-        $req = $db->query('', '
-            SELECT f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.title, f.description, f.views, f.id_member, f.member_name
-            FROM {db_prefix}elga_files as f
-            WHERE f.id_album = {int:album}
-            ORDER BY f.id DESC
-            LIMIT {int:start}, {int:per_page}',
-            [
-                'album' => $album['id'],
-                'start' => $context['start'],
-                'per_page' => $per_page,
-            ]
-        );
-
-        $url = $modSettings['elga_files_url'];
-        $context['elga_files'] = [];
-        if ($db->num_rows($req) > 0) {
-            while ($row = $db->fetch_assoc($req)) {
-                $row['thumb'] = $url.'/'.$row['thumb'];
-                $row['icon'] = $url.'/'.$row['fname'];
-                $context['elga_files'][$row['id']] = $row;
-            }
-        }
-        $db->free_result($req);
+        $context['elga_files'] = ElgaSubs::getFiles($album['id'], $context['start'], $per_page, ['sort' => $sort]);
     }
 
     public function action_add_album()
@@ -190,8 +256,6 @@ $(document).ready(function(){
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
         is_not_guest();
-
-        $txt['cannot_elga_create_albums'] = 'Вы не можете создавать альбомы! Не хватает прав!';
         isAllowedTo('elga_create_albums');
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
@@ -200,13 +264,13 @@ $(document).ready(function(){
 
         $context['sub_template'] = 'add_album';
         $context['elga_sa'] = 'add_album';
-        $context['page_title'] = 'New album';
+        $context['page_title'] = $txt['elga_new_album'];
         $context['elga_id'] = 0;
         $context['elga_albums'] = ElgaSubs::getAlbums();
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=add_album',
-            'name' => 'New album',
+            'name' => $txt['elga_new_album'],
         ];
 
         if (isset($_REQUEST['send'])) {
@@ -237,8 +301,8 @@ $(document).ready(function(){
             ]);
             $validator->text_replacements([
                 'location' => 'Location not selected!',
-                'album' => 'Album not selected!',
-                'title' => 'Title is empty!',
+                'album' => $txt['elga_album_not_selected'],
+                'title' => $txt['elga_empty_title'],
                 'descr' => $txt['error_message'],
             ]);
 
@@ -274,10 +338,38 @@ $(document).ready(function(){
             if (empty($context['errors'])) {
                 $db = database();
 
+                $lastalbum = ElgaSubs::getNestedSetsManager()->getLastParent();
+                if (null === $lastalbum) {
+                    $leftkey = 1;
+                    $rightkey = 2;
+                }
+                else {
+                    $leftkey = $lastalbum->right + 1;
+                    $rightkey = $lastalbum->right + 2;
+                }
+
                 $db->insert('', '{db_prefix}elga_albums',
-                    [ 'name' => 'string', 'icon' => 'string', 'description' => 'string', ],
-                    [ $title, ($icon ? $icon : ''), $descr, ],
-                    [ ]
+                    [
+                        'name' => 'string',
+                        'icon_orig_name' => 'string',
+                        'icon_name' => 'string',
+                        'icon_thumb' => 'string',
+                        'icon_fhash' => 'string',
+                        'description' => 'string',
+                        'leftkey' => 'int',
+                        'rightkey' => 'int',
+                    ],
+                    [
+                        $title,
+                        ($icon ? $icon['orig_name'] : ''),
+                        ($icon ? $icon['name'] : ''),
+                        ($icon ? $icon['thumb'] : ''),
+                        ($icon ? $icon['fhash'] : ''),
+                        $descr,
+                        $leftkey,
+                        $rightkey,
+                    ],
+                    []
                 );
                 $id = $db->insert_id('{db_prefix}elga_albums', 'id');
 
@@ -401,11 +493,17 @@ $(document).ready(function(){
                     UPDATE {db_prefix}elga_albums
                     SET 
                         name = {string:name},'.($icon ? '
-                        icon = {string:icon},' : '').'
+                        icon_orig_name = {string:orig_name},
+                        icon_name = {string:icon_name},
+                        icon_thumb = {string:icon_thumb},
+                        icon_fhash = {string:icon_fhash},' : '').'
                         description = {string:descr}
                     WHERE id = {int:id}',
                     [
-                        'icon' => $icon ? $icon : '',
+                        'orig_name' => ($icon ? $icon['orig_name'] : ''),
+                        'icon_name' => ($icon ? $icon['name'] : ''),
+                        'icon_thumb' => ($icon ? $icon['thumb'] : ''),
+                        'icon_fhash' => ($icon ? $icon['fhash'] : ''),
                         'name' => $title,
                         'descr' => $descr,
                         'id' => $id,
@@ -414,7 +512,7 @@ $(document).ready(function(){
 
                 // del old image
                 if ($db->affected_rows() && '' !== $a['icon'] && $a['icon'] !== $icon) {
-                    delOldIcon($a);
+                    ElgaSubs::delOldIcon($a);
                 }
 
                 redirectexit('action=gallery;sa=album;id='.$id);
@@ -425,13 +523,14 @@ $(document).ready(function(){
                 $context['elga_id'] = $id;
 
                 $context['sub_template'] = 'add_album';
+                $atitle = sprintf($txt['edit_album'], $title);
 
                 $context['linktree'][] = [
                     'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
-                    'name' => 'Edit album '.$title,
+                    'name' => $atitle,
                 ];
 
-                $context['page_title'] = 'Edit album '.$title;
+                $context['page_title'] = $atitle;
 
                 ElgaSubs::createChecks('edit_album');
             }
@@ -464,19 +563,21 @@ $(document).ready(function(){
         $context['elga_descr'] = $a['description'];
 
         $context['sub_template'] = 'add_album';
+        $atitle = sprintf($txt['edit_album'], $a['name']);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
-            'name' => 'Edit album '.$a['name'],
+            'name' => $atitle,
         ];
 
-        $context['page_title'] = 'Edit album '.$a['name'];
+        $context['page_title'] = $atitle;
 
         ElgaSubs::createChecks('edit_album');
 
         $context['elga_id'] = $id;
     }
 
+    // @TODO
     public function action_remove_album()
     {
         isAllowedTo('elga_delete_albums');
@@ -491,7 +592,6 @@ $(document).ready(function(){
 
         $txt['cannot_elga_create_files'] = 'Вы не можете создавать файлы';
         isAllowedTo('elga_create_files');
-        //echo allowedTo('elga_create_files');
 
         // if (!allowedTo('moderate_forum') && !allowedTo('admin_forum'))
             // fatal_error('Не хватает прав!', false);
@@ -569,7 +669,7 @@ $(document).ready(function(){
                 $context['errors'][] = 'Album not exists!';
             }
 
-            $img = ElgaSubs::uploadImage();
+            $img = ElgaSubs::createFileImage();
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
             require_once SUBSDIR.'/Post.subs.php';
@@ -584,11 +684,14 @@ $(document).ready(function(){
                 // die();
 
                 $db->insert('', '{db_prefix}elga_files',
-                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'thumb' => 'string', 'id_album' => 'int',
+                    [ 'orig_name' => 'string', 'fname' => 'string', 'fsize' => 'raw', 'fhash' => 'string',
+                      'thumb' => 'string', 'preview' => 'string', 'id_album' => 'int',
                       'title' => 'string', 'description' => 'string', 'id_member' => 'int', 'member_name' => 'string',
-                      'time_added' => 'int', 'exif' => 'string', ],
-                    [ $img['orig_name'], $img['name'], $img['size'], $img['thumb'], $validator->album, $title,
-                      $descr, $user_info['id'], $user_info['name'], time(), '', ],
+                      'time_added' => 'int', 'exif' => 'string',
+                    ],
+                    [ $img['orig_name'], $img['name'], $img['size'], $img['fhash'], $img['thumb'], $img['preview'],
+                      $validator->album, $title, $descr, $user_info['id'], $user_info['name'], time(), '',
+                    ],
                     [ 'id_member', 'id_topic' ]
                 );
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
@@ -709,7 +812,7 @@ $(document).ready(function(){
 
             $img = 0;
             if ('' !== $_FILES['image']['name']) {
-                $img = ElgaSubs::uploadImage();
+                $img = ElgaSubs::createFileImage();
             }
 
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
@@ -725,7 +828,8 @@ $(document).ready(function(){
                         orig_name = {string:oname},
                         fname = {string:fname},
                         fsize = {raw:fsize},
-                        thumb = {string:thumb},' : '').'
+                        thumb = {string:thumb},
+                        preview = {string:preview},' : '').'
                         id_album = {int:album},
                         title = {string:title},
                         description = {string:descr},
@@ -736,7 +840,9 @@ $(document).ready(function(){
                         'oname' => $img ? $img['orig_name'] : '',
                         'fname' => $img ? $img['name'] : '',
                         'fsize' => $img ? $img['size'] : '',
+                        'fhash' => $img ? $img['fhash'] : '',
                         'thumb' => $img ? $img['thumb'] : '',
+                        'preview' => $img ? $img['preview'] : '',
                         'album' => $validator->album,
                         'title' => $title,
                         'descr' => $descr,
@@ -835,30 +941,7 @@ $(document).ready(function(){
             fatal_error('Bad id value. Required int type.', false);
         }
 
-        $id = $_REQUEST['id'] = ElgaSubs::uint($_GET['id']);
-
-        $file = ElgaSubs::getFile($id);
-        if (!$file) {
-            fatal_error('File not found.', false);
-        }
-
-        $db = database();
-        $req = $db->query('', '
-            DELETE FROM {db_prefix}elga_files
-            WHERE id = {int:id}',
-            [
-                'id' => $id,
-            ]
-        );
-
-        $dir = $modSettings['elga_files_path'];
-        $img = $dir.'/'.$file['fname'];
-        $thumb = $dir.'/'.$file['thumb'];
-        foreach ([$img, $thumb] as $f) {
-            if (is_file($f)) {
-                @unlink($f);
-            }
-        }
+        ElgaSubs::removeFile($_GET['id']);
 
         redirectexit('action=gallery');
     }
@@ -890,25 +973,89 @@ $(document).ready(function(){
         }
         $url = $modSettings['elga_files_url'];
         $context['elga_file'] = & $file;
-        $context['elga_file']['icon'] = $url.'/'.$context['elga_file']['fname'];
+
         require_once SUBSDIR.'/Post.subs.php';
         censorText($file['description']);
-        $file['description'] = parse_bbc($file['description']);
 
-        $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=album;id='.$file['id_album'],
-            'name' => $file['album_name'],
-        ];
+        ElgaSubs::loadAlbumsLinkTree($file['id_album'], false, true);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=file;id='.$file['id'],
             'name' => $file['title'],
         ];
 
-        $context['page_title'] = ''.$file['title'];
+        $context['page_title'] = $file['title'];
 
         $context['sub_template'] = 'file';
 
         $context['elga_is_author'] = $user_info['id'] == $file['id_member'] || allowedTo('moderate_forum') || allowedTo('admin_forum');
+
+        if (empty($_SESSION['elga_lastreadfile']) || $_SESSION['elga_lastreadfile'] != $file['id']) {
+            ElgaSubs::updateFile($id, 'views = views + 1');
+            $_SESSION['elga_lastreadfile'] = $file['id'];
+        }
+
+        // jQuery UI
+        $modSettings['jquery_include_ui'] = true;
+		//loadCSSFile('jquery.ui.slider.css');
+		//loadCSSFile('jquery.ui.theme.css');
+    }
+
+    // delete this function in production
+    public function action_reloadthumbs()
+    {
+        global $user_info, $modSettings;
+        // global $context, $scripturl, $boardurl;
+
+        if ( ! $user_info['is_admin'] ) {
+            redirectexit('action=gallery');
+        }
+
+        die; // delete this line if you know what you're doing
+        $fp = $modSettings['elga_files_path'];
+
+        foreach (ElgaSubs::getFilesIterator(0, 0, 1000) as $row) {
+            $dir = pathinfo($row['fname'])['dirname'];
+
+            // create thumb image
+            $thumb_name = pathinfo($row['fname'], PATHINFO_FILENAME).'_thumb.'.pathinfo($row['fname'], PATHINFO_EXTENSION);
+            $width = empty($modSettings['elga_imgthumb_max_width']) ? 350 : $modSettings['elga_imgthumb_max_width'];
+            $height = empty($modSettings['elga_imgthumb_max_height']) ? 350 : $modSettings['elga_imgthumb_max_height'];
+            $o = ElgaSubs::thumb(
+                $fp . '/' . $row['fname'],
+                $fp . '/' . $dir . '/' . $thumb_name,
+                $width,
+                $height
+            );
+
+            // create preview image
+            $preview_name = pathinfo($row['fname'], PATHINFO_FILENAME).'_preview.'.pathinfo($row['fname'], PATHINFO_EXTENSION);
+            $width = empty($modSettings['elga_imgpreview_max_width']) ? 350 : $modSettings['elga_imgpreview_max_width'];
+            $height = empty($modSettings['elga_imgpreview_max_height']) ? 350 : $modSettings['elga_imgpreview_max_height'];
+            $o2 = ElgaSubs::thumb(
+                $fp . '/' . $row['fname'],
+                $fp . '/' . $dir . '/' . $preview_name,
+                $width,
+                $height
+            );
+
+            if ( !empty($o) && !empty($o2) ) {
+                $db = database();
+                $db->query('', '
+                    UPDATE {db_prefix}elga_files
+                    SET
+                        thumb = {string:thumb},
+                        preview = {string:preview}
+                    WHERE id = {int:id}',
+                    [
+                        'thumb' => $dir . '/' . $thumb_name,
+                        'preview' => $dir . '/' . $preview_name,
+                        'id' => $row['id'],
+                    ]
+                );
+            }
+        }
+
+        redirectexit('action=gallery');
     }
 }
