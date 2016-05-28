@@ -274,7 +274,7 @@ class ElgaSubs
         $db = database();
 
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(DISTINCT f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
@@ -332,7 +332,7 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(DISTINCT f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
@@ -364,7 +364,7 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.*, (COUNT(p.id) - 1) AS depth, COUNT(f.id) as total
+        SELECT a.*, (COUNT(p.id) - 1) AS depth, COUNT(DISTINCT f.id) as total
         FROM {db_prefix}elga_albums AS a, {db_prefix}elga_albums AS p, {db_prefix}elga_files AS f
         WHERE a.leftkey BETWEEN p.leftkey AND p.rightkey
             AND a.leftkey > ' . $r['leftkey'] . '
@@ -397,7 +397,7 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(DISTINCT f.id) as total, (COUNT(p.id) - 1) AS depth
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
