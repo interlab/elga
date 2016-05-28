@@ -274,7 +274,8 @@ class ElgaSubs
         $db = database();
 
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(DISTINCT f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey,
+            (COUNT(DISTINCT p.id) - 1) AS depth, COUNT(DISTINCT f.id) as total
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
@@ -326,15 +327,16 @@ class ElgaSubs
     {
         global $modSettings, $scripturl;
 
-        if (!is_numeric($id)) {
+        if ( ! is_numeric($id) ) {
             fatal_error('Bad id value. Required int type.', false);
         }
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(DISTINCT f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey,
+            (COUNT(DISTINCT p.id) - 1) AS depth, COUNT(DISTINCT f.id) as total
         FROM {db_prefix}elga_albums AS a
-            JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
+            INNER JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
         WHERE a.id = {int:id}
         LIMIT 1', [
@@ -364,10 +366,11 @@ class ElgaSubs
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.*, (COUNT(p.id) - 1) AS depth, COUNT(DISTINCT f.id) as total
-        FROM {db_prefix}elga_albums AS a, {db_prefix}elga_albums AS p, {db_prefix}elga_files AS f
-        WHERE a.leftkey BETWEEN p.leftkey AND p.rightkey
-            AND a.leftkey > ' . $r['leftkey'] . '
+        SELECT a.*, (COUNT(DISTINCT p.id) - 1) AS depth, COUNT(DISTINCT f.id) as total
+        FROM {db_prefix}elga_albums AS a
+            INNER JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
+            LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
+        WHERE  a.leftkey > ' . $r['leftkey'] . '
             AND a.rightkey < ' . $r['rightkey'] . '
             AND a.id = f.id_album
         GROUP BY a.id
@@ -394,12 +397,20 @@ class ElgaSubs
         if (empty($a['depth'])) {
             return null;
         }
+        if ( empty($a['depth']) ) {
+            if ( ! $get_current ) {
+                return null;
+            } else {
+                return [$id => $a];
+            } 
+        }
 
         $db = database();
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey, COUNT(DISTINCT f.id) as total, (COUNT(p.id) - 1) AS depth
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey,
+            (COUNT(DISTINCT p.id) - 1) AS depth, COUNT(DISTINCT f.id) as total
         FROM {db_prefix}elga_albums AS a
-            JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
+            INNER JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
         WHERE a.leftkey < ' . $a['leftkey'] . '
             AND a.rightkey > ' . $a['rightkey'] . '
