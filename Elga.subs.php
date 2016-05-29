@@ -394,10 +394,10 @@ class ElgaSubs
         global $modSettings, $scripturl;
 
         $a = self::getAlbum($id);
-        if (empty($a['depth'])) {
+        if (empty($a)) {
             return null;
         }
-        if ( empty($a['depth']) ) {
+        if (empty($a['depth'])) {
             if ( ! $get_current ) {
                 return null;
             } else {
