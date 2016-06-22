@@ -274,7 +274,7 @@ class ElgaSubs
         $db = database();
 
         $req = $db->query('', '
-        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.leftkey, a.rightkey,
+        SELECT a.id, a.name, a.description, a.icon_name AS icon, a.icon_thumb, a.icon_fhash, a.leftkey, a.rightkey,
             (COUNT(DISTINCT p.id) - 1) AS depth, COUNT(DISTINCT f.id) as total
         FROM {db_prefix}elga_albums AS a
             JOIN {db_prefix}elga_albums AS p ON (a.leftkey BETWEEN p.leftkey AND p.rightkey)
@@ -649,12 +649,12 @@ class ElgaSubs
         }
     }
 
-    public static function delOldIcon($a)
+    public static function delOldIcon($icon)
     {
         global $modSettings;
 
         $path = $modSettings['elga_icons_path']; //BOARDDIR.'/files/gallery/icons';
-        $file = $path.'/'.$a['icon'];
+        $file = $path.'/'.$icon;
         if (file_exists($file)) {
             @unlink($file);
         }
@@ -768,5 +768,35 @@ class ElgaSubs
         $ns->setDb( $db_type, $db_host, $db_port, $db_name, $db_user, $db_passwd );
 
         return $ns;
+    }
+
+    public static function moveAlbum($action, $current, $id)
+    {
+        switch ($action) {
+            case 'moveToPrevSiblingOf':
+            case 'moveToNextSiblingOf':
+            case 'moveToFirstChildOf':
+            case 'moveToLastChildOf':
+                $ns = self::getNestedSetsManager();
+                if ( ! method_exists($ns, $action) ) {
+                    fatal_error('Unknown move method');
+                }
+
+                if ( $ns->issetNode($current) && $ns->issetNode($id) ) {
+                    if ($ns->isParent($current, $id)) {
+                        fatal_error('Node Is Parent!');
+                    }
+
+                    $succ = call_user_func_array([$ns, $action], [$current, $id]);
+                } else {
+                    $succ = false;
+                }
+
+                break;
+            default:
+                $succ = null;
+        }
+
+        return $succ;
     }
 }

@@ -222,7 +222,7 @@ function elga_show_albums(array $albums = [])
             if ($user_info['is_admin']) {
                 echo '
             <p><a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $album['id'], '" class="elga-edit">
-            <i class="fa fa-edit fa-lg"></i> [', $txt['edit_album'], ']</a></p>';
+            <i class="fa fa-edit fa-lg"></i> [', $txt['elga_edit_album'], ']</a></p>';
             }
 
             if ( $album['rightkey'] - $album['leftkey'] > 1) {
@@ -392,10 +392,12 @@ function template_add_album()
         <dd>
             <select name="location" id="location" tabindex="', $context['tabindex']++, '">';
 
-    foreach ($txt['elga_location_variants'] as $k => $v) {
-        echo '
-            <option value="', $k, '">', $v, '</option>';
-    }
+    $v = $txt['elga_location_variants'];
+    echo '
+        <option value="not">', $v[0], '</option>
+        <option value="moveToPrevSiblingOf">', $v[1], '</option>
+        <option value="moveToNextSiblingOf">', $v[2], '</option>
+        <option value="moveToLastChildOf">', $v[3], '</option>';
 
     echo '
             </select>
@@ -403,7 +405,7 @@ function template_add_album()
             <select name="album" id="album" tabindex="', $context['tabindex']++, '">
             <option value="0"></option>';
 
-     foreach ($context['elga_albums'] as $row) {
+     foreach ($context['elga_albums2'] as $row) {
         if ($row['id'] == $context['elga_id']) {
             continue;
         }
@@ -480,17 +482,27 @@ function template_album()
     ', $txt['elga_last_files'], '
     </h2>';
 
+
+    echo '
+    <div class="elga-buttons">
+    <ul>';
     if (allowedTo('elga_create_files')) {
         echo '
-    <div class="elga-buttons">
-    <ul>
         <li class="listlevel1">
     <a href="', $scripturl, '?action=gallery;sa=add_file;album=', $context['elga_album']['id'], '" class="linklevel1">', $txt['elga_create_file'], '</a>
-        </li>
+        </li>';
+    }
+    if (allowedTo('elga_edit_albums')) {
+        echo '
+        <li class="listlevel1">
+    <a href="', $scripturl, '?action=gallery;sa=edit_album;id=', $context['elga_album']['id'], '" class="linklevel1">', $txt['elga_edit_album'], '</a>
+        </li>';
+    }
+    echo '
     </ul>
     </div>';
-    }
-
+    
+    // echo elga_show_buttons();
     echo elga_show_sort_fields($context['elga_album']['id']);
     echo elga_show_select_cats();
 

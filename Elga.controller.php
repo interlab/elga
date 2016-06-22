@@ -401,6 +401,20 @@ class ElgaController extends Action_Controller
 
         $albums = ElgaSubs::getAlbums();
         $context['elga_albums'] = & $albums;
+
+        // skip childs
+        $id = isset($_REQUEST['id']) ? ElgaSubs::uint($_REQUEST['id']) : 0;
+        if ($id) {
+            $a = ElgaSubs::getAlbum($id);
+            $context['elga_albums2'] = [];
+            foreach ($albums as $key => $row) {
+                if ($a['leftkey'] < $row['leftkey'] && $a['rightkey'] > $row['rightkey']) {
+                    continue;
+                }
+                $context['elga_albums2'][$key] = $row;
+            }
+        }
+
         $context['elga_sa'] = 'edit_album';
 
         if (isset($_REQUEST['send'])) {
@@ -424,7 +438,6 @@ class ElgaController extends Action_Controller
                 fatal_error('Вы не можете редактировать этот альбом! Не хватает прав!', false);
             }
 
-            // No errors, yet.
             $context['errors'] = [];
             loadLanguage('Errors');
 
@@ -435,22 +448,25 @@ class ElgaController extends Action_Controller
             require_once SUBSDIR.'/DataValidator.class.php';
             $validator = new Data_Validator();
             $validator->sanitation_rules([
-                'location' => 'int',
+                'location' => 'string',
+                'id' => 'int',
                 'album' => 'int',
                 'title' => 'trim|Util::htmlspecialchars',
                 'descr' => 'trim|Util::htmlspecialchars',
             ]);
             $validator->validation_rules([
-                'location' => 'required|numeric',
+                'location' => 'required|alpha',
+                'id' => 'required|numeric',
                 'album' => 'required|numeric',
                 'title' => 'required',
-                'descr' => 'required',
+                // 'descr' => 'required',
             ]);
             $validator->text_replacements([
                 'location' => 'Location not selected!',
-                'album' => 'Album not selected!',
+                'id' => 'Id album not selected!',
+                'album' => 'Album field not selected!',
                 'title' => 'Title is empty!',
-                'descr' => $txt['error_message'],
+                // 'descr' => $txt['error_message'],
             ]);
 
             // Any form errors
@@ -472,9 +488,9 @@ class ElgaController extends Action_Controller
                 }
             }
 
-            if (!isset($albums[$_POST['album']])) {
-                $context['errors'][] = 'Album not exists!';
-            }
+            // if (!isset($albums[$_POST['album']])) {
+                // $context['errors'][] = 'Album not exists!';
+            // }
 
             $icon = 0;
             if ('' !== $_FILES['icon']['name']) {
@@ -486,7 +502,9 @@ class ElgaController extends Action_Controller
             $descr = $validator->descr;
             preparsecode($descr);
 
-            // No errors, then send the PM to the admins
+            // move album
+            ElgaSubs::moveAlbum($validator->location, $validator->id, $validator->album);
+
             if (empty($context['errors'])) {
                 $db = database();
                 $db->query('', '
@@ -510,9 +528,9 @@ class ElgaController extends Action_Controller
                     ]
                 );
 
-                // del old image
+                // delete old icon
                 if ($db->affected_rows() && '' !== $a['icon'] && $a['icon'] !== $icon) {
-                    ElgaSubs::delOldIcon($a);
+                    ElgaSubs::delOldIcon($a['icon']);
                 }
 
                 redirectexit('action=gallery;sa=album;id='.$id);
@@ -523,7 +541,7 @@ class ElgaController extends Action_Controller
                 $context['elga_id'] = $id;
 
                 $context['sub_template'] = 'add_album';
-                $atitle = sprintf($txt['edit_album'], $title);
+                $atitle = sprintf($txt['elga_edit_album'], $title);
 
                 $context['linktree'][] = [
                     'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
@@ -543,8 +561,6 @@ class ElgaController extends Action_Controller
             redirectexit('action=gallery');
         }
 
-        $id = ElgaSubs::uint($_GET['id']);
-        $a = ElgaSubs::getAlbum($id);
         if (!$a) {
             fatal_error('Album not found!', false);
         }
@@ -563,7 +579,7 @@ class ElgaController extends Action_Controller
         $context['elga_descr'] = $a['description'];
 
         $context['sub_template'] = 'add_album';
-        $atitle = sprintf($txt['edit_album'], $a['name']);
+        $atitle = sprintf($txt['elga_edit_album'], $a['name']);
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=edit_album;id='.$id,
