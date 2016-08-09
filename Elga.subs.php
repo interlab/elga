@@ -221,13 +221,10 @@ class ElgaSubs
             'album' => self::uint($idalbum),
         ]);
 
-        if (!$db->num_rows($req)) {
-            $db->free_result($req);
-
-            return 0;
+        $id = 0;
+        if ($db->num_rows($req)) {
+            $id = (int) $db->fetch_row($req)[0];
         }
-
-        $id = (int) $db->fetch_row($req)[0];
         $db->free_result($req);
 
         return $id;
@@ -255,13 +252,10 @@ class ElgaSubs
             'album' => self::uint($idalbum),
         ]);
 
-        if (!$db->num_rows($req)) {
-            $db->free_result($req);
-
-            return 0;
+        $id = 0;
+        if ($db->num_rows($req)) {
+            $id = (int) $db->fetch_row($req)[0];
         }
-
-        $id = (int) $db->fetch_row($req)[0];
         $db->free_result($req);
 
         return $id;

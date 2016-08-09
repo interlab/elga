@@ -980,13 +980,13 @@ class ElgaController extends Action_Controller
         */
 
         $file = ElgaSubs::getFile($id);
-
-        $file['prev_id'] = ElgaSubs::getPrevId($file['id'], $file['id_album']);
-        $file['next_id'] = ElgaSubs::getNextId($file['id'], $file['id_album']);
-
         if (!$file) {
             fatal_error('File not found.', false);
         }
+
+        $file['prev_id'] = ElgaSubs::getPrevId($id, $file['id_album']);
+        $file['next_id'] = ElgaSubs::getNextId($id, $file['id_album']);
+
         $url = $modSettings['elga_files_url'];
         $context['elga_file'] = & $file;
 
@@ -996,7 +996,7 @@ class ElgaController extends Action_Controller
         ElgaSubs::loadAlbumsLinkTree($file['id_album'], false, true);
 
         $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=file;id='.$file['id'],
+            'url' => $scripturl.'?action=gallery;sa=file;id='.$id,
             'name' => $file['title'],
         ];
 
@@ -1006,9 +1006,9 @@ class ElgaController extends Action_Controller
 
         $context['elga_is_author'] = $user_info['id'] == $file['id_member'] || allowedTo('moderate_forum') || allowedTo('admin_forum');
 
-        if (empty($_SESSION['elga_lastreadfile']) || $_SESSION['elga_lastreadfile'] != $file['id']) {
+        if (empty($_SESSION['elga_lastreadfile']) || $_SESSION['elga_lastreadfile'] != $id) {
             ElgaSubs::updateFile($id, 'views = views + 1');
-            $_SESSION['elga_lastreadfile'] = $file['id'];
+            $_SESSION['elga_lastreadfile'] = $id;
         }
 
         // jQuery UI
