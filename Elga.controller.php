@@ -226,7 +226,7 @@ class ElgaController extends Action_Controller
         // $limit = 20;
         $per_page = 20;
 
-        $totalfiles = ElgaSubs::countFiles($album['id']);
+        $totalfiles = ElgaSubs::countFiles(['album' => $album['id']]);
         if (!$totalfiles) {
             return;
         }
@@ -248,7 +248,60 @@ class ElgaController extends Action_Controller
             'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
         ];
 
-        $context['elga_files'] = ElgaSubs::getFiles($album['id'], $context['start'], $per_page, ['sort' => $sort]);
+        $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $album['id'],]);
+    }
+
+    public function action_browse()
+    {
+        global $context, $scripturl, $boardurl, $modSettings, $txt, $user_info;
+
+        is_not_guest();
+
+        $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
+
+        $id_album = isset($_GET['album']) ? (int) $_GET['album'] : 0;
+        $id_user = isset($_GET['user']) ? (int) $_GET['user'] : 0;
+
+        $context['page_title'] = 'My files';
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=browse',
+            'name' => 'Browse files',
+        ];
+
+        $context['sub_template'] = 'browse';
+
+        // @TODO
+        // if (isset($_GET['type']) && $_GET['type'] === 'js') {
+            // Template_Layers::getInstance()->removeAll();
+            // $context['sub_template'] = 'album_js';
+        // }
+
+        $per_page = 20;
+
+        $totalfiles = ElgaSubs::countFiles(['album' => $id_album, 'user' => $id_user,]);
+        if (!$totalfiles) {
+            return;
+        }
+
+        $context['elga_total'] = $totalfiles;
+        $context['elga_per_page'] = $per_page;
+        $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
+        $context['page_index'] = constructPageIndex(
+            $scripturl.'?action=gallery;sa=myfiles;start=%1$d',
+            $_REQUEST['start'],
+            $totalfiles,
+            $per_page,
+            true
+        );
+        $context['start'] = $_REQUEST['start'];
+        $context['elga_next_start'] = $context['start'] + $per_page;
+        $context['page_info'] = [
+            'current_page' => $_REQUEST['start'] / $per_page + 1,
+            'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
+        ];
+
+        $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $id_album, 'user' => $id_user,]);
     }
 
     public function action_add_album()

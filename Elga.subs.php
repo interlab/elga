@@ -62,15 +62,23 @@ class ElgaSubs
         return $row;
     }
 
-    public static function countFiles($album_id)
+    public static function countFiles(array $query=[])
     {
+        $query['user'] = empty($query['user']) ? 0 : $query['user'];
+        $query['album'] = empty($query['album']) ? 0 : $query['album'];
+
         $db = database();
         $req = $db->query('', '
             SELECT COUNT(*)
-            FROM {db_prefix}elga_files
-            WHERE id_album = {int:id}
+            FROM {db_prefix}elga_files AS f
+            WHERE 1=1' . ($query['user'] ? '
+                AND f.id_member = {int:id_member}' : '') . '' . ($query['album'] ? '
+                AND f.id_album = {int:id_album}' : '') . '
             LIMIT 1',
-            ['id' => $album_id]
+            [
+                'id_member' => $query['user'],
+                'id_album' => $query['album'],
+            ]
         );
         if (!$db->num_rows($req)) {
             $total = 0;
@@ -86,7 +94,7 @@ class ElgaSubs
     {
         $limit = self::uint($limit);
 
-        return self::getFiles(0, 0, $limit);
+        return self::getFiles(0, $limit);
     }
 
     public static function getFilesIterator($album_id, $offset, $limit)
@@ -150,11 +158,13 @@ class ElgaSubs
         return $order;
     }
 
-    public static function getFiles($album_id, $offset, $limit, array $params = [])
+    public static function getFiles($offset, $limit, array $params = [])
     {
         global $modSettings, $txt, $boardurl, $scripturl;
 
         $sort = self::parseSortQuery( ( isset($params['sort']) ? $params['sort'] : '' ) );
+        $params['album'] = empty($params['album']) ? 0 : $params['album'];
+        $params['user'] = empty($params['user']) ? 0 : $params['user'];
 
         $db = database();
         $req = $db->query('', '
@@ -163,12 +173,15 @@ class ElgaSubs
                 f.description, f.views, f.id_member, f.member_name,
                 a.id AS alb_id, a.name AS alb_name
             FROM {db_prefix}elga_files as f
-                INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)' . ($album_id ? '
-            WHERE f.id_album = {int:album}' : '') . '
+                INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
+            WHERE 1=1' . ($params['album'] ? '
+                AND f.id_album = {int:id_album}' : '') . ($params['user'] ? '
+                AND f.id_member = {int:id_member}' : '') . '
             ORDER BY ' . (empty($sort) ? 'f.id DESC' : $sort) . '
             LIMIT {int:start}, {int:per_page}',
             [
-                'album' => $album_id,
+                'id_member' => $params['user'],
+                'id_album' => $params['album'],
                 'start' => $offset, // $context['start'],
                 'per_page' => $limit, // $per_page,
             ]
