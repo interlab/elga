@@ -207,7 +207,7 @@
 }
 
 .elga-buttons {
-
+    margin: 5px 0;
 }
 
 .elga-fname {
@@ -296,4 +296,19 @@ table.elga-managealbum {
 .elga-managealbum td.elga-manage {
     text-align: center;
     width: 18rem;
+}
+
+.elga-second-row {
+    padding: 8px 0;
+}
+
+.elga-second-row .pagesection {
+    clear: none;
+    display: inline-block;
+    padding: 0;
+}
+
+.elga-second-row .elga-sort-fields,
+.elga-second-row .elga-select-cats {
+    margin: 5px 0 0 0;
 }

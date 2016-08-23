@@ -562,8 +562,14 @@ function template_album()
 
     elga_show_buttons_albums($context['elga_album']['id']);
 
+    echo '
+    <div class="elga-second-row">';
+    // Show the page index... "Pages: [1]".
+    template_pagesection('normal_buttons', 'right');
     echo elga_show_sort_fields($context['elga_album']['id']);
     echo elga_show_select_cats();
+    echo '
+    </div>';
 
     if (empty($context['elga_files'])) {
         echo '
@@ -571,9 +577,6 @@ function template_album()
 
         return;
     }
-
-    // Show the page index... "Pages: [1]".
-    template_pagesection('normal_buttons', 'right');
 
     echo elga_thumbs($context['elga_files']);
 
