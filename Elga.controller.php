@@ -284,11 +284,15 @@ class ElgaController extends Action_Controller
             return;
         }
 
+        $url = $scripturl.'?action=gallery;sa=browse';
+        $url .= $id_album ? ';album=' . $id_album : '';
+        $url .= $id_user ? ';user=' . $id_album : '';
+        
         $context['elga_total'] = $totalfiles;
         $context['elga_per_page'] = $per_page;
         $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
         $context['page_index'] = constructPageIndex(
-            $scripturl.'?action=gallery;sa=myfiles;start=%1$d',
+            $url . ';start=%1$d',
             $_REQUEST['start'],
             $totalfiles,
             $per_page,
