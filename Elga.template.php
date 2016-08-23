@@ -56,7 +56,7 @@ function elga_show_buttons()
     <div class="clear"></div>';
 }
 
-function elga_show_buttons_boards($id)
+function elga_show_buttons_albums($id)
 {
     global $context, $user_info, $scripturl, $txt;
 
@@ -67,8 +67,7 @@ function elga_show_buttons_boards($id)
     ];
 
     $right_links = [
-        [ 'url' => $scripturl . '?action=gallery;sa=browse;album=' . $id, 'enable' => true, 'name' => 'Все файлы', ],
-        [ 'url' => $scripturl . '?action=gallery;sa=browse;album=' . $id . ';user=' . $user_info['id'], 'enable' => !$user_info['is_guest'], 'name' => 'Мои файлы', ],
+        [ 'url' => $scripturl . '?action=gallery;sa=album;id=' . $id . ';user=' . $user_info['id'], 'enable' => !$user_info['is_guest'], 'name' => 'Мои файлы', ],
     ];
 
     echo '
@@ -107,7 +106,8 @@ function elga_show_buttons_boards($id)
     </ul>';
 
     echo '
-    </div>';
+    </div>
+    <div class="clear"></div>';
 }
 
 function elga_thumbs($files, $usealbum=false)
@@ -560,7 +560,7 @@ function template_album()
     ', $txt['elga_last_files'], '
     </h2>';
 
-    elga_show_buttons_boards($context['elga_album']['id']);
+    elga_show_buttons_albums($context['elga_album']['id']);
 
     echo elga_show_sort_fields($context['elga_album']['id']);
     echo elga_show_select_cats();
@@ -583,45 +583,10 @@ function template_album()
         <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=',
         $context['elga_album']['id'], ';start=', $context['elga_next_start'],
         (empty($context['elga_sort']) ? '' : ';sort=' . $context['elga_sort']),
+        ($context['elga_req_user'] ? ';user=' . $context['elga_req_user'] : ''),
             '" class="jscroll-next">next page</a>
     </div>';
     }
-}
-
-function template_browse()
-{
-    global $context, $scripturl, $txt, $boardurl;
-
-    echo '
-    <h2 class="category_header elga-h2">
-        Browse files
-    </h2>';
-
-    echo elga_show_sort_fields();
-    echo elga_show_select_cats();
-
-    if (empty($context['elga_files'])) {
-        echo '
-    <h1>Файлы не найдены</h1>';
-
-        return;
-    }
-
-    // Show the page index... "Pages: [1]".
-    template_pagesection('normal_buttons', 'right');
-
-    echo elga_thumbs($context['elga_files'], true);
-
-    // @TODO
-    // if ($context['elga_is_next_start']) {
-        // echo '
-    // <div class="elga-scroll">
-        // <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=',
-        // $context['elga_album']['id'], ';start=', $context['elga_next_start'],
-        // (empty($context['elga_sort']) ? '' : ';sort=' . $context['elga_sort']),
-            // '" class="jscroll-next">next page</a>
-    // </div>';
-    // }
 }
 
 function template_album_js()
@@ -663,7 +628,71 @@ function template_album_js()
     <a href="', $scripturl, '?action=gallery;sa=album;type=js;id=',
     $context['elga_album']['id'], ';start=', $context['elga_next_start'],
     (empty($context['elga_sort']) ? '' : ';sort=' . $context['elga_sort']),
+    ($context['elga_req_user'] ? ';user=' . $context['elga_req_user'] : ''),
         '" class="jscroll-next">next page</a>';
+        // die('');
+    }
+}
+
+function template_browse()
+{
+    global $context, $scripturl, $txt, $boardurl;
+
+    echo '
+    <h2 class="category_header elga-h2">
+        Browse files
+    </h2>';
+
+    elga_show_buttons();
+    echo elga_show_sort_fields();
+    echo elga_show_select_cats();
+
+    if (empty($context['elga_files'])) {
+        echo '
+    <h1>Файлы не найдены</h1>';
+
+        return;
+    }
+
+    template_pagesection('normal_buttons', 'right');
+
+    echo elga_thumbs($context['elga_files'], true);
+
+    if ($context['elga_is_next_start']) {
+        echo '
+    <div class="elga-scroll">
+        <a href="', $context['elga_url_js'], ';start=', $context['elga_next_start'], '" class="jscroll-next">next page</a>
+    </div>';
+    }
+}
+
+function template_browse_js()
+{
+    global $context, $scripturl, $txt, $boardurl, $modSettings;
+
+    $usealbum = true;
+
+    foreach ($context['elga_files'] as $row) {
+        echo '
+        <div class="elga-thumb-file">
+            <p class="elga-fname"><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></p>
+            <p><a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
+                <img src="' . $row['thumb-url'] . '" alt="..." height="100px" width="100px" class="fancybox" />
+            </a></p>
+            ' . ($usealbum ? 
+            '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
+            <p><i class="fa fa-eye" aria-hidden="true"></i> ' . $row['views'] . '</p>
+            <p><i class="fa fa-hdd-o" aria-hidden="true"></i> ' . $row['hsize'] . '</p>
+            <p><i class="fa fa-user" aria-hidden="true"></i> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
+        </div>';
+    }
+
+    if (!$context['elga_is_next_start']) {
+        // die(''); // end
+    }
+    else {
+        echo '
+    <a href="', $context['elga_url_js'], ';start=', $context['elga_next_start'], '" class="jscroll-next">next page</a>';
         // die('');
     }
 }

@@ -47,7 +47,7 @@
             var selval = $sortselect.val();
             var query = window.location.search;
             // var album_id = $sortselect.parent().find('input[name=album_id]').val();
-            var q = query.match(/;album=(\d+)/);
+            var q = query.match(/;(?:album|id)=(\d+)/);
             var album_id = q ? q[1] : 0;
             
             q = query.match(/;sa=([\w_]+)/);

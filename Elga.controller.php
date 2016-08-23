@@ -195,6 +195,7 @@ class ElgaController extends Action_Controller
         }
 
         $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
+        $context['elga_req_user'] = $id_user = isset($_REQUEST['user']) ? (int) $_REQUEST['user'] : 0;
 
         $album = ElgaSubs::getAlbum($_GET['id'], true);
         if (empty($album)) {
@@ -226,7 +227,7 @@ class ElgaController extends Action_Controller
         // $limit = 20;
         $per_page = 20;
 
-        $totalfiles = ElgaSubs::countFiles(['album' => $album['id']]);
+        $totalfiles = ElgaSubs::countFiles([ 'album' => $album['id'], 'user' => $id_user, ]);
         if (!$totalfiles) {
             return;
         }
@@ -235,7 +236,7 @@ class ElgaController extends Action_Controller
         $context['elga_per_page'] = $per_page;
         $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
         $context['page_index'] = constructPageIndex(
-            $scripturl.'?action=gallery;sa=album;id='.$album['id'].';start=%1$d',
+            $scripturl.'?action=gallery;sa=album;id='.$album['id'].($id_user ? ';user=' . $id_user : '') . ';start=%1$d',
             $_REQUEST['start'],
             $totalfiles,
             $per_page,
@@ -248,7 +249,7 @@ class ElgaController extends Action_Controller
             'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
         ];
 
-        $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $album['id'],]);
+        $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $album['id'], 'user' => $id_user, ]);
     }
 
     public function action_browse()
@@ -263,19 +264,20 @@ class ElgaController extends Action_Controller
         $id_user = isset($_GET['user']) ? (int) $_GET['user'] : 0;
 
         $context['page_title'] = 'My files';
+        $url = $scripturl.'?action=gallery;sa=browse';
 
         $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=browse',
+            'url' => $url,
             'name' => 'Browse files',
         ];
 
         $context['sub_template'] = 'browse';
 
-        // @TODO
-        // if (isset($_GET['type']) && $_GET['type'] === 'js') {
-            // Template_Layers::getInstance()->removeAll();
-            // $context['sub_template'] = 'album_js';
-        // }
+        $url_js = '';
+        if (isset($_GET['type']) && $_GET['type'] === 'js') {
+            Template_Layers::getInstance()->removeAll();
+            $context['sub_template'] = 'browse_js';
+        }
 
         $per_page = 20;
 
@@ -284,9 +286,9 @@ class ElgaController extends Action_Controller
             return;
         }
 
-        $url = $scripturl.'?action=gallery;sa=browse';
         $url .= $id_album ? ';album=' . $id_album : '';
         $url .= $id_user ? ';user=' . $id_album : '';
+        $url .= $sort ? ';sort=' . $sort : '';
         
         $context['elga_total'] = $totalfiles;
         $context['elga_per_page'] = $per_page;
@@ -305,6 +307,7 @@ class ElgaController extends Action_Controller
             'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
         ];
 
+        $context['elga_url_js'] = $url . ';type=js';
         $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $id_album, 'user' => $id_user,]);
     }
 
