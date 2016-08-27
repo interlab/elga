@@ -324,9 +324,12 @@ class ElgaController extends Action_Controller
 
         $context['sub_template'] = 'add_album';
         $context['elga_sa'] = 'add_album';
+        $context['elga_form_dest'] = $scripturl . '?action=gallery;sa=' . $context['elga_sa'];
+        $context['elga_contr'] = 'add';
         $context['page_title'] = $txt['elga_new_album'];
         $context['elga_id'] = 0;
         $context['elga_albums'] = ElgaSubs::getAlbums();
+        $context['elga_albums2'] = & $context['elga_albums'];
 
         $context['linktree'][] = [
             'url' => $scripturl.'?action=gallery;sa=add_album',
@@ -446,6 +449,10 @@ class ElgaController extends Action_Controller
 
         // GET
         ElgaSubs::createChecks('add_album');
+
+        if (!empty($_REQUEST['album'])) {
+            $context['elga_id'] = (int) $_REQUEST['album'];
+        }
     }
 
     public function action_edit_album()
@@ -476,6 +483,8 @@ class ElgaController extends Action_Controller
         }
 
         $context['elga_sa'] = 'edit_album';
+        $context['elga_form_dest'] = $scripturl . '?action=gallery;sa=' . $context['elga_sa'];
+        $context['elga_contr'] = 'edit';
 
         if (isset($_REQUEST['send'])) {
             checkSession('post');

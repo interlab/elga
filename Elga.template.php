@@ -452,7 +452,7 @@ function template_add_album()
     echo '
     <h2 class="category_header">', $context['page_title'], '</h2>
 
-    <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
+    <form action="', $context['elga_form_dest'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
 
     if (!empty($context['errors'])) {
@@ -475,7 +475,7 @@ function template_add_album()
         <option value="not">', $v[0], '</option>
         <option value="moveToPrevSiblingOf">', $v[1], '</option>
         <option value="moveToNextSiblingOf">', $v[2], '</option>
-        <option value="moveToLastChildOf">', $v[3], '</option>';
+        <option value="moveToLastChildOf"'.('add' === $context['elga_contr'] && $context['elga_id'] > 0 ? ' selected' : '').'>', $v[3], '</option>';
 
     echo '
             </select>
@@ -484,11 +484,17 @@ function template_add_album()
             <option value="0"></option>';
 
      foreach ($context['elga_albums2'] as $row) {
-        if ($row['id'] == $context['elga_id']) {
+        if ('edit' === $context['elga_contr'] && $row['id'] == $context['elga_id']) {
             continue;
         }
-        echo '
+        elseif ('add' === $context['elga_contr'] && $row['id'] == $context['elga_id']) {
+            echo '
+            <option value="', $row['id'], '" selected>', $row['name'], '</option>';
+        }
+        else {
+            echo '
             <option value="', $row['id'], '">', $row['name'], '</option>';
+        }
     }
 
     echo '
@@ -499,7 +505,7 @@ function template_add_album()
             <label for="title">', $txt['elga_album_name'], '</label>
         </dt>
         <dd>
-            <input type="text" name="title" id="title" value="', !empty($context['elga_title']) ? $context['elga_title'] : '', '" tabindex="', $context['tabindex']++, '">
+            <input type="text" name="title" id="title" value="', !empty($context['elga_title']) ? $context['elga_title'] : '', '" tabindex="', $context['tabindex']++, '" required>
         </dd>
 
         <dt>
