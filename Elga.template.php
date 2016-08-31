@@ -756,33 +756,36 @@ function template_file()
 
 
     <div class="elga-file-descr">
-    <table>
-    <tbody>
-    <tr>
-        <td>', $txt['elga_fname'], '</td><td>' . $row['orig_name'] . '&nbsp;&nbsp;<a href="', $row['img-url'], '">[Открыть]</a>
-        &nbsp;&nbsp;<a href="', $row['img-download-url'], '">[Скачать]</a></td>
-    </tr><tr>
-        <td>', $txt['elga_size'], '</td><td>', $row['hsize'], '</td>
-    </tr><tr>
-        <td>', $txt['elga_views'], '</td><td>', $row['views'],'</td>
-    </tr><tr>
-        <td>', $txt['elga_author'], '</td>
-        <td><a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a></td>
-    </tr><tr>
-        <td>', $txt['elga_date'], '</td>
-        <td>', standardTime($row['time_added']), '</td>
-    </tr><tr>
-        <td>', $txt['elga_bbcode_link'], '</td><td>
+    <dl>
+        <dt>', $txt['elga_fname'], '</dt>
+        <dd>' . $row['orig_name'] . '&nbsp;&nbsp;<a href="', $row['img-url'], '">[Открыть]</a>
+        &nbsp;&nbsp;<a href="', $row['img-download-url'], '">[Скачать]</a></dd>
+
+        <dt>', $txt['elga_size'], '</dt>
+        <dd>', $row['hsize'], '</dd>
+
+        <dt>', $txt['elga_views'], '</dt>
+        <dd>', $row['views'],'</dd>
+
+        <dt>', $txt['elga_author'], '</dt>
+        <dd><a href="', $scripturl, '?action=profile;u=', $row['id_member'], '">', $row['member_name'], '</a></dd>
+
+        <dt>', $txt['elga_date'], '</dt>
+        <dd>', standardTime($row['time_added']), '</dd>
+
+        <dt>', $txt['elga_bbcode_link'], '</dt>
+        <dd>
         &nbsp;<input id="elga-bbcode-copy" value="', $row['img-bbc'], '" size="60" readonly>
         &nbsp;<button id="elga-copy-btn">Скопировать</button>
-        &nbsp;<span id="elga-copy-answer"></span></td>
-    </tr><tr>
-        <td>', $txt['elga_ftitle'], '</td><td>', $row['title'], '</td>
-    </tr><tr>
-        <td>', $txt['elga_descr'], '</td><td>', $row['description'], '</td>
-    </tr>
-    </tbody>
-    </table>
+        &nbsp;<span id="elga-copy-answer"></span>
+        </dd>
+
+        <dt>', $txt['elga_ftitle'], '</dt>
+        <dd>', $row['title'], '</dd>
+
+        <dt>', $txt['elga_descr'], '</dt>
+        <dd>', $row['description'], '</dd>
+    </dl>
     </div>
 
 

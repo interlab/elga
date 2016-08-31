@@ -379,7 +379,6 @@ class ElgaSubs
             LEFT JOIN {db_prefix}elga_files AS f ON (a.id = f.id_album)
         WHERE  a.leftkey > ' . $r['leftkey'] . '
             AND a.rightkey < ' . $r['rightkey'] . '
-            AND a.id = f.id_album
         GROUP BY a.id
         ORDER BY a.leftkey
         LIMIT 250', []);

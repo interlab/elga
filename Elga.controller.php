@@ -351,13 +351,13 @@ class ElgaController extends Action_Controller
             require_once SUBSDIR.'/DataValidator.class.php';
             $validator = new Data_Validator();
             $validator->sanitation_rules([
-                'location' => 'int',
+                'location' => 'string',
                 'album' => 'int',
                 'title' => 'trim|Util::htmlspecialchars',
                 'descr' => 'trim|Util::htmlspecialchars',
             ]);
             $validator->validation_rules([
-                'location' => 'required|numeric',
+                'location' => 'required|alpha',
                 'album' => 'required|numeric',
                 'title' => 'required',
                 'descr' => 'required',
