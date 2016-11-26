@@ -597,7 +597,13 @@ class ElgaSubs
             fatal_error('уже существует файл с таким же названием');
         }
 
-        /*
+        $originalname = $dest_dir.'/'.pathinfo($nfname, PATHINFO_FILENAME).'.original.'.$ext;
+
+        if (!move_uploaded_file($tmpname, $originalname) && $sha1 === sha1_file($originalname)) {
+            fatal_error('Ошибка копирования временного файла!', false);
+            die('error copy file');
+        }
+
         try {
             $imagine = new \Imagine\Imagick\Imagine();
         } catch (\Imagine\Exception\RuntimeException $e) {
@@ -608,48 +614,31 @@ class ElgaSubs
             }
         }
 
-        $imagine->open($tmpname)
-            ->copy()
-            ->save('test_' . $dest_name);
-        */
-
-        if (!move_uploaded_file($tmpname, $dest_name) && $sha1 === sha1_file($dest_name)) {
-            fatal_error('Ошибка копирования временного файла!', false);
-        } else {
-
-            try {
-				$imagine = new \Imagine\Imagick\Imagine();
-			} catch (\Imagine\Exception\RuntimeException $e) {
-				try {
-					$imagine = new \Imagine\Gd\Imagine();
-				} catch (\Imagine\Exception\RuntimeException $e) {
-					$imagine = new \Imagine\Gmagick\Imagine();
-				}
-			}
-
-			$imagine->open($dest_name)
-				->copy()
-				->save($dest_name . '.test.'.$ext);
-
-            // create thumb image
-            $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-            self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $img['max_thumb_width'], $img['max_thumb_height']);
-
-            // create preview image
-            if ( $img['is_preview'] ) {
-                $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
-                self::thumb($dest_name, $dest_dir.'/'.$preview_name, $img['max_preview_width'], $img['max_preview_height']);
-            }
-
-            return [
-                'name' => $date.'/'.$nfname,
-                'orig_name' => $name, // ? need sanitize?
-                'size' => $fsize,
-                'thumb' => $date.'/'.$thumb_name,
-                'preview' => $img['is_preview'] ? $date . '/' . $preview_name : '',
-                'fhash' => $sha1,
-            ];
+        try {
+            $imagine->open($originalname)->save($dest_name);
+        } catch (Exception $e) {
+            unlink($originalname);
+            throw new Exception('Error save file');
         }
+
+        // create thumb image
+        $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
+        self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $img['max_thumb_width'], $img['max_thumb_height']);
+
+        // create preview image
+        if ( $img['is_preview'] ) {
+            $preview_name = pathinfo($dest_name, PATHINFO_FILENAME).'_preview.'.pathinfo($dest_name, PATHINFO_EXTENSION);
+            self::thumb($dest_name, $dest_dir.'/'.$preview_name, $img['max_preview_width'], $img['max_preview_height']);
+        }
+
+        return [
+            'name' => $date.'/'.$nfname,
+            'orig_name' => $name, // ? need sanitize?
+            'size' => $fsize,
+            'thumb' => $date.'/'.$thumb_name,
+            'preview' => $img['is_preview'] ? $date . '/' . $preview_name : '',
+            'fhash' => $sha1,
+        ];
     }
 
     public static function removeFile($id)
