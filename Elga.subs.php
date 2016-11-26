@@ -557,15 +557,15 @@ class ElgaSubs
             ];
         }
 
+        if ( ! self::findFileUploadErrors($img['key'], $img['path'], $img['maxsize']) ) {
+            return false;
+        }
+
         $name = $_FILES[$img['key']]['name'];
         $tmpname = $_FILES[$img['key']]['tmp_name'];
         $fname = pathinfo($name, PATHINFO_FILENAME);
         $ext = pathinfo($name, PATHINFO_EXTENSION);
         $fsize = filesize($tmpname);
-
-        if ( ! self::findFileUploadErrors($img['key'], $img['path'], $img['maxsize']) ) {
-            return false;
-        }
 
         $sha1 = sha1_file($tmpname);
         $nfname = $sha1 . '.' . $ext;
@@ -597,9 +597,40 @@ class ElgaSubs
             fatal_error('уже существует файл с таким же названием');
         }
 
+        /*
+        try {
+            $imagine = new \Imagine\Imagick\Imagine();
+        } catch (\Imagine\Exception\RuntimeException $e) {
+            try {
+                $imagine = new \Imagine\Gd\Imagine();
+            } catch (\Imagine\Exception\RuntimeException $e) {
+                $imagine = new \Imagine\Gmagick\Imagine();
+            }
+        }
+
+        $imagine->open($tmpname)
+            ->copy()
+            ->save('test_' . $dest_name);
+        */
+
         if (!move_uploaded_file($tmpname, $dest_name) && $sha1 === sha1_file($dest_name)) {
             fatal_error('Ошибка копирования временного файла!', false);
         } else {
+
+            try {
+				$imagine = new \Imagine\Imagick\Imagine();
+			} catch (\Imagine\Exception\RuntimeException $e) {
+				try {
+					$imagine = new \Imagine\Gd\Imagine();
+				} catch (\Imagine\Exception\RuntimeException $e) {
+					$imagine = new \Imagine\Gmagick\Imagine();
+				}
+			}
+
+			$imagine->open($dest_name)
+				->copy()
+				->save($dest_name . '.test.'.$ext);
+
             // create thumb image
             $thumb_name = pathinfo($dest_name, PATHINFO_FILENAME).'_thumb.'.pathinfo($dest_name, PATHINFO_EXTENSION);
             self::thumb($dest_name, $dest_dir.'/'.$thumb_name, $img['max_thumb_width'], $img['max_thumb_height']);
@@ -714,6 +745,7 @@ class ElgaSubs
         } catch (\Imagine\Exception\RuntimeException $e) {
             $imagine = new \Imagine\Gd\Imagine();
         }
+        // @TODO: $imagine = new \Imagine\Gmagick\Imagine();
         $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET; # THUMBNAIL_OUTBOUND
         $image = $imagine->open($img);
         $size = $image->getSize();

@@ -469,6 +469,9 @@ class ElgaController extends Action_Controller
         $albums = ElgaSubs::getAlbums();
         $context['elga_albums'] = & $albums;
 
+        $context['errors'] = [];
+        loadLanguage('Errors');
+
         // skip childs
         $id = isset($_REQUEST['id']) ? ElgaSubs::uint($_REQUEST['id']) : 0;
         if ($id) {
@@ -506,9 +509,6 @@ class ElgaController extends Action_Controller
             if (!allowedTo('moderate_forum') && !allowedTo('admin_forum')) {
                 fatal_error('Вы не можете редактировать этот альбом! Не хватает прав!', false);
             }
-
-            $context['errors'] = [];
-            loadLanguage('Errors');
 
             // Could they get the right send topic verification code?
             require_once SUBSDIR.'/VerificationControls.class.php';
@@ -699,14 +699,13 @@ class ElgaController extends Action_Controller
 
         $context['page_title'] = 'New File';
 
+        $context['errors'] = [];
+        loadLanguage('Errors');
+
         if (isset($_REQUEST['send'])) {
             checkSession('post');
             validateToken('add_file');
             spamProtection('add_file');
-
-            // No errors, yet.
-            $context['errors'] = [];
-            loadLanguage('Errors');
 
             // Could they get the right send topic verification code?
             require_once SUBSDIR.'/VerificationControls.class.php';
@@ -754,12 +753,13 @@ class ElgaController extends Action_Controller
                 $context['errors'][] = 'Album not exists!';
             }
 
-            $img = ElgaSubs::createFileImage();
-
             $title = strtr($validator->title, ["\r" => '', "\n" => '', "\t" => '']);
+            $title = Util::strlen($title) > 100 ? Util::substr($title, 0, 100) : $title;
             require_once SUBSDIR.'/Post.subs.php';
             $descr = $validator->descr;
             preparsecode($descr);
+
+            $img = ElgaSubs::createFileImage();
 
             // No errors, then send the PM to the admins
             if (empty($context['errors'])) {
@@ -782,10 +782,15 @@ class ElgaController extends Action_Controller
                 $insert_id = $db->insert_id('{db_prefix}elga_files', 'id');
 
                 redirectexit('action=gallery;sa=file;id='.$insert_id);
-            } else {
+            }
+            // If errors
+            else {
                 $context['elga_album'] = $validator->album;
                 $context['elga_title'] = $title;
-                $context['elga_descr'] = $descr;
+                $context['elga_descr'] = un_preparsecode($descr);
+
+                censorText($context['elga_title']);
+                censorText($context['elga_descr']);
 
                 ElgaSubs::createChecks('add_file');
 
@@ -813,6 +818,9 @@ class ElgaController extends Action_Controller
         $albums = ElgaSubs::getAlbums();
         $context['elga_albums'] = & $albums;
         $context['elga_sa'] = 'edit_file';
+
+        $context['errors'] = [];
+        loadLanguage('Errors');
 
         if (isset($_REQUEST['send'])) {
             checkSession('post');
@@ -845,10 +853,6 @@ class ElgaController extends Action_Controller
             if ($user_info['id'] != $file['id_member'] && !allowedTo('moderate_forum') && !allowedTo('admin_forum')) {
                 fatal_error('Вы не можете редактировать эту запись! Не хватает прав!', false);
             }
-
-            // No errors, yet.
-            $context['errors'] = [];
-            loadLanguage('Errors');
 
             // Could they get the right send topic verification code?
             require_once SUBSDIR.'/VerificationControls.class.php';
@@ -1082,8 +1086,8 @@ class ElgaController extends Action_Controller
 
         // jQuery UI
         $modSettings['jquery_include_ui'] = true;
-		//loadCSSFile('jquery.ui.slider.css');
-		//loadCSSFile('jquery.ui.theme.css');
+        //loadCSSFile('jquery.ui.slider.css');
+        //loadCSSFile('jquery.ui.theme.css');
     }
 
     // delete this function in production

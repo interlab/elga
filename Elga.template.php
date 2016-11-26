@@ -359,10 +359,8 @@ function template_add_file()
     <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
         name="new_file" id="new_file" enctype="multipart/form-data">';
 
-    if (!empty($context['errors'])) {
-        echo '
-                <div class="errorbox">Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
-    }
+    echo '
+        <div class="errorbox"', empty($context['errors']) ? ' style="display: none;"' : '', '>Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
 
     echo '
 <div class="content">

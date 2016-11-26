@@ -283,5 +283,3 @@ function elga_load_permissions(&$permissionGroups, &$permissionList, &$leftPermi
     // $loader = require_once EXTDIR.'/elga_lib/vendor/autoload.php';
     // dump($permissionGroups, $permissionList, $leftPermissionGroups, $hiddenPermissions, $relabelPermissions);
 }
-
-
