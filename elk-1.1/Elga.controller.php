@@ -6,17 +6,66 @@ if (!defined('ELK')) {
 
 // @todo: comments -> add edit delete
 
-class ElgaController extends Action_Controller
+use ElkArte\sources\Frontpage_Interface;
+
+class Elga_Controller extends Action_Controller implements Frontpage_Interface
 {
-    public function __construct()
+    private static function checkEnable()
     {
+        return !empty($GLOBALS['modSettings']['elga_enabled']);
+    }
+
+    public static function frontPageHook(&$default_action)
+    {
+        if (! self::checkEnable()) {
+            return;
+        }
+
+        $default_action = [
+            'controller' => 'Elga_Controller',
+            'function' => 'action_index'
+        ];
+    }
+
+    public static function canFrontPage()
+    {
+        global $txt;
+
+        $txt['Elga_Controller'] = 'Gallery addon (Elga)';
+
+        return true;
+    }
+
+    public static function frontPageOptions()
+    {
+        // parent::frontPageOptions();
+
+        return [];
+    }
+
+    public function __construct($eventManager = null)
+    {
+        parent::__construct($eventManager);
+
         $loader = require_once EXTDIR . '/elga_lib/vendor/autoload.php';
+        
+        global $modSettings;
+        $modSettings['require_font-awesome'] = true;
+    }
+
+    // run after loadTheme
+    public function pre_dispatch()
+    {
+        require_once SUBSDIR.'/Elga.subs.php';
+
+        // loadLanguage('FlarumStyle');
     }
 
     public function action_index()
     {
         global $txt, $context, $scripturl, $modSettings;
 
+        loadLanguage('Elga');
         $context['page_title'] = $txt['elga_home'];
 
         $context['linktree'][] = [
@@ -36,19 +85,42 @@ class ElgaController extends Action_Controller
             return;
         }
 
-        isAllowedTo('elga_view_files');
+        // Actions here
+        require_once(SUBSDIR . '/Action.class.php');
+        // All we know
+        $subActions = [
+            'home' => [ $this, 'action_home', 'permission' => 'elga_view_files' ],
+            'ajax' => [ $this, 'action_ajax', 'permission' => 'elga_view_files' ],
+            'search' => [ $this, 'action_search', 'permission' => 'elga_view_files' ],
+            'show' => [ $this, 'action_show', 'permission' => 'elga_view_files' ],
+            'browse' => [ $this, 'action_browse', 'permission' => 'elga_view_files' ],
+
+            'album' => [ $this, 'action_album', 'permission' => 'elga_view_files' ],
+            'add_album' => [ $this, 'action_add_album', 'permission' => 'elga_create_albums' ],
+            'edit_album' => [ $this, 'action_edit_album', 'permission' => 'elga_edit_albums' ],
+            'managealbums' => [ $this, 'action_managealbums', 'permission' => 'elga_edit_albums' ],
+            'remove_album' => [ $this, 'action_remove_album', 'permission' => 'elga_delete_albums' ],
+
+            'file' => [ $this, 'action_file', 'permission' => 'elga_view_files' ],
+            'add_file' => [ $this, 'action_add_file', 'permission' => 'elga_create_files' ],
+            'edit_file' => [ $this, 'action_edit_file', 'permission' => 'elga_edit_files_own' ],
+            'remove_file' => [ $this, 'action_remove_file', 'permission' => 'elga_delete_files_own' ],
+            'reloadthumbs' => [ $this, 'action_reloadthumbs', 'permission' => 'admin_forum' ],
+        ];
+        // Your bookmark activity will end here if you don't have permission.
+        $action = new Action();
+        // Default to sub-action 'main' if they have asked for somethign odd
+        $subAction = $action->initialize($subActions, 'home');
+        $context['sub_action'] = $subAction;
+        // Call the right function
+        $action->dispatch($subAction);
+    }
+
+    public function action_home()
+    {
+        global $context;
 
         $context['sub_template'] = 'home';
-
-        if (isset($_REQUEST['sa'])) {
-            $sa = 'action_'.$_REQUEST['sa'];
-            if (method_exists($this, $sa)) {
-                $this->$sa();
-
-                return;
-            }
-        }
-
         $context['elga_albums'] = ElgaSubs::getAlbums();
         $context['elga_last_files'] = ElgaSubs::getLastFiles(20);
     }
@@ -74,6 +146,21 @@ class ElgaController extends Action_Controller
         }
     }
 
+    public function action_search()
+    {
+        global $context, $scripturl, $txt;
+
+        $context['sub_template'] = 'search';
+
+        $context['elga_albums'] = ElgaSubs::getAlbums();
+
+        // dump($context['elga_albums']);
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=search',
+            'name' => 'Поиск',
+        ];
+    }
+
     public function action_show()
     {
         global $modSettings;
@@ -95,25 +182,36 @@ class ElgaController extends Action_Controller
         if (isset($_GET['mode'])) {
             switch ($_GET['mode']) {
                 case 'preview':
-                $fpath = $path . '/' . $file['preview'];
+                    $fpath = $path . '/' . $file['preview'];
                 break;
 
                 case 'thumb':
-                $fpath = $path . '/' . $file['thumb'];
+                    $fpath = $path . '/' . $file['thumb'];
                 break;
 
                 case 'download':
+                    header('Content-disposition: attachment; filename=' . $file['orig_name']);
+                    header('Content-type: application/octet-stream');
+                    readfile($path . '/' . $file['fname']);
+                    exit(0);
+                break;
 
-                header('Content-disposition: attachment; filename=' . $file['orig_name']);
-                header('Content-type: application/octet-stream');
-                readfile($path . '/' . $file['fname']);
-                exit(0);
-
+                case 'exif':
+                    $fpath = $path . '/' . $file['fname'];
+                    $fext = pathinfo($fpath, PATHINFO_EXTENSION);
+                    $arr = ElgaSubs::cameraUsed($fpath);
+                    // dump($arr);
+                    if ($arr) {
+                        foreach ($arr as $key => $val) {
+                            echo htmlspecialchars($key), ': ', htmlspecialchars($val), "<br />\n";
+                        }
+                    }
+                    die;
                 break;
 
                 default:
-                $fpath = $path . '/' . $file['fname'];
-                ElgaSubs::updateFile($id, 'views = views + 1');
+                    $fpath = $path . '/' . $file['fname'];
+                    ElgaSubs::updateFile($id, 'views = views + 1');
             }
         } else {
             $fpath = $path . '/' . $file['fname'];
@@ -133,57 +231,63 @@ class ElgaController extends Action_Controller
         die();
     }
 
-    public function action_managealbums()
+    public function action_browse()
     {
-        global $txt, $context, $scripturl, $boardurl, $modSettings;
+        global $context, $scripturl, $boardurl, $modSettings, $txt, $user_info;
 
         is_not_guest();
-        isAllowedTo('elga_edit_albums');
 
-        $context['elga_albums'] = ElgaSubs::getAlbums();
+        $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
 
-        $context['page_title'] = $txt['elga_managealbums'];
-        $context['sub_template'] = 'managealbums';
+        $id_album = isset($_GET['album']) ? (int) $_GET['album'] : 0;
+        $id_user = isset($_GET['user']) ? (int) $_GET['user'] : 0;
+
+        $context['page_title'] = 'My files';
+        $url = $scripturl.'?action=gallery;sa=browse';
 
         $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=managealbums',
-            'name' => $txt['elga_managealbums'],
+            'url' => $url,
+            'name' => 'Browse files',
         ];
 
-        // move album
-        if (isset($_REQUEST['m'])) {
-            switch ($_REQUEST['m']) {
-                case 'move':
-                    if (ElgaSubs::getAlbum($_REQUEST['id'])) {
-                        $context['elga_move_id'] = $_REQUEST['id'];
-                    }
-                    break;
-                case 'moveToPrevSiblingOf':
-                case 'moveToNextSiblingOf':
-                case 'moveToFirstChildOf':
-                case 'moveToLastChildOf':
-                    checkSession('get');
-                    $ns = ElgaSubs::getNestedSetsManager();
-                    if (isset($_REQUEST['id'], $_REQUEST['current']) &&
-                        $ns->issetNode($_REQUEST['id']) &&
-                        $ns->issetNode($_REQUEST['current'])
-                    ) {
-                        if (call_user_func_array([$ns, $_REQUEST['m']], [$_REQUEST['current'], $_REQUEST['id']])) {
-                            $context['elga_flashdata'] = [$_REQUEST['m'], 'success', 'Узел успешно перемещён!'];
-                            $context['elga_albums'] = ElgaSubs::getAlbums();
-                        } else {
-                            $context['elga_flashdata'] = [$_REQUEST['m'], 'error', 'Ошибка! Unknown Error Type. #' . __LINE__];
-                        }
-                    }
-                    break;
-                default:
-                    die('unknown m');
-            }
+        $context['sub_template'] = 'browse';
+
+        $url_js = '';
+        if (isset($_GET['type']) && $_GET['type'] === 'js') {
+            Template_Layers::getInstance()->removeAll();
+            $context['sub_template'] = 'browse_js';
         }
 
-        // if (isset($_REQUEST['m']) && ElgaSubs::getAlbum($_REQUEST['move'])) {
-            // $context['elga_move_id'] = $_REQUEST['move'];
-        // }
+        $per_page = 20;
+
+        $totalfiles = ElgaSubs::countFiles(['album' => $id_album, 'user' => $id_user,]);
+        if (!$totalfiles) {
+            return;
+        }
+
+        $url .= $id_album ? ';album=' . $id_album : '';
+        $url .= $id_user ? ';user=' . $id_album : '';
+        $url .= $sort ? ';sort=' . $sort : '';
+        
+        $context['elga_total'] = $totalfiles;
+        $context['elga_per_page'] = $per_page;
+        $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
+        $context['page_index'] = constructPageIndex(
+            $url . ';start=%1$d',
+            $_REQUEST['start'],
+            $totalfiles,
+            $per_page,
+            true
+        );
+        $context['start'] = $_REQUEST['start'];
+        $context['elga_next_start'] = $context['start'] + $per_page;
+        $context['page_info'] = [
+            'current_page' => $_REQUEST['start'] / $per_page + 1,
+            'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
+        ];
+
+        $context['elga_url_js'] = $url . ';type=js';
+        $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $id_album, 'user' => $id_user,]);
     }
 
     public function action_album()
@@ -252,71 +356,9 @@ class ElgaController extends Action_Controller
         $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $album['id'], 'user' => $id_user, ]);
     }
 
-    public function action_browse()
-    {
-        global $context, $scripturl, $boardurl, $modSettings, $txt, $user_info;
-
-        is_not_guest();
-
-        $context['elga_sort'] = $sort = ( empty($_GET['sort']) ? '' : $_GET['sort'] );
-
-        $id_album = isset($_GET['album']) ? (int) $_GET['album'] : 0;
-        $id_user = isset($_GET['user']) ? (int) $_GET['user'] : 0;
-
-        $context['page_title'] = 'My files';
-        $url = $scripturl.'?action=gallery;sa=browse';
-
-        $context['linktree'][] = [
-            'url' => $url,
-            'name' => 'Browse files',
-        ];
-
-        $context['sub_template'] = 'browse';
-
-        $url_js = '';
-        if (isset($_GET['type']) && $_GET['type'] === 'js') {
-            Template_Layers::getInstance()->removeAll();
-            $context['sub_template'] = 'browse_js';
-        }
-
-        $per_page = 20;
-
-        $totalfiles = ElgaSubs::countFiles(['album' => $id_album, 'user' => $id_user,]);
-        if (!$totalfiles) {
-            return;
-        }
-
-        $url .= $id_album ? ';album=' . $id_album : '';
-        $url .= $id_user ? ';user=' . $id_album : '';
-        $url .= $sort ? ';sort=' . $sort : '';
-        
-        $context['elga_total'] = $totalfiles;
-        $context['elga_per_page'] = $per_page;
-        $context['elga_is_next_start'] = intval($_REQUEST['start']) + $per_page < $totalfiles;
-        $context['page_index'] = constructPageIndex(
-            $url . ';start=%1$d',
-            $_REQUEST['start'],
-            $totalfiles,
-            $per_page,
-            true
-        );
-        $context['start'] = $_REQUEST['start'];
-        $context['elga_next_start'] = $context['start'] + $per_page;
-        $context['page_info'] = [
-            'current_page' => $_REQUEST['start'] / $per_page + 1,
-            'num_pages' => floor(($totalfiles - 1) / $per_page) + 1,
-        ];
-
-        $context['elga_url_js'] = $url . ';type=js';
-        $context['elga_files'] = ElgaSubs::getFiles($context['start'], $per_page, ['sort' => $sort, 'album' => $id_album, 'user' => $id_user,]);
-    }
-
     public function action_add_album()
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
-
-        is_not_guest();
-        isAllowedTo('elga_create_albums');
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
@@ -458,9 +500,6 @@ class ElgaController extends Action_Controller
     public function action_edit_album()
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
-
-        is_not_guest();
-        isAllowedTo('elga_edit_albums');
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
@@ -662,21 +701,122 @@ class ElgaController extends Action_Controller
         $context['elga_id'] = $id;
     }
 
+    public function action_managealbums()
+    {
+        global $txt, $context, $scripturl, $boardurl, $modSettings;
+
+        $context['elga_albums'] = ElgaSubs::getAlbums();
+
+        $context['page_title'] = $txt['elga_managealbums'];
+        $context['sub_template'] = 'managealbums';
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=managealbums',
+            'name' => $txt['elga_managealbums'],
+        ];
+
+        // move album
+        if (isset($_REQUEST['m'])) {
+            switch ($_REQUEST['m']) {
+                case 'move':
+                    if (ElgaSubs::getAlbum($_REQUEST['id'])) {
+                        $context['elga_move_id'] = $_REQUEST['id'];
+                    }
+                    break;
+                case 'moveToPrevSiblingOf':
+                case 'moveToNextSiblingOf':
+                case 'moveToFirstChildOf':
+                case 'moveToLastChildOf':
+                    checkSession('get');
+                    $ns = ElgaSubs::getNestedSetsManager();
+                    if (isset($_REQUEST['id'], $_REQUEST['current']) &&
+                        $ns->issetNode($_REQUEST['id']) &&
+                        $ns->issetNode($_REQUEST['current'])
+                    ) {
+                        if (call_user_func_array([$ns, $_REQUEST['m']], [$_REQUEST['current'], $_REQUEST['id']])) {
+                            $context['elga_flashdata'] = [$_REQUEST['m'], 'success', 'Узел успешно перемещён!'];
+                            $context['elga_albums'] = ElgaSubs::getAlbums();
+                        } else {
+                            $context['elga_flashdata'] = [$_REQUEST['m'], 'error', 'Ошибка! Unknown Error Type. #' . __LINE__];
+                        }
+                    }
+                    break;
+                default:
+                    die('unknown m');
+            }
+        }
+
+        // if (isset($_REQUEST['m']) && ElgaSubs::getAlbum($_REQUEST['move'])) {
+            // $context['elga_move_id'] = $_REQUEST['move'];
+        // }
+    }
+
     // @TODO
     public function action_remove_album()
     {
         isAllowedTo('elga_delete_albums');
     }
 
+    public function action_file()
+    {
+        global $context, $scripturl, $boardurl, $user_info, $modSettings;
+
+        if (empty($_GET['id'])) {
+            redirectexit('action=gallery');
+        }
+
+        $id = (int) $_GET['id'];
+
+        /*
+        $pn = '';
+        if (isset($_GET['prev_next'])) {
+            $pn = $_GET['prev_next'] === 'prev' ? '<' : '>';
+        }
+        */
+
+        $file = ElgaSubs::getFile($id);
+        if (!$file) {
+            fatal_error('File not found.', false);
+        }
+
+        $file['prev_id'] = ElgaSubs::getPrevId($id, $file['id_album']);
+        $file['next_id'] = ElgaSubs::getNextId($id, $file['id_album']);
+
+        $url = $modSettings['elga_files_url'];
+        $context['elga_file'] = & $file;
+
+        require_once SUBSDIR.'/Post.subs.php';
+        censorText($file['description']);
+
+        ElgaSubs::loadAlbumsLinkTree($file['id_album'], false, true);
+
+        $context['linktree'][] = [
+            'url' => $scripturl.'?action=gallery;sa=file;id='.$id,
+            'name' => $file['title'],
+        ];
+
+        $context['page_title'] = $file['title'];
+
+        $context['sub_template'] = 'file';
+
+        $context['elga_is_author'] = $user_info['id'] == $file['id_member'] || allowedTo('moderate_forum') || allowedTo('admin_forum');
+
+        if (empty($_SESSION['elga_lastreadfile']) || $_SESSION['elga_lastreadfile'] != $id) {
+            ElgaSubs::updateFile($id, 'views = views + 1');
+            $_SESSION['elga_lastreadfile'] = $id;
+        }
+
+        // jQuery UI
+        $modSettings['jquery_include_ui'] = true;
+        loadCSSFile('jquery.ui.tabs.css'); // for Elk 1.1
+        // loadCSSFile('jquery.ui.slider.css');
+        // loadCSSFile('jquery.ui.theme.css');
+    }
+
     // @todo: parse bbc ?
     public function action_add_file()
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
-
-        is_not_guest();
-
-        $txt['cannot_elga_create_files'] = 'Вы не можете создавать файлы';
-        isAllowedTo('elga_create_files');
 
         // if (!allowedTo('moderate_forum') && !allowedTo('admin_forum'))
             // fatal_error('Не хватает прав!', false);
@@ -698,6 +838,7 @@ class ElgaController extends Action_Controller
         ];
 
         $context['page_title'] = 'New File';
+        $context['submit_label'] = 'Сохранить *-*';
 
         $context['errors'] = [];
         loadLanguage('Errors');
@@ -763,6 +904,9 @@ class ElgaController extends Action_Controller
 
             // No errors, then send the PM to the admins
             if (empty($context['errors'])) {
+
+                ElgaSubs::create_editor('descr', $descr);
+
                 $db = database();
 
                 // dump($img);
@@ -775,7 +919,7 @@ class ElgaController extends Action_Controller
                       'time_added' => 'int', 'exif' => 'string',
                     ],
                     [ $img['orig_name'], $img['name'], $img['size'], $img['fhash'], $img['thumb'], $img['preview'],
-                      $validator->album, $title, $descr, $user_info['id'], $user_info['name'], time(), '',
+                      $validator->album, $title, $descr, $user_info['id'], $user_info['name'], time(), $img['exif'],
                     ],
                     [ 'id_member', 'id_topic' ]
                 );
@@ -792,11 +936,15 @@ class ElgaController extends Action_Controller
                 censorText($context['elga_title']);
                 censorText($context['elga_descr']);
 
+                ElgaSubs::create_editor('descr', $context['elga_descr']);
+
                 ElgaSubs::createChecks('add_file');
 
                 return;
             }
         }
+
+        ElgaSubs::create_editor('descr', '');
 
         ElgaSubs::createChecks('add_file');
 
@@ -807,9 +955,6 @@ class ElgaController extends Action_Controller
     public function action_edit_file()
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
-
-        is_not_guest();
-        isAllowedTo('elga_edit_files');
 
         $context['require_verification'] = !$user_info['is_mod'] && !$user_info['is_admin'] &&
             !empty($modSettings['posts_require_captcha']) && ($user_info['posts'] < $modSettings['posts_require_captcha'] ||
@@ -831,27 +976,19 @@ class ElgaController extends Action_Controller
                 redirectexit('action=gallery');
             }
             $id = (int) $_POST['id'];
-            $db = database();
-            $req = $db->query('', '
-            SELECT
-                f.id, f.orig_name, f.fname, f.thumb, f.fsize, f.id_album, f.title, f.description, f.views, f.id_member, f.member_name,
-                a.name AS album_name
-            FROM {db_prefix}elga_files as f
-                INNER JOIN {db_prefix}elga_albums AS a ON (a.id = f.id_album)
-            WHERE f.id = {int:id}
-            LIMIT 1', [
-                'id' => $id,
-            ]);
-            if (!$db->num_rows($req)) {
-                $db->free_result($req);
+
+            $file = ElgaSubs::getFile($id);
+            if ( ! $file ) {
                 fatal_error('File not found!', false);
             }
-            $context['elga_file'] = $file = $db->fetch_assoc($req);
-            $db->free_result($req);
+            $context['elga_file'] =& $file;
+            $file['id_member'] = (int) $file['id_member'];
 
-            // perms
-            if ($user_info['id'] != $file['id_member'] && !allowedTo('moderate_forum') && !allowedTo('admin_forum')) {
-                fatal_error('Вы не можете редактировать эту запись! Не хватает прав!', false);
+            // Check permissions
+            if ($user_info['id'] === $file['id_member']) {
+                isAllowedTo('elga_edit_files_own');
+            } else {
+                isAllowedTo('elga_edit_files_any');
             }
 
             // Could they get the right send topic verification code?
@@ -911,6 +1048,7 @@ class ElgaController extends Action_Controller
 
             // No errors, then send the PM to the admins
             if (empty($context['errors'])) {
+                $db = database();
                 $db->query('', '
                     UPDATE {db_prefix}elga_files
                     SET '.($img ? '
@@ -923,7 +1061,8 @@ class ElgaController extends Action_Controller
                         title = {string:title},
                         description = {string:descr},
                         id_member = {int:mem_id},
-                        member_name = {string:mem_name}
+                        member_name = {string:mem_name},
+                        exif = {string:exif}
                     WHERE id = {int:id}',
                     [
                         'oname' => $img ? $img['orig_name'] : '',
@@ -938,6 +1077,7 @@ class ElgaController extends Action_Controller
                         'mem_id' => $user_info['id'],
                         'mem_name' => $user_info['name'],
                         'id' => $id,
+                        'exif' => $img ? $img['exif'] : '',
                     ]
                 );
 
@@ -947,7 +1087,9 @@ class ElgaController extends Action_Controller
                 }
 
                 redirectexit('action=gallery;sa=file;id='.$id);
-            } else {
+            }
+            // If errors
+            else {
                 $context['elga_album'] = $validator->album;
                 $context['elga_title'] = $title;
                 $context['elga_descr'] = $descr;
@@ -960,6 +1102,8 @@ class ElgaController extends Action_Controller
                 ];
 
                 $context['page_title'] = 'Edit '.$title;
+
+                ElgaSubs::create_editor('descr', $context['elga_descr']);
 
                 ElgaSubs::createChecks('edit_file');
             }
@@ -1006,11 +1150,13 @@ class ElgaController extends Action_Controller
         $context['sub_template'] = 'add_file';
 
         $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=edit_file;id='.$file['id'],
+            'url' => $scripturl.'?action=gallery;sa=file;id='.$file['id'],
             'name' => 'Edit '.$file['title'],
         ];
 
         $context['page_title'] = 'Edit '.$file['title'];
+
+        ElgaSubs::create_editor('descr', $context['elga_descr']);
 
         ElgaSubs::createChecks('edit_file');
 
@@ -1021,9 +1167,6 @@ class ElgaController extends Action_Controller
     {
         global $context, $txt, $user_info, $modSettings, $scripturl;
 
-        is_not_guest();
-        isAllowedTo('elga_delete_files');
-
         checkSession('get');
 
         if (!is_numeric($_GET['id'])) {
@@ -1033,61 +1176,6 @@ class ElgaController extends Action_Controller
         ElgaSubs::removeFile($_GET['id']);
 
         redirectexit('action=gallery');
-    }
-
-    public function action_file()
-    {
-        global $context, $scripturl, $boardurl, $user_info, $modSettings;
-
-        if (empty($_GET['id'])) {
-            redirectexit('action=gallery');
-        }
-
-        $id = (int) $_GET['id'];
-
-        /*
-        $pn = '';
-        if (isset($_GET['prev_next'])) {
-            $pn = $_GET['prev_next'] === 'prev' ? '<' : '>';
-        }
-        */
-
-        $file = ElgaSubs::getFile($id);
-        if (!$file) {
-            fatal_error('File not found.', false);
-        }
-
-        $file['prev_id'] = ElgaSubs::getPrevId($id, $file['id_album']);
-        $file['next_id'] = ElgaSubs::getNextId($id, $file['id_album']);
-
-        $url = $modSettings['elga_files_url'];
-        $context['elga_file'] = & $file;
-
-        require_once SUBSDIR.'/Post.subs.php';
-        censorText($file['description']);
-
-        ElgaSubs::loadAlbumsLinkTree($file['id_album'], false, true);
-
-        $context['linktree'][] = [
-            'url' => $scripturl.'?action=gallery;sa=file;id='.$id,
-            'name' => $file['title'],
-        ];
-
-        $context['page_title'] = $file['title'];
-
-        $context['sub_template'] = 'file';
-
-        $context['elga_is_author'] = $user_info['id'] == $file['id_member'] || allowedTo('moderate_forum') || allowedTo('admin_forum');
-
-        if (empty($_SESSION['elga_lastreadfile']) || $_SESSION['elga_lastreadfile'] != $id) {
-            ElgaSubs::updateFile($id, 'views = views + 1');
-            $_SESSION['elga_lastreadfile'] = $id;
-        }
-
-        // jQuery UI
-        $modSettings['jquery_include_ui'] = true;
-        //loadCSSFile('jquery.ui.slider.css');
-        //loadCSSFile('jquery.ui.theme.css');
     }
 
     // delete this function in production

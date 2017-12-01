@@ -1,0 +1,355 @@
+
+.elga-thumbs,
+.elga-thumbs-albums {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-align-content: stretch;
+    -ms-flex-line-pack: stretch;
+    align-content: stretch;
+    -webkit-align-items: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+
+    margin: 0;
+    text-align: center;
+}
+
+.elga-thumb-album {
+    -webkit-order: 0;
+    -ms-flex-order: 0;
+    order: 0;
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -webkit-align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+
+    text-decoration: none;
+    /*display: inline-block;
+    vertical-align: top;*/
+    margin: 1.3em 0 0 1.5em;
+    padding: 4px;
+    background-color: #FFF;
+    border: 1px solid #CECECE;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    /*background: -moz-linear-gradient(top, #fafbfd, #fafbfc);*/
+    background: #fafbfd;
+    background: -moz-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, #fafbfd), color-stop(100%, #fafbfc));
+    background: -webkit-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: -o-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: -ms-linear-gradient(top, #fafbfd 0%, #fafbfc 100%);
+    background: linear-gradient(to bottom, #fafbfd 0%, #fafbfc 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fafbfd', endColorstr='#fafbfc', GradientType=0 );
+}
+
+.elga-h2 {
+    margin-top: 1rem;
+}
+
+.elga-r {
+    width: 14em;
+    min-height: 10em;
+    display: inline-block;
+    padding: 4px;
+}
+
+.elga-thumb-album a,
+.elga-thumb-file a {
+    font-weight: bold;
+    font-size: 110%;
+}
+
+.elga-thumb-album a.elga-edit,
+.elga-thumb-file a.elga-edit {
+    font-weight: normal;
+    font-size: 90%;
+}
+
+.elga-thumb-file {
+    display: inline-block;
+    vertical-align: top;
+	min-height: 8em;
+	min-width: 8em;
+    width: 14em;
+    text-decoration: none;
+    margin: 0.5em 0px 0px 0.5em;
+    padding: 4px;
+    background-color: #F6F7FB;
+    /*border: 1px solid #C4C4C4;*/
+    border-radius: 6px;
+    box-shadow: 0px 0px 1px 0px rgba(99, 99, 99, 0.77);
+}
+
+.elga-album-descr {
+    text-transform: none;
+    font-size: 0.8em;
+    line-height: 1.29em;
+    font-weight: bold;
+    color: #555;
+    text-decoration: none;
+    /*display: block;*/
+}
+
+.elga-photo-container {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: space-around;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    -webkit-align-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+
+    background-color: #EEE;
+    border: 1px solid #CCC;
+    text-align: center;
+    margin: 0.8rem 0 1rem 0;
+    padding: 1rem 10px;
+}
+
+.elga-photo-container a,
+.elga-photo-container a:hover {
+    color: unset;
+    text-decoration: none;
+}
+
+.elga-arrow {
+    -webkit-order: 0;
+    -ms-flex-order: 0;
+    order: 0;
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -webkit-align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+
+    color: #354172;
+    line-height: 1;
+    background: #F4F4F4 linear-gradient(to bottom, #FFF, #E4E4E4) repeat scroll 0% 0%;
+    box-shadow: 1px 1px 2px #E5E5E5;
+    font-size: 1rem;
+    font-family: arial,sans-serif !important;
+    border: 1px solid #C4C4C4;
+    border-radius: 6px;
+    border-color: #CFCFCF #AFAFAF #AFAFAF #BFBFBF;
+    padding: 10px;
+    white-space: nowrap;
+}
+
+.elga-arrow:hover {
+    box-shadow: 0px 0px 3px 0px #2991EA;
+}
+
+/*
+.elga-file-descr {
+    background: #FFF none repeat scroll 0% 0%;
+    box-shadow: 0px 0em 0.4em rgba(0, 0, 0, 0.3);
+    margin: 15px 0px;
+    padding: 0.5rem 0.75rem;
+}
+*/
+#elga-tabs-file {
+    margin: 15px 0px;
+}
+
+#elga-tabs-descr {
+    padding: 0.5rem 0.75rem;
+}
+
+
+.elga-file-descr {
+    overflow-x:auto;
+}
+
+/*
+.elga-file-descr td:first-child {
+    font-weight: bold;
+    color: #666;
+    min-width: 12rem;
+    vertical-align: top;
+}
+*/
+
+.elga-file-descr dl {
+    clear: right;
+    overflow: auto;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.elga-file-descr dt {
+    font-weight: bold;
+    color: #666;
+    min-width: 12rem;
+
+    float: left;
+    clear: both;
+    /*margin: 0 0 10px 0;*/
+    padding: 0;
+}
+
+.elga-file-descr dd {
+    float: right;
+    overflow: auto;
+    margin: 0 0 3px 0;
+    padding: 0;
+    width: 80%;
+    /*min-height: 2em;*/
+}
+
+
+.elga-disabled:hover, a.elga-disabled:hover {
+    color:#777 !important;
+    cursor:not-allowed;
+}
+
+.elga-sort-fields {
+    float: right;
+    white-space: nowrap;
+}
+
+.elga-select-cats {
+    float: right;
+    white-space: nowrap;
+}
+
+.elga-buttons {
+    margin: 5px 0;
+}
+
+.elga-fname {
+    margin-bottom: 4px;
+}
+
+table.elga-managealbum {
+    border-collapse:collapse;
+    border-spacing: 0;
+    width: 100%;    
+}
+
+.elga-managealbum {
+    font-family: 'trebuchet MS', 'Lucida sans', Arial;
+    font-size: 14px;
+    color: #444;
+
+    border: solid #ccc 1px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 1px 1px #ccc; 
+    -moz-box-shadow: 0 1px 1px #ccc; 
+    box-shadow: 0 1px 1px #ccc;         
+}
+
+.elga-managealbum tr:hover {
+    background: #fbf8e9;
+    -o-transition: all 0.1s ease-in-out;
+    -webkit-transition: all 0.1s ease-in-out;
+    -moz-transition: all 0.1s ease-in-out;
+    -ms-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;     
+}    
+
+.elga-managealbum td, .elga-managealbum th {
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;    
+}
+
+.elga-managealbum th {
+    text-align: center;    
+}
+
+.elga-managealbum th {
+    background-color: #dce9f9;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9));
+    background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -moz-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -ms-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -o-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: linear-gradient(top, #ebf3fc, #dce9f9);
+    -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.8) inset; 
+    -moz-box-shadow:0 1px 0 rgba(255,255,255,.8) inset;  
+    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;        
+    border-top: none;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5); 
+}
+
+.elga-managealbum td:first-child, .elga-managealbum th:first-child {
+    border-left: none;
+}
+
+.elga-managealbum th:first-child {
+    border-radius: 6px 0 0 0;
+}
+
+.elga-managealbum th:last-child {
+    border-radius: 0 6px 0 0;
+}
+
+.elga-managealbum th:only-child {
+    border-radius: 6px 6px 0 0;
+}
+
+.elga-managealbum tr:last-child td:first-child {
+    border-radius: 0 0 0 6px;
+}
+
+.elga-managealbum tr:last-child td:last-child {
+    border-radius: 0 0 6px 0;
+}
+
+.elga-managealbum td.elga-manage {
+    text-align: center;
+    width: 18rem;
+}
+
+.elga-second-row {
+    padding: 8px 0;
+}
+
+.elga-second-row .pagesection {
+    clear: none;
+    display: inline-block;
+    padding: 0;
+}
+
+.elga-second-row .elga-sort-fields,
+.elga-second-row .elga-select-cats {
+    margin: 5px 0 0 0;
+}
+
+.elga-menu-icon::before { 
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='hsl(0, 0%, 33%)' viewBox='0 0 3584 3584'%3E%3Cpath d='M1195 1314q0 149-105 254t-254 105-254-105-104-254 104-254 254-104 254 104 105 254z m1911 717v836h-2628v-358l597-598 299 299 956-956z m179-1314h-2986q-24 0-42 18t-18 42v2269q0 24 18 42t42 18h2986q24 0 42-18t18-42v-2269q0-24-18-42t-42-18z m299 60v2269q0 123-88 211t-211 88h-2986q-123 0-211-88t-88-211v-2269q0-123 88-211t211-88h2986q123 0 211 88t88 211z'/%3E%3C/svg%3E");
+}
+
+.elga-form-file-dt {
+    width: 20%;
+    clear: both;
+}
+

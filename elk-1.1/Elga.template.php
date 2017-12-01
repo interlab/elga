@@ -5,14 +5,34 @@ function elga_show_buttons()
     global $context, $scripturl, $user_info, $txt;
 
     $left_links = [
-        [ 'enable' => allowedTo('elga_create_files'),        'name' => $txt['elga_create_file'],         'url' => $scripturl . '?action=gallery;sa=add_file', ],
-        [ 'enable' => allowedTo('elga_create_albums'),    'name' => $txt['elga_create_album'],     'url' => $scripturl . '?action=gallery;sa=add_album', ],
-        [ 'enable' => allowedTo('elga_edit_albums'),       'name' => $txt['elga_managealbums'],   'url' => $scripturl . '?action=gallery;sa=managealbums', ],
+        [
+            'enable' => allowedTo('elga_create_files'),
+            'name' => $txt['elga_create_file'],
+            'url' => $scripturl . '?action=gallery;sa=add_file',
+        ],
+        [
+            'enable' => allowedTo('elga_create_albums'),
+            'name' => $txt['elga_create_album'],
+            'url' => $scripturl . '?action=gallery;sa=add_album',
+        ],
+        [
+            'enable' => allowedTo('elga_edit_albums'),
+            'name' => $txt['elga_managealbums'],
+            'url' => $scripturl . '?action=gallery;sa=managealbums',
+        ],
     ];
 
     $right_links = [
-        [ 'url' => $scripturl . '?action=gallery;sa=browse', 'enable' => true, 'name' => 'Все файлы', ],
-        [ 'url' => $scripturl . '?action=gallery;sa=browse;user=' . $user_info['id'], 'enable' => !$user_info['is_guest'], 'name' => 'Мои файлы', ],
+        [
+            'enable' => true,
+            'name' => 'Все файлы',
+            'url' => $scripturl . '?action=gallery;sa=browse',
+        ],
+        [
+            'enable' => !$user_info['is_guest'],
+            'name' => 'Мои файлы',
+            'url' => $scripturl . '?action=gallery;sa=browse;user=' . $user_info['id'],
+        ],
     ];
 
 
@@ -114,14 +134,13 @@ function elga_thumbs($files, $usealbum=false)
 {
     global $scripturl, $txt;
 
-    $r = '
-    <div class="elga-thumbs">';
+    $r = '';
     foreach ($files as $row) {
         $r .= '
         <div class="elga-thumb-file">
             <p class="elga-fname"><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></p>
-            <p><a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
-                <img src="' . $row['thumb-url'] . '" alt="..." height="100px" width="100px" class="fancybox" />
+            <p><a href="' . $row['icon'] . '" rel="group" title="' . $row['title'] . '" data-fancybox="">
+                <img src="' . $row['thumb-url'] . '" alt="thumb" height="100px" width="100px" />
             </a></p>
             ' . ($usealbum ? 
             '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
@@ -130,8 +149,7 @@ function elga_thumbs($files, $usealbum=false)
             <p><i class="fa fa-user" aria-hidden="true"></i> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
         </div>';
     }
-    $r .= '
-    </div>';
+    $r .= '';
 
     return $r;
 }
@@ -139,6 +157,69 @@ function elga_thumbs($files, $usealbum=false)
 function template_empty()
 {
     
+}
+
+function template_search()
+{
+    global $txt, $context, $scripturl;
+
+    echo '
+    <style>
+    div.elga-search-form {
+        margin: 0 auto;
+        margin-bottom: 20px;
+        padding: 10px;
+        display: table;
+        /*
+        display: block;
+        width: 50%;
+        */
+        border: 1px solid blue;
+        border-color: #ddd;
+
+        border-radius: 4px;
+        -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    	border-color: #ddd;
+	}
+	/*
+	div.elga-search-form form > div {
+		display: table;
+		margin: 0 auto;
+	}
+	*/
+	</style>
+	<div class="elga-search-form">
+	<form action="', $scripturl, '?action=gallery;sa=search" id="elga-search-form" class="elga-search-form">
+		<input type="hidden" name="action" value="gallery" />
+		<input type="hidden" name="sa" value="search" />
+		<label for="q">Поиск</label> <input name="q" id="q" value="" required maxlength="80" size="40" />
+		&nbsp;<button name="save" type="submit" value="send"><i class="fa fa-search" aria-hidden="true"></i>  Отправить</button>
+		<br><br>
+		<div>
+		<fieldset>
+			<legend>Настройки</legend>
+		<span>Альбом</span>
+		<select name="albums" required>
+			<option value="0">Выбрать альбом</option>';
+
+		foreach ($context['elga_albums'] as $album) {
+			echo '
+			<option value="', $album['id'], '">', (str_repeat('-', $album['depth'])), ' ', $album['name'], '</option>';
+		}
+
+	echo '
+		</select>
+		<br><br>
+		<span>Где искать</span>
+		<select name="location" id="location">
+			<option value="name">Название</option>
+			<option value="descr">Описание</option>
+		</select>
+		</fieldset>
+		</div>
+	</form>
+	</div>';
 }
 
 function elga_show_sort_fields($album_id=0)
@@ -353,80 +434,92 @@ function template_add_file()
 {
     global $context, $scripturl, $txt;
 
+    // loadTemplate('GenericHelpers');
+    // loadTemplate('GenericControls');
+    
+    $context['elga-file-is-required'] = $context['elga_sa'] !== 'edit_file' ? 'required' : '';
+
     echo '
     <h2 class="category_header">', $context['page_title'], '</h2>
 
     <form action="', $scripturl, '?action=gallery;sa=', $context['elga_sa'], '" method="post" accept-charset="UTF-8"
-        name="new_file" id="new_file" enctype="multipart/form-data">';
+        name="new_file" id="new_file" enctype="multipart/form-data">
 
-    echo '
+    <div class="forumposts">
+        <div class="editor_wrapper">
+
         <div class="errorbox"', empty($context['errors']) ? ' style="display: none;"' : '', '>Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
 
     echo '
-<div class="content">
-    <dl class="settings">
+    <dl id="post_header">
 
         <dt>
-            <label for="album">Album</label>
+            <label for="album">', $txt['elga-field-album'], '</label>
         </dt>
         <dd>
-
-            <select name="album" id="album" tabindex="', $context['tabindex']++, '">
-            <option value="0"></option>';
+            <select name="album" id="album" tabindex="', $context['tabindex']++, '" required>
+            <option></option>';
 
     foreach ($context['elga_albums'] as $row) {
         $selected = $context['elga_album'] == $row['id'];
         echo '
-            <option value="', $row['id'], '"', ($selected ? ' selected="selected"' : ''), '>
+            <option value="', $row['id'], '"', ($selected ? ' selected="selected"' : ''), '>', (str_repeat('-', $row['depth'])), ' ', '
                 ', $row['name'], '
             </option>';
     }
 
     echo '
         </select>&nbsp;&nbsp
-
         </dd>
 
         <dt>
-            <label for="title">Title</label>
+            <label for="title">', $txt['elga-field-name'], '</label>
         </dt>
         <dd>
-            <input type="text" name="title" id="title" value="', !empty($context['elga_title']) ? $context['elga_title'] : '', '" tabindex="', $context['tabindex']++, '">
+            <input type="text" name="title" id="title" size="80" value="', !empty($context['elga_title']) ? $context['elga_title'] : '', '" tabindex="', $context['tabindex']++, '" required>
         </dd>
-        <dt>
-            <label for="descr">Ваше сообщение</label>
-        </dt>
-        <dd>
-            <textarea id="descr" name="descr" cols="50" rows="10" tabindex="', $context['tabindex']++, '">', !empty($context['elga_descr']) ? $context['elga_descr'] : '', '</textarea>
-        </dd>
-        <dt>
-            <label>Добавить файл</label>
-        </dt>
-        <dd>
-            <input type="file" name="image" size="80" tabindex="', $context['tabindex']++, '" accept="image/*" />
-        </dd>';
+    </dl>';
 
-    if ($context['require_verification'])
-    {
+	echo '', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
+
+    
+    echo '
+    <dl id="post_header">
+        <dt class="elga-form-file-dt">
+            <label>', $txt['elga-field-file'], '</label>
+        </dt>
+        <dd>
+            <input type="file" name="image" tabindex="', $context['tabindex']++, '" accept="image/*"  ', $context['elga-file-is-required'], '>
+        </dd>
+    </dl>';
+
+	// Show our submit buttons before any more options
+	echo '
+        <div id="post_confirm_buttons" class="submitbutton">
+        ', template_control_richedit_buttons($context['post_box_name']), '
+        </div>';
+
+    if ($context['require_verification']) {
+        echo '
+    <dl class="settings">';
         template_verification_controls($context['visual_verification_id'], '
-                    <dt>
-                            ' . $txt['verification'] . ':
-                    </dt>
-                    <dd>
-                            ', '
-                    </dd>');
+        <dt>
+                ' . $txt['verification'] . ':
+        </dt>
+        <dd>
+                ', '
+        </dd>');
+            echo '
+    </dl>';
     }
 
     echo '
-    </dl>
-    <hr>
-    <div class="submitbutton">
-    <input type="submit" value="', $txt['sendtopic_send'], '" name="send" tabindex="', $context['tabindex']++, '" class="button_submit" />
     <input type="hidden" name="sa" value="', $context['elga_sa'], '">';
     if (isset($context['elga_file'])) {
         echo '
     <input type="hidden" name="id" value="', $context['elga_file']['id'], '" />';
     }
+
     echo '
     <input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />';
     if ($context['elga_sa'] === 'add_file') {
@@ -436,10 +529,10 @@ function template_add_file()
         echo '
     <input type="hidden" name="', $context['edit_file_token_var'], '" value="', $context['edit_file_token'], '" />';
     }
-    echo '
-    </div>
-</div>
 
+    echo '
+        </div><!-- end .forumposts -->
+    </div><!-- end .editor_wrapper -->
     </form>';
 }
 
@@ -582,7 +675,10 @@ function template_album()
         return;
     }
 
-    echo elga_thumbs($context['elga_files']);
+    echo '
+    <div class="elga-thumbs">
+    ', elga_thumbs($context['elga_files'], false), '
+    </div>';
 
     if ($context['elga_is_next_start']) {
         echo '
@@ -610,22 +706,7 @@ function template_album_js()
     // if (!$context['elga']['is_next_start'])
         // die('');
 
-    //echo '<div class="elga-thumbs">';
-    foreach ($context['elga_files'] as $row) {
-        echo '
-        <div class="elga-thumb-file">
-            <p class="elga-fname"><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></p>
-            <p><a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
-                <img src="' . $row['thumb-url'] . '" alt="..." height="100px" width="100px" class="fancybox" />
-            </a></p>
-            ' . ($usealbum ? 
-            '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
-            <p><i class="fa fa-eye" aria-hidden="true"></i> ' . $row['views'] . '</p>
-            <p><i class="fa fa-hdd-o" aria-hidden="true"></i> ' . $row['hsize'] . '</p>
-            <p><i class="fa fa-user" aria-hidden="true"></i> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
-        </div>';
-    }
-    //echo '</div>';
+    echo '', elga_thumbs($context['elga_files'], $usealbum), '';
 
     if (!$context['elga_is_next_start']) {
         // die(''); // end
@@ -645,14 +726,15 @@ function template_browse()
 {
     global $context, $scripturl, $txt, $boardurl;
 
+    elga_show_buttons();
+
     echo '
     <h2 class="category_header elga-h2">
         Browse files
     </h2>';
 
-    elga_show_buttons();
-    echo elga_show_sort_fields();
-    echo elga_show_select_cats();
+    // echo elga_show_sort_fields();
+    // echo elga_show_select_cats();
 
     if (empty($context['elga_files'])) {
         echo '
@@ -661,9 +743,24 @@ function template_browse()
         return;
     }
 
+    echo '
+    <div class="elga-header-box">
+        <div class="elga-page-box">';
+
     template_pagesection('normal_buttons', 'right');
 
-    echo elga_thumbs($context['elga_files'], true);
+    echo '
+        </div>
+        <div class="elga-sort-box">',
+    elga_show_sort_fields(), 
+    elga_show_select_cats(), '
+        </div>
+    </div>';
+
+    echo '
+    <div class="elga-thumbs">
+    ', elga_thumbs($context['elga_files'], true), '
+    </div>';
 
     if ($context['elga_is_next_start']) {
         echo '
@@ -679,20 +776,7 @@ function template_browse_js()
 
     $usealbum = true;
 
-    foreach ($context['elga_files'] as $row) {
-        echo '
-        <div class="elga-thumb-file">
-            <p class="elga-fname"><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></p>
-            <p><a href="' . $row['icon'] . '" class="fancybox" rel="group" title="' . $row['title'] . '">
-                <img src="' . $row['thumb-url'] . '" alt="..." height="100px" width="100px" class="fancybox" />
-            </a></p>
-            ' . ($usealbum ? 
-            '<p><strong>' . $txt['elga_album'] . '</strong> <a href="' . $scripturl . '?action=gallery;sa=album;id=' . $row['alb_id'] . '">' . $row['alb_name'] . '</a></p>' : '') . '
-            <p><i class="fa fa-eye" aria-hidden="true"></i> ' . $row['views'] . '</p>
-            <p><i class="fa fa-hdd-o" aria-hidden="true"></i> ' . $row['hsize'] . '</p>
-            <p><i class="fa fa-user" aria-hidden="true"></i> <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['member_name'] . '</a></p>
-        </div>';
-    }
+    echo '', elga_thumbs($context['elga_files'], $usealbum), '';
 
     if (!$context['elga_is_next_start']) {
         // die(''); // end
@@ -736,8 +820,8 @@ function template_file()
     <div class="elga-photo-container">
         <div class="elga-arrow' . ($row['prev_id'] ? '' : ' elga-disabled') . '">' . ($row['prev_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['prev_id']. '">' : '') . '&#8592; Пред.</a></div>
         <div class="elga-display">
-    <a href="', $row['icon'], '" class="fancybox" rel="group">
-        <img src="', $row['preview-url'], '" alt="..." style="max-height:500px; max-width: 500px;" class="fancybox" />
+    <a href="', $row['icon'], '" data-fancybox="" rel="group">
+        <img src="', $row['preview-url'], '" alt="image" style="max-height:500px; max-width: 500px;" />
     </a>
         </div>
         <div class="elga-arrow' . ($row['next_id'] ? '' : ' elga-disabled') . '">' . ($row['next_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['next_id']. '">' : '') . 'След. &#8594;</a></div>
@@ -788,7 +872,41 @@ function template_file()
 
 
     </div>
-    <div id="elga-tabs-exif">', $row['exif'], '</div>
+    <div id="elga-tabs-exif">';
+
+	/*
+	$exif =& $row['exif'];
+	// dump($exif);
+
+	if (is_array($exif) || $exif instanceof Traversable) {
+		if (empty($exif)) {
+			echo 'Нет данных Exif.';
+		} else {
+			// dump($exif);
+			foreach ($exif as $k => $v) {
+				echo $k, ': ', $v, '<br>';
+			}
+		}
+	}
+	*/
+
+	/*
+	$exif =& $row['exif'];
+	// dump($exif);
+
+	if (empty($exif)) {
+		echo 'Нет данных Exif.';
+	} else {
+		// dump($exif);
+		foreach ($exif as $k => $v) {
+			if (is_array($v)) { $v = 'Array'; }
+			echo $k, ': ', $v, '<br>';
+		}
+	}
+	*/
+
+	echo '
+	</div>
 </div>';
 
     echo elga_show_select_cats();

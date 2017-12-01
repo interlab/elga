@@ -4,6 +4,8 @@ if (!defined('ELK')) {
     die('No access...');
 }
 
+use Imagine\Image\Metadata\ExifMetadataReader;
+
 class ElgaSubs
 {
     public static function json_response(array $data)
@@ -48,6 +50,7 @@ class ElgaSubs
         // $row['preview-url'] = $url.'/'.$row['preview'];
         // $row['icon'] = $url.'/'.$row['fname'];
         $row['thumb-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=thumb';
+        $row['preview'] = $row['preview'];
         $row['preview-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=preview';
         $row['icon'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
         $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
@@ -57,6 +60,8 @@ class ElgaSubs
         // $row['img-url'] = $boardurl . '/gallery.php?id=' . $row['id'];
         $row['img-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
         $row['img-download-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'] . ';mode=download';
+        $row['exif'] = empty($row['exif']) ? [] : json_decode($row['exif']);
+        // dump($row['exif']);
         $db->free_result($req);
 
         return $row;
@@ -367,7 +372,7 @@ class ElgaSubs
         return $row;
     }
 
-    public function getSubAlbums($r)
+    public static function getSubAlbums($r)
     {
         global $modSettings;
 
@@ -395,7 +400,7 @@ class ElgaSubs
         return $data;
     }
 
-    public function getParentsAlbums($id, $depth = null, $get_current = false)
+    public static function getParentsAlbums($id, $depth = null, $get_current = false)
     {
         global $modSettings, $scripturl;
 
@@ -563,8 +568,7 @@ class ElgaSubs
 
         $name = $_FILES[$img['key']]['name'];
         $tmpname = $_FILES[$img['key']]['tmp_name'];
-        $fname = pathinfo($name, PATHINFO_FILENAME);
-        $ext = pathinfo($name, PATHINFO_EXTENSION);
+        list(, , $ext, $fname) = array_values(pathinfo($name));
         $fsize = filesize($tmpname);
 
         $sha1 = sha1_file($tmpname);
@@ -594,10 +598,10 @@ class ElgaSubs
 
         $dest_name = $dest_dir.'/'.$nfname;
         if (file_exists($dest_name)) {
-            fatal_error('уже существует файл с таким же названием');
+            fatal_error('Уже существует файл с таким же названием');
         }
 
-        $originalname = $dest_dir.'/'.pathinfo($nfname, PATHINFO_FILENAME).'.original.'.$ext;
+        $originalname = $dest_dir.'/'.pathinfo($nfname, PATHINFO_FILENAME).'_original.'.$ext;
 
         if (!move_uploaded_file($tmpname, $originalname) && $sha1 === sha1_file($originalname)) {
             fatal_error('Ошибка копирования временного файла!', false);
@@ -615,7 +619,16 @@ class ElgaSubs
         }
 
         try {
-            $imagine->open($originalname)->save($dest_name);
+            $image = $imagine
+                ->setMetadataReader(new ExifMetadataReader())
+                ->open($originalname);
+            $exif = $image->metadata()->toArray();
+            unset($exif['filepath']);
+            unset($exif['uri']);
+            // dump($exif);
+            // die;
+            $exif = json_encode($exif);
+            $image->save($dest_name);
         } catch (Exception $e) {
             unlink($originalname);
             throw new Exception('Error save file');
@@ -638,6 +651,7 @@ class ElgaSubs
             'thumb' => $date.'/'.$thumb_name,
             'preview' => $img['is_preview'] ? $date . '/' . $preview_name : '',
             'fhash' => $sha1,
+            'exif' => '', // $exif, // todo: chek if big size
         ];
     }
 
@@ -667,7 +681,18 @@ class ElgaSubs
         global $modSettings;
 
         $path = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
-        $imgs = [ $path.'/'.$img['fname'], $path.'/'.$img['thumb'], $path.'/'.$img['preview'] ];
+        $pinf = pathinfo($img['fname']);
+        $dirname = $pinf['dirname'];
+        $ext = $pinf['extension'];
+        $name = $pinf['filename'];
+        // dump($img);
+        // die;
+        $imgs = [
+            $path . '/' . $dirname . '/' . $name . '_original.' . $ext,
+            $path.'/'.$img['fname'],
+            $path.'/'.$img['thumb'],
+            $path.'/'.$img['preview'],
+        ];
         foreach ( $imgs as $file ) {
             if (file_exists($file)) {
                 @unlink($file);
@@ -825,5 +850,134 @@ class ElgaSubs
         }
 
         return $succ;
+    }
+
+    // This function is used to determine the camera details for a specific image. It returns an array with the parameters.
+    public static function cameraUsed($imagePath)
+    {
+        if (empty($imagePath)) {
+            throw new InvalidArgumentEsception('Path is empty!');
+        }
+
+        if (!file_exists($imagePath)) {
+            throw new InvalidArgumentEsception('File not found!');
+        }
+
+        // There are 2 arrays which contains the information we are after, so it's easier to state them both
+        $exif_ifd0 = read_exif_data($imagePath ,'IFD0', 0);      
+        $exif_exif = read_exif_data($imagePath ,'EXIF', 0);
+
+        //error control
+        $notFound = "Unavailable";
+        $ifd0_is_ary = is_array($exif_ifd0);
+
+        // Make
+        if ($ifd0_is_ary && array_key_exists('Make', $exif_ifd0)) {
+            $camMake = $exif_ifd0['Make'];
+        } else {
+            $camMake = $notFound;
+        }
+
+        // Model
+        if ($ifd0_is_ary && array_key_exists('Model', $exif_ifd0)) {
+            $camModel = $exif_ifd0['Model'];
+        } else {
+            $camModel = $notFound;
+        }
+
+        // Exposure
+        if ($ifd0_is_ary && array_key_exists('ExposureTime', $exif_ifd0)) {
+            $camExposure = $exif_ifd0['ExposureTime'];
+        } else {
+            $camExposure = $notFound;
+        }
+
+        // Date
+        if ($ifd0_is_ary && array_key_exists('DateTime', $exif_ifd0)) {
+            $camDate = $exif_ifd0['DateTime'];
+        } else {
+            $camDate = $notFound;
+        }
+
+        // Aperture
+        if ($ifd0_is_ary && is_array($exif_ifd0['COMPUTED']) && array_key_exists('ApertureFNumber', $exif_ifd0['COMPUTED'])) {
+            $camAperture = $exif_ifd0['COMPUTED']['ApertureFNumber'];
+        } else {
+            $camAperture = $notFound;
+        }
+
+        // Heght
+        if ($ifd0_is_ary && is_array($exif_ifd0['COMPUTED']) && array_key_exists('Height', $exif_ifd0['COMPUTED'])) {
+            $camHeight = $exif_ifd0['COMPUTED']['Height'];
+        } else {
+            $camHeight = $notFound;
+        }
+
+        // Width
+        if ($ifd0_is_ary && is_array($exif_ifd0['COMPUTED']) && array_key_exists('Width', $exif_ifd0['COMPUTED'])) {
+            $camWidth = $exif_ifd0['COMPUTED']['Width'];
+        } else {
+            $camWidth = $notFound;
+        }
+
+        // Orientation
+        if ($ifd0_is_ary && array_key_exists('Orientation', $exif_ifd0)) {
+            $camOrientation = $exif_ifd0['Orientation'];
+        } else {
+            $camOrientation = $notFound;
+        }
+
+        // XResolution
+        if ($ifd0_is_ary && array_key_exists('XResolution', $exif_ifd0)) {
+            $camXResolution = $exif_ifd0['XResolution'];
+        } else {
+            $camXResolution = $notFound;
+        }
+
+        // YResolution
+        if ($ifd0_is_ary && array_key_exists('YResolution', $exif_ifd0)) {
+            $camYResolution = $exif_ifd0['YResolution'];
+        } else {
+            $camYResolution = $notFound;
+        }
+
+        // PlanarConfiguration
+        if ($ifd0_is_ary && array_key_exists('PlanarConfiguration', $exif_ifd0)) {
+            $camPlanarConfiguration = $exif_ifd0['PlanarConfiguration'];
+        } else {
+            $camPlanarConfiguration = $notFound;
+        }
+
+        // ResolutionUnit
+        if ($ifd0_is_ary && array_key_exists('ResolutionUnit', $exif_ifd0)) {
+            $camResolutionUnit = $exif_ifd0['ResolutionUnit'];
+        } else {
+            $camResolutionUnit = $notFound;
+        }
+
+        // ISO
+        if (is_array($exif_exif) && array_key_exists('ISOSpeedRatings', $exif_exif)) {
+            $camIso = $exif_exif['ISOSpeedRatings'];
+        } else {
+            $camIso = $notFound;
+        }
+
+        $return = [
+            'Make' => $camMake,
+            'Model' => $camModel,
+            'Exposure' => $camExposure,
+            'Aperture' => $camAperture,
+            'Date' => $camDate,
+            'ISO' => $camIso,
+            'Height' =>$camHeight,
+            'Width' => $camWidth,
+            'Orientation' => $camOrientation,
+            'XResolution' => $camXResolution,
+            'YResolution' => $camYResolution,
+            'PlanarConfiguration' => $camPlanarConfiguration,
+            'ResolutionUnit' => $camResolutionUnit,
+        ];
+
+        return $return;
     }
 }

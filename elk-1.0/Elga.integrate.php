@@ -7,7 +7,7 @@ if (!defined('ELK')) {
 // integrate_actions
 function elga_actions(&$actions, &$adminActions)
 {
-    $actions['gallery'] = ['Elga.controller.php', 'ElgaController', 'action_index'];
+    $actions['gallery'] = ['Elga.controller.php', 'Elga_Controller', 'action_index'];
     require_once SUBSDIR.'/Elga.subs.php';
     loadLanguage('Elga');
 }
@@ -257,6 +257,7 @@ function elga_load_illegal_guest_permissions()
         'elga_create_albums',
         'elga_edit_albums',
         'elga_delete_albums',
+        'elga_create_files',
         'elga_edit_files',
         'elga_delete_files',
     ]);

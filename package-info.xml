@@ -18,19 +18,19 @@
     <type>modification</type>
     <install for="1.0.1 - 1.0.99">
         <readme type="inline">This will install Elga</readme>
-        <require-file name="gallery.php" destination="BOARDDIR" />
-        <require-file name="Elga.integrate.php" destination="SUBSDIR" />
-        <require-file name="Elga.subs.php" destination="SUBSDIR" />
-        <require-file name="Elga.controller.php" destination="CONTROLLERDIR" />
-        <require-file name="Elga.template.php" destination="THEMEDIR" />
-        <require-file name="elga.css" destination="THEMEDIR/css" />
-        <require-dir name="scripts" destination="THEMEDIR" />
+        <require-file name="/elk-1.0/gallery.php" destination="BOARDDIR" />
+        <require-file name="/elk-1.0/Elga.integrate.php" destination="SUBSDIR" />
+        <require-file name="/elk-1.0/Elga.subs.php" destination="SUBSDIR" />
+        <require-file name="/elk-1.0/Elga.controller.php" destination="CONTROLLERDIR" />
+        <require-file name="/elk-1.0/Elga.template.php" destination="THEMEDIR" />
+        <require-file name="/elk-1.0/elga.css" destination="THEMEDIR/css" />
+        <require-dir name="/elk-1.0/scripts" destination="THEMEDIR" />
+        <require-file name="/elk-1.0/languages/english/Elga.english.php" destination="LANGUAGEDIR/english" />
+        <require-file name="/elk-1.0/languages/russian/Elga.russian.php" destination="LANGUAGEDIR/russian" />
         <require-dir name="elga_lib" destination="EXTDIR" />
         <require-dir name="elga_files" destination="BOARDDIR" />
-        <require-file name="languages/english/Elga.english.php" destination="LANGUAGEDIR/english" />
-        <require-file name="languages/russian/Elga.russian.php" destination="LANGUAGEDIR/russian" />
-        <code>Hooks.php</code>
-        <database>install.php</database>
+        <code>/elk-1.0/Hooks.php</code>
+        <database>/elk-1.0/install.php</database>
         <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />
     </install>
 
@@ -46,7 +46,60 @@
         <remove-dir name="EXTDIR/elga_lib" />
         <remove-file name="LANGUAGEDIR/english/Elga.english.php" />
         <remove-file name="LANGUAGEDIR/russian/Elga.russian.php" />
-        <code>Hooks.php</code>
+        <code>/elk-1.0/Hooks.php</code>
+        <!--<database>/elk-1.0/uninstall.php</database>-->
+        <redirect url="?action=admin;area=packages" timeout="500" />
+    </uninstall>
+
+    <install for="1.1.0 - 1.1.99">
+        <readme type="inline">This will install Elga for ElkArte 1.1</readme>
+        <require-file name="/elk-1.1/gallery.php" destination="BOARDDIR" />
+        <require-file name="/elk-1.1/Elga.integrate.php" destination="SUBSDIR" />
+        <require-file name="/elk-1.1/Elga.subs.php" destination="SUBSDIR" />
+        <require-file name="/elk-1.1/Elga.controller.php" destination="CONTROLLERDIR" />
+        <require-file name="/elk-1.1/Elga.template.php" destination="THEMEDIR" />
+        <require-file name="/elk-1.1/elga.css" destination="THEMEDIR/css" />
+        <require-dir name="/elk-1.1/scripts" destination="THEMEDIR" />
+        <require-file name="/elk-1.1/languages/english/Elga.english.php" destination="LANGUAGEDIR/english" />
+        <require-file name="/elk-1.1/languages/russian/Elga.russian.php" destination="LANGUAGEDIR/russian" />
+        <require-dir name="elga_lib" destination="EXTDIR" />
+        <require-dir name="elga_files" destination="BOARDDIR" />
+
+        <hook hook="integrate_actions" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_actions" />
+        <hook hook="integrate_menu_buttons" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_menu_buttons" />
+        <hook hook="integrate_whos_online" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_whos_online" />
+        <hook hook="integrate_admin_areas" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_admin_areas" />
+        <hook hook="integrate_sa_modify_modifications" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_sa_modify_modifications" />
+        <hook hook="integrate_load_illegal_guest_permissions" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_load_illegal_guest_permissions" />
+        <hook hook="integrate_load_permissions" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_load_permissions" />
+
+        <modification>/elk-1.1/install.xml</modification>
+        <database>/elk-1.1/install.php</database>
+        <redirect url="?action=admin;area=addonsettings;sa=elga" timeout="500" />
+    </install>
+
+    <uninstall for="1.1.0 - 1.1.99">
+        <readme type="inline">This will uninstall Elga from ElkArte 1.1</readme>
+        <remove-file name="BOARDDIR/gallery.php" />
+        <remove-file name="SUBSDIR/Elga.integrate.php" />
+        <remove-file name="SUBSDIR/Elga.subs.php" />
+        <remove-file name="CONTROLLERDIR/Elga.controller.php" />
+        <remove-file name="THEMEDIR/Elga.template.php" />
+        <remove-file name="THEMEDIR/css/elga.css" />
+        <remove-dir name="THEMEDIR/scripts/elga" />
+        <remove-dir name="EXTDIR/elga_lib" />
+        <remove-file name="LANGUAGEDIR/english/Elga.english.php" />
+        <remove-file name="LANGUAGEDIR/russian/Elga.russian.php" />
+
+        <hook reverse="true" hook="integrate_actions" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_actions" />
+        <hook reverse="true" hook="integrate_menu_buttons" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_menu_buttons" />
+        <hook reverse="true" hook="integrate_whos_online" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_whos_online" />
+        <hook reverse="true" hook="integrate_admin_areas" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_admin_areas" />
+        <hook reverse="true" hook="integrate_sa_modify_modifications" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_sa_modify_modifications" />
+        <hook reverse="true" hook="integrate_load_illegal_guest_permissions" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_load_illegal_guest_permissions" />
+        <hook reverse="true" hook="integrate_load_permissions" file="SUBSDIR/Elga.integrate.php" function="Elga_Integrate::integrate_load_permissions" />
+
+        <modification reverse="true">/elk-1.1/install.xml</modification>
         <!--<database>uninstall.php</database>-->
         <redirect url="?action=admin;area=packages" timeout="500" />
     </uninstall>

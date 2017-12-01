@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.elkarte.net/site/modification">
+
+<modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
+	<id>inter:elga</id>
+
+	<file name="THEMEDIR/css/index.css">
+		<operation>
+			<search position="end" />
+            <add><![CDATA[
+.elga-icon-menu::before { 
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='hsl(0, 0%, 33%)' viewBox='0 0 3584 3584'%3E%3Cpath d='M1195 1314q0 149-105 254t-254 105-254-105-104-254 104-254 254-104 254 104 105 254z m1911 717v836h-2628v-358l597-598 299 299 956-956z m179-1314h-2986q-24 0-42 18t-18 42v2269q0 24 18 42t42 18h2986q24 0 42-18t18-42v-2269q0-24-18-42t-42-18z m299 60v2269q0 123-88 211t-211 88h-2986q-123 0-211-88t-88-211v-2269q0-123 88-211t211-88h2986q123 0 211 88t88 211z'/%3E%3C/svg%3E");
+}]]></add>
+		</operation>
+	</file>
+
+</modification>
+
