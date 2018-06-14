@@ -843,7 +843,7 @@ class Manager
             return true;
         }
 
-        if ($parent[$this->left_column] + 1 == $node[$this->left_column]) {
+        if ($parent->left + 1 == $node->left) {
             # throw new Exception('Node on Position!');
             $this->updateNode($node, $params);
 
@@ -860,24 +860,24 @@ class Manager
             $sql = '
             UPDATE ' . $this->db_table . '
                 SET ' . $this->left_column . ' =
-                        CASE WHEN ' . $this->left_column . ' > ' . $parent[$this->left_column] . '
+                        CASE WHEN ' . $this->left_column . ' > ' . $parent->left . '
                             THEN ' . $this->left_column . ' + (2 * ' . $count_nodes . ')
                             ELSE ' . $this->left_column . '
                         END,
                     ' . $this->right_column . ' = ' . $this->right_column . ' + (2 * ' . $count_nodes . ')
-            WHERE ' . $this->left_column . ' > ' . $parent[$this->left_column] . '
-                OR ' . $this->right_column . ' >= ' . $parent[$this->right_column];
+            WHERE ' . $this->left_column . ' > ' . $parent->left . '
+                OR ' . $this->right_column . ' >= ' . $parent->right;
 
             $q = $this->db->prepare($sql);
             $q->execute();
 
             # В бд ещё нет изменений
-            if ($parent[$this->left_column] < $node[$this->left_column]) {
-                $node[$this->left_column] = $node[$this->left_column] + (2 * $count_nodes);
-                $node[$this->right_column] = $node[$this->right_column] + (2 * $count_nodes);
+            if ($parent->left < $node->left) {
+                $node->left = $node->left + (2 * $count_nodes);
+                $node->right = $node->right + (2 * $count_nodes);
             }
 
-            $difference = $parent[$this->left_column] - $node[$this->left_column] + 1;
+            $difference = $parent->left - $node->left + 1;
 
             # Перенести на новое место
             $sql = '
@@ -885,8 +885,8 @@ class Manager
                 SET ' . ($params ? implode(' = ?, ', array_keys($params)) . ' = ?,' : '') . '
                     ' . $this->left_column . ' = ' . $this->left_column . ' + ' . $difference . ',
                     ' . $this->right_column . ' = ' . $this->right_column . ' + ' . $difference . '
-            WHERE ' . $this->left_column . ' >= ' . $node[$this->left_column] . '
-                AND ' . $this->right_column . ' <= ' . $node[$this->right_column];
+            WHERE ' . $this->left_column . ' >= ' . $node->left . '
+                AND ' . $this->right_column . ' <= ' . $node->right;
 
             $q = $this->db->prepare($sql);
             $q->execute(array_values($params));
