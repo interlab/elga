@@ -82,6 +82,7 @@ class Elga_Integrate
             // $no_stat_actions[] = 'gallery';
     // }
 
+    // integrate_whos_online
     public static function integrate_whos_online($actions)
     {
         global $scripturl, $txt;
@@ -96,17 +97,43 @@ class Elga_Integrate
             $action = sprintf($txt['who_gallery'], $scripturl . '?action=gallery');
         }
 
-        if (!empty($actions['sa']) and 'gallery' === $actions['action']) {
+        if (!empty($actions['sa']) && 'gallery' === $actions['action']) {
             switch ($actions['sa']) {
                 case 'search':
                     $action = sprintf($txt['who_gallery_search'], $scripturl . '?action=gallery;sa=search');
                 break;
 
-                // @todo: album
-                // case 'album':
+                case 'album':
+                    if (!isset($actions['id']) || !is_numeric($actions['id'])) {
+                        $action = $txt['who_gallery'];
+                    } else {
+                        $db = database();
+                        $req = $db->query('', '
+                            SELECT a.id, a.name
+                            FROM {db_prefix}elga_albums AS a
+                            WHERE a.id = {int:id}
+                            LIMIT 1',
+                            [
+                                'id' => (int) $actions['id'],
+                            ]
+                        );
+                        if (!$db->num_rows($req)) {
+                            $action = $txt['who_gallery'];
+                        } else {
+                            $row = $db->fetch_assoc($req);
+                            $action = sprintf($txt['who_gallery_album'],
+                                $scripturl . '?action=gallery;sa=album;id='.$row['id'],
+                                censorText($row['name'])
+                            );
+                        }
+                        $db->free_result($req);
+                    }
+                break;
 
                 case 'file':
-                    if (isset($actions['id']) and is_numeric($actions['id'])) {
+                    if (!isset($actions['id']) || !is_numeric($actions['id'])) {
+                        $action = $txt['who_gallery'];
+                    } else {
                         $db = database();
                         $req = $db->query('', '
                             SELECT f.id, f.title
@@ -121,7 +148,10 @@ class Elga_Integrate
                             $action = $txt['who_gallery'];
                         } else {
                             $row = $db->fetch_assoc($req);
-                            $action = sprintf($txt['who_gallery_file'], $scripturl . '?action=gallery;sa=file;id='.$row['id'], censorText($row['name']));
+                            $action = sprintf($txt['who_gallery_file'],
+                                $scripturl . '?action=gallery;sa=file;id='.$row['id'],
+                                censorText($row['title'])
+                            );
                         }
                         $db->free_result($req);
                     }
@@ -132,8 +162,9 @@ class Elga_Integrate
             }
         }
 
-        if (!empty($action))
-            return $action; # !important
+        if (!empty($action)) {
+            return $action;
+        }
     }
 
     // Menu.subs.php - 87

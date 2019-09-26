@@ -50,6 +50,7 @@ $txt['elga_stitle'] = 'Название';
 $txt['who_gallery'] = 'Просматривает <a href="%s">галерею</a>';
 $txt['who_gallery_search'] = 'Выполняет поиск в <a href="%s">галерее</a>';
 $txt['who_gallery_file'] = 'Просматривает файл <a href="%s">%s</a>';
+$txt['who_gallery_album'] = 'Просматривает альбом <a href="%s">%s</a>';
 
 $txt['elga_settings_title'] = 'Gallery Settings';
 $txt['elga_settings_desc'] = 'This addon adds a images gallery.';
