@@ -42,7 +42,7 @@ class Manager
      */
     public function setDb(
         $db_type = 'mysql',
-        $db_host = 'localhost',
+        $db_host = '127.0.0.1',
         $db_port = 3306,
         $db_name = 'categories',
         $db_user = 'root',
@@ -51,6 +51,9 @@ class Manager
     ) {
         try {
             if ('mysql' === $db_type) {
+                if (is_null($db_host)) {
+                    $db_host = '127.0.0.1';
+                }
                 $this->db = new PDO($db_type . ':host=' . $db_host . ';dbname=' . $db_name, $db_user, $db_password,
                     array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $charset)
                 );
