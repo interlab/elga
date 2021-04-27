@@ -87,6 +87,8 @@ class Elga_Integrate
     {
         global $scripturl, $txt;
 
+        loadLanguage('Elga');
+
         if (empty($actions) || empty($actions['action'])) {
             $action = $txt['who_unknown'];
 
