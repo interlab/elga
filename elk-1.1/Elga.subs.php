@@ -50,7 +50,7 @@ class ElgaSubs
         // $row['preview-url'] = $url.'/'.$row['preview'];
         // $row['icon'] = $url.'/'.$row['fname'];
         $row['thumb-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=thumb';
-		$row['preview'] = $row['preview'];
+        $row['preview'] = $row['preview'];
         $row['preview-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'].';mode=preview';
         $row['icon'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
         $row['hsize'] = round($row['fsize'] / 1024, 2) . ' ' . $txt['kilobyte'];
@@ -60,8 +60,8 @@ class ElgaSubs
         // $row['img-url'] = $boardurl . '/gallery.php?id=' . $row['id'];
         $row['img-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'];
         $row['img-download-url'] = $scripturl . '?action=gallery;sa=show;id='.$row['id'] . ';mode=download';
-		$row['exif'] = empty($row['exif']) ? [] : json_decode($row['exif']);
-		// dump($row['exif']);
+        $row['exif'] = empty($row['exif']) ? [] : json_decode($row['exif']);
+        // dump($row['exif']);
         $db->free_result($req);
 
         return $row;
@@ -620,15 +620,15 @@ class ElgaSubs
 
         try {
             $image = $imagine
-				->setMetadataReader(new ExifMetadataReader())
-				->open($originalname);
-			$exif = $image->metadata()->toArray();
-			unset($exif['filepath']);
-			unset($exif['uri']);
-			// dump($exif);
-			// die;
-			$exif = json_encode($exif);
-			$image->save($dest_name);
+                ->setMetadataReader(new ExifMetadataReader())
+                ->open($originalname);
+            $exif = $image->metadata()->toArray();
+            unset($exif['filepath']);
+            unset($exif['uri']);
+            // dump($exif);
+            // die;
+            $exif = json_encode($exif);
+            $image->save($dest_name);
         } catch (Exception $e) {
             unlink($originalname);
             throw new Exception('Error save file');
@@ -651,7 +651,7 @@ class ElgaSubs
             'thumb' => $date.'/'.$thumb_name,
             'preview' => $img['is_preview'] ? $date . '/' . $preview_name : '',
             'fhash' => $sha1,
-			'exif' => '', // $exif, // todo: chek if big size
+            'exif' => '', // $exif, // todo: chek if big size
         ];
     }
 
@@ -681,18 +681,18 @@ class ElgaSubs
         global $modSettings;
 
         $path = $modSettings['elga_files_path']; //BOARDDIR.'/files/gallery';
-		$pinf = pathinfo($img['fname']);
-		$dirname = $pinf['dirname'];
-		$ext = $pinf['extension'];
-		$name = $pinf['filename'];
-		// dump($img);
-		// die;
+        $pinf = pathinfo($img['fname']);
+        $dirname = $pinf['dirname'];
+        $ext = $pinf['extension'];
+        $name = $pinf['filename'];
+        // dump($img);
+        // die;
         $imgs = [
-			$path . '/' . $dirname . '/' . $name . '_original.' . $ext,
-			$path.'/'.$img['fname'],
-			$path.'/'.$img['thumb'],
-			$path.'/'.$img['preview'],
-		];
+            $path . '/' . $dirname . '/' . $name . '_original.' . $ext,
+            $path.'/'.$img['fname'],
+            $path.'/'.$img['thumb'],
+            $path.'/'.$img['preview'],
+        ];
         foreach ( $imgs as $file ) {
             if (file_exists($file)) {
                 @unlink($file);
@@ -851,7 +851,6 @@ class ElgaSubs
 
         return $succ;
     }
-
     /**
      * 
      * @global array $context

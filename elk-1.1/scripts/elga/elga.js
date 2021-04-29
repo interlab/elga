@@ -1,6 +1,25 @@
 ;(function($){
     //var repeat = function(s, n) { return new Array(n + 1).join(s) };
     $(document).ready(function(){
+        function _elga_load_fancybox(){
+            $(".elga-grouped-elems").fancybox({
+                closeExisting: false,
+                loop: true,
+                arrows: true,
+                infobar: true,
+                buttons: [
+                    "zoom",
+                    //"share",
+                    "slideShow",
+                    //"fullScreen",
+                    "download",
+                    "thumbs",
+                    "close"
+                ]
+            });
+        }
+        _elga_load_fancybox();
+
         // var i = 0;
         // console.log(elgaimgload.src);
         $('.elga-scroll').jscroll({
@@ -13,6 +32,8 @@
                 jQuery("div.jscroll-added").children().not("div.jscroll-next-parent").appendTo("div.elga-thumbs");
                 // i++;
                 // console.log(i + 'test jscroll');
+
+                _elga_load_fancybox();
             },
         });
 
@@ -84,6 +105,20 @@
             $answer.html('').show();
             $answer.html(copyTxt()).fadeOut(4000);
         });
+
+		// EXIF tab
+		$( "#elga-tabs-file" ).on( "tabsactivate", function( event, ui ) {
+			// todo: cache
+			if (ui.newPanel.attr('id') == 'elga-tabs-exif') {
+				// console.log('exif tab is  loaded');
+				var query = window.location.search;
+				var f = query.match(/;(?:id)=(\d+)/);
+				var id = f ? f[1] : 0;
+				if (id) {
+				    ui.newPanel.html('<h1>LOADING ...</h1>').load( elk_scripturl + '?action=gallery;sa=show;id=' + id + ';mode=exif' );
+				}
+			}
+		} );
 
     });
 })(jQuery);

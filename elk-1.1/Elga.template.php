@@ -35,7 +35,6 @@ function elga_show_buttons()
         ],
     ];
 
-
     echo '
     <div class="elga-buttons">';
 
@@ -139,7 +138,7 @@ function elga_thumbs($files, $usealbum=false)
         $r .= '
         <div class="elga-thumb-file">
             <p class="elga-fname"><a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['id'] . '">' . $row['title'] . '</a></p>
-            <p><a href="' . $row['icon'] . '" rel="group" title="' . $row['title'] . '" data-fancybox="">
+            <p><a href="' . $row['icon'] . '" title="' . $row['title'] . '" class="elga-grouped-elems" data-fancybox="gallery">
                 <img src="' . $row['thumb-url'] . '" alt="thumb" height="100px" width="100px" />
             </a></p>
             ' . ($usealbum ? 
@@ -427,7 +426,10 @@ function template_home()
     <span class="nextlinks">Сортировка по: Дата | Название</span>
     </h2>';
 
-    echo elga_thumbs($context['elga_last_files'], true);
+    echo '
+    <div class="elga-thumbs">
+    ', elga_thumbs($context['elga_last_files'], true), '
+    </div>';
 }
 
 function template_add_file()
@@ -436,7 +438,7 @@ function template_add_file()
 
     // loadTemplate('GenericHelpers');
     // loadTemplate('GenericControls');
-    
+
     $context['elga-file-is-required'] = $context['elga_sa'] !== 'edit_file' ? 'required' : '';
 
     echo '
@@ -447,7 +449,6 @@ function template_add_file()
 
     <div class="forumposts">
         <div class="editor_wrapper">
-
         <div class="errorbox"', empty($context['errors']) ? ' style="display: none;"' : '', '>Исправьте ошибки: <ul><li>', implode('</li><li>', $context['errors']), '</li></ul></div>';
 
     echo '
@@ -457,6 +458,7 @@ function template_add_file()
             <label for="album">', $txt['elga-field-album'], '</label>
         </dt>
         <dd>
+
             <select name="album" id="album" tabindex="', $context['tabindex']++, '" required>
             <option></option>';
 
@@ -470,6 +472,7 @@ function template_add_file()
 
     echo '
         </select>&nbsp;&nbsp
+
         </dd>
 
         <dt>
@@ -480,9 +483,8 @@ function template_add_file()
         </dd>
     </dl>';
 
-	echo '', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
+	echo template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
 
-    
     echo '
     <dl id="post_header">
         <dt class="elga-form-file-dt">
@@ -820,7 +822,7 @@ function template_file()
     <div class="elga-photo-container">
         <div class="elga-arrow' . ($row['prev_id'] ? '' : ' elga-disabled') . '">' . ($row['prev_id'] ? '<a href="' . $scripturl . '?action=gallery;sa=file;id=' . $row['prev_id']. '">' : '') . '&#8592; Пред.</a></div>
         <div class="elga-display">
-    <a href="', $row['icon'], '" data-fancybox="" rel="group">
+    <a href="', $row['icon'], '" data-fancybox="">
         <img src="', $row['preview-url'], '" alt="image" style="max-height:500px; max-width: 500px;" />
     </a>
         </div>
