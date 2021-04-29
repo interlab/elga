@@ -1,7 +1,11 @@
 ;(function($){
     //var repeat = function(s, n) { return new Array(n + 1).join(s) };
     $(document).ready(function(){
+        const fancybox_exists = jQuery().fancybox ? true : false;
         function _elga_load_fancybox(){
+            if (!fancybox_exists) {
+                return;
+            }
             $(".elga-grouped-elems").fancybox({
                 closeExisting: false,
                 loop: true,
