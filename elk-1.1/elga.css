@@ -227,6 +227,14 @@
     cursor:not-allowed;
 }
 
+.elga-page-box {
+    float: left;
+}
+
+.elga-sort-box {
+    padding: 5px;
+}
+
 .elga-sort-fields {
     float: right;
     white-space: nowrap;

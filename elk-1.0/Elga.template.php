@@ -745,6 +745,7 @@ function template_browse()
     elga_show_sort_fields(), 
     elga_show_select_cats(), '
         </div>
+        <div class="clear"></div>
     </div>';
 
     echo '

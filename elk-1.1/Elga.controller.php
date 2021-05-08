@@ -77,7 +77,7 @@ class Elga_Controller extends Action_Controller implements Frontpage_Interface
         loadTemplate('Elga');
 
         loadJavascriptFile('elga/elga.js');
-        loadJavascriptFile('elga/jscroll-2.3.4/jquery.jscroll.js');
+        loadJavascriptFile('elga/jquery.jscroll.min.js');
 
         if ( ! $modSettings['elga_enabled'] ) {
             $context['sub_template'] = 'gallery_off';
