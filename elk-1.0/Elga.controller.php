@@ -276,6 +276,7 @@ class Elga_Controller extends Action_Controller
             $per_page,
             true
         );
+        $_REQUEST['start'] = (int) $_REQUEST['start'];
         $context['start'] = $_REQUEST['start'];
         $context['elga_next_start'] = $context['start'] + $per_page;
         $context['page_info'] = [

@@ -2,7 +2,7 @@
     "require": {
         "php": ">=5.4.0",
         "gargron/fileupload": "1.0.*",
-        "imagine/Imagine": "*",
+        "imagine/imagine": "1.3.*",
         "interlab/nested-sets": "dev-master"
     },
     "require-dev": {
